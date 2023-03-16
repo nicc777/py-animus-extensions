@@ -1,0 +1,8 @@
+---
+kind: CliInputPrompt
+version: v1
+metadata:
+  name: get-name-from-cli
+spec:
+  promptText: 'What is your name?'
+  promptCharacter: 'name > '
