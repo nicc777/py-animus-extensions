@@ -19,6 +19,14 @@ class CliInputPrompt(ManifestBase):
     The result will be stored in a variable named `CliInputPrompt:<<metadata.name>>`
 
     Example Spec
+
+    NOTE: This does not yet work from DOCKER.
+
+    Test (assuming you are in the root of the cloned repo):
+
+    ```shell
+    DEBUG=1 venv/bin/animus apply -m $PWD/examples/cli-input-prompt/basic/get_name.yaml -s $PWD/implementations
+    ```
     """
 
     def __init__(self, logger=get_logger(), post_parsing_method: object=None, version: str='v1', supported_versions: tuple=('v1',)):
