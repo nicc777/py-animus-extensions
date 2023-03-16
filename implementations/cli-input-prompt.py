@@ -20,13 +20,22 @@ class CliInputPrompt(ManifestBase):
 
     Example Spec
 
-    NOTE: This does not yet work from DOCKER.
-
     Test (assuming you are in the root of the cloned repo):
 
     ```shell
     DEBUG=1 venv/bin/animus apply -m $PWD/examples/cli-input-prompt/basic/get_name.yaml -s $PWD/implementations
     ```
+
+    OR
+
+    ```shell
+    docker run --rm -e "DEBUG=0" -it \
+        -v $PWD/implementations:/tmp/src \
+        -v $PWD/examples/cli-input-prompt/basic:/tmp/data \
+        ghcr.io/nicc777/py-animus:latest apply -m /tmp/data/get_name.yaml -s /tmp/src
+    ```
+
+    NOTE that the docker example requires the `-it` switch in order to capture user input
     """
 
     def __init__(self, logger=get_logger(), post_parsing_method: object=None, version: str='v1', supported_versions: tuple=('v1',)):
