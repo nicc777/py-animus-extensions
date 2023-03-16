@@ -77,7 +77,7 @@ class CliInputPrompt(ManifestBase):
                     self.spec['promptCharacter'] = '> '
                 if isinstance(self.spec['promptCharacter'], str) is False:
                     self.spec['promptCharacter'] = '> '
-                if len(self.spec['promptCharacter']) > 2:
+                if len(self.spec['promptCharacter']) > 64:
                     self.spec['promptCharacter'] = '> '
             
             if 'valueExpires' not in self.spec:
@@ -109,16 +109,12 @@ class CliInputPrompt(ManifestBase):
                 if isinstance(self.spec['convertEmptyInputToNone'], bool) is False:
                     self.spec['convertEmptyInputToNone'] = True
 
-            print('000')
             if 'maskInput' not in self.spec:
                 self.spec['maskInput'] = False
-                print('111')
             else:
                 if self.spec['maskInput'] is None:
-                    print('222')
                     self.spec['maskInput'] = False
                 if isinstance(self.spec['maskInput'], bool) is False:
-                    print('333')
                     self.spec['maskInput'] = False
 
         variable_cache.store_variable(variable=Variable(name='{}:validated'.format(self._var_name()),logger=self.logger, initial_value=True), overwrite_existing=True)
