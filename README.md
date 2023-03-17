@@ -7,3 +7,5 @@ Before using, remember to run:
 ```
 pip3 install --upgrade -r requirements.txt
 ```
+
+[Documentation for extensions](doc/README.md)
