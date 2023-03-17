@@ -2,6 +2,10 @@
 
 Brief intro as to what this extension does
 
+```shell
+export EXTENSION_NAME="put-name-here"
+```
+
 # Spec fields
 
 | Field                              | Type    | Required | In Versions | Description                                                                                                                                                                                                          |
@@ -11,6 +15,10 @@ Brief intro as to what this extension does
 # Example Usages
 
 ## Example scenario title...
+
+```shell
+export SCENARIO_NAME="put-name-here"
+```
 
 Example manifest:
 

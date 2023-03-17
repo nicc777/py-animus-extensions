@@ -6,6 +6,10 @@ Stores final result in a `Variable` called `CliInputPrompt:<<name-from-manifest>
 
 May have some use where a user needs to supply information, but in these scenarios it will be hard to automate such a process.
 
+```shell
+export EXTENSION_NAME="cli-input-prompt"
+```
+
 # Spec fields
 
 | Field                              | Type    | Required | In Versions | Description                                                                                                                                                                                                          |
@@ -22,6 +26,10 @@ May have some use where a user needs to supply information, but in these scenari
 
 ## Minimal Example
 
+```shell
+export SCENARIO_NAME="minimal"
+```
+
 Example manifest:
 
 ```yaml
@@ -35,6 +43,10 @@ metadata:
 Will prompt a user for input with the `> ` prompt and store the value.
 
 ## Basic Example
+
+```shell
+export SCENARIO_NAME="basic"
+```
 
 Example manifest:
 
@@ -52,6 +64,10 @@ spec:
 Will first print on the screen "`What is your name?`" and then prompt a user for input with the `name > ` prompt and store the value.
 
 ## Get user credentials Example
+
+```shell
+export SCENARIO_NAME="password"
+```
 
 Example manifest:
 
