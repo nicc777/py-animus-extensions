@@ -62,6 +62,8 @@ class CliInputPrompt(ManifestBase):
             raise_exception_on_expired=False,
             raise_exception_on_not_found=False
         ):
+            
+            self.log(message='Not Yet Validated', level='debug')
 
             if 'promptText' not in self.spec:
                 self.spec['promptText'] = ''
@@ -126,6 +128,10 @@ class CliInputPrompt(ManifestBase):
                 if isinstance(self.spec['maskInput'], bool) is False:
                     self.spec['maskInput'] = False
 
+            self.log(message='Spec Validated', level='debug')
+        else:
+            self.log(message='Already Validated', level='debug')
+
         variable_cache.store_variable(variable=Variable(name='{}:validated'.format(self._var_name()),logger=self.logger, initial_value=True), overwrite_existing=True)
 
     def implemented_manifest_differ_from_this_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache())->bool:
@@ -146,7 +152,6 @@ class CliInputPrompt(ManifestBase):
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False):
         self._validate(variable_cache=variable_cache)
         value = None
-        value_len = 0
         self.log(message='variable_cache={}'.format(str(variable_cache)), level='debug')
         if self.implemented_manifest_differ_from_this_manifest(manifest_lookup_function=manifest_lookup_function, variable_cache=variable_cache) is False:
             self.log(message='variable_cache={}'.format(str(variable_cache)), level='debug')
@@ -175,16 +180,10 @@ class CliInputPrompt(ManifestBase):
             if value == '' and self.spec['convertEmptyInputToNone'] is True:
                 value = None
             self.log(message='value={}'.format(value), level='debug')
-            
 
         ttl = -1
         if self.spec['valueExpires'] is True:
             ttl = int(self.spec['valueTTL'])
-
-        if value is not None:
-            value_len = len(value)
-        else:
-            self.log(message='Value is None and length will be reported as ZERO length', level='warning')
 
         variable_cache.store_variable(
             variable=Variable(
