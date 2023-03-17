@@ -149,8 +149,11 @@ class CliInputPrompt(ManifestBase):
                 raise_exception_on_expired=False,
                 raise_exception_on_not_found=False
             )
+            self.log(message='value retrieved from CACHE', level='info')
+            self.log(message='value retrieved from CACHE value={}'.format(value), level='debug')
             variable_cache.delete_variable(variable_name='{}:working'.format(self._var_name()))
         else:
+            self.log(message='Getting value from USER', level='info')
             self.log(message='variable_cache={}'.format(str(variable_cache)), level='debug')
             self.log(message='spec={}'.format(self.spec), level='debug')
             if self.spec['promptText'] is not None:
