@@ -185,4 +185,5 @@ class CliInputPrompt(ManifestBase):
         return 
     
     def delete_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False):
+        variable_cache.delete_variable(variable_name=self._var_name())
         return 
