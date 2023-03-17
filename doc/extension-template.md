@@ -4,9 +4,9 @@ Brief intro as to what this extension does
 
 # Spec fields
 
-| Field                              | Type    | Required | Description                                                                                                                                                                                                          |
-|------------------------------------|:-------:|:--------:|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `spec.fieldName`                   | Type    | Yes/No   | What this setting does...                                                                                                                                                                                            |
+| Field                              | Type    | Required | In Versions | Description                                                                                                                                                                                                          |
+|------------------------------------|:-------:|:--------:|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `spec.fieldName`                   | Type    | Yes/No   | ALL         | What this setting does...                                                                                                                                                                                            |
 
 # Example Usages
 
@@ -25,3 +25,9 @@ spec:
 ```
 
 Brief discussion of the example...
+
+# Versions and Changelog
+
+## Version X
+
+Describe changes for this version, for example new spec fields added etc.

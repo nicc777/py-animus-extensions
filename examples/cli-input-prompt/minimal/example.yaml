@@ -1,0 +1,5 @@
+---
+kind: CliInputPrompt
+version: v1
+metadata:
+  name: get-name-from-cli
