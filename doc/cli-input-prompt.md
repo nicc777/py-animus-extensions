@@ -1,4 +1,4 @@
-# Put the `Kind` here...
+# CliInputPrompt
 
 This manifest, when applied, will prompt a user for some input.
 
