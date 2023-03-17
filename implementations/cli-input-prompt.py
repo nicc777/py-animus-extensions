@@ -15,6 +15,7 @@ class CliInputPrompt(ManifestBase):
     * `spec.valueTTL` - (int, optional, default=60) If `spec.valueExpires` is used, use this value to fine tune the exact timeout period in seconds
     * `spec.convertEmptyInputToNone` - (bool, optional, default=True) - If input is empty, convert the final value to NoneType
     * `spec.maskInput` - (bool, optional, default=False) - If true, do not echo characters. This is suitable to ask for a password, for example
+    * `spec.containsCredentials` - (bool, optional, default=False) - If true, set the for_logging=True parameter for the Variable
 
     The result will be stored in a variable named `CliInputPrompt:<<metadata.name>>`
 
@@ -69,6 +70,14 @@ class CliInputPrompt(ManifestBase):
                     self.spec['promptText'] = ''
                 if isinstance(self.spec['promptText'], str) is False:
                     self.spec['promptText'] = ''
+
+            if 'containsCredentials' not in self.spec:
+                self.spec['containsCredentials'] = False
+            else:
+                if self.spec['containsCredentials'] is None:
+                    self.spec['containsCredentials'] = False
+                if isinstance(self.spec['containsCredentials'], bool) is False:
+                    self.spec['containsCredentials'] = False
             
             if 'promptCharacter' not in self.spec:
                 self.spec['promptCharacter'] = '> '
@@ -162,8 +171,11 @@ class CliInputPrompt(ManifestBase):
                 value = getpass(prompt=self.spec['promptCharacter'])
             else:
                 value = input(self.spec['promptCharacter'])
+            self.log(message='value={}'.format(value), level='debug')
             if value == '' and self.spec['convertEmptyInputToNone'] is True:
                 value = None
+            self.log(message='value={}'.format(value), level='debug')
+            
 
         ttl = -1
         if self.spec['valueExpires'] is True:
@@ -171,17 +183,33 @@ class CliInputPrompt(ManifestBase):
 
         if value is not None:
             value_len = len(value)
+        else:
+            self.log(message='Value is None and length will be reported as ZERO length', level='warning')
 
         variable_cache.store_variable(
             variable=Variable(
                 name=self._var_name(),
                 initial_value=value,
                 ttl=ttl,
-                logger=self.logger
+                logger=self.logger,
+                mask_in_logs=self.spec['containsCredentials']
             ),
             overwrite_existing=True
         )
-        self.log(message='Captured {} characters from user input and stored in variable named "{}"'.format(value_len, self._var_name()), level='info')
+        self.log(
+            message='("{}") Input value "{}"'.format(
+                self._var_name(),
+                variable_cache.get_value(
+                    variable_name=self._var_name(),
+                    value_if_expired='',
+                    default_value_if_not_found='',
+                    raise_exception_on_expired=False,
+                    raise_exception_on_not_found=False,
+                    for_logging=True
+                )
+            ),
+            level='info'
+        )
         return 
     
     def delete_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False):
