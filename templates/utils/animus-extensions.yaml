@@ -1,0 +1,33 @@
+---
+kind: AnimusExtensionTemplate
+version: v1
+metadata:
+  name: cli-input-prompt-v1
+spec:
+  description: |
+    This manifest, when applied, will prompt a user for some input.
+
+    May have some use where a user needs to supply information, but in these scenarios it will be hard to automate such a process.
+  kind: CliInputPrompt
+  version: v1
+  supportedVersions:
+  - 'v1'
+  baseClass: ManifestBase
+  pipRequirements:
+  - 'py-animus'
+  importStatements:
+  - 'from py_animus.manifest_management import *''
+  - 'from py_animus import get_logger'
+  - 'import traceback'
+  - 'from getpass import getpass'
+  specFields:
+  - fieldName: promptText
+    fieldType: str
+    fieldRequired: false
+    fieldDefaultValue: ''
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation', level='debug')
