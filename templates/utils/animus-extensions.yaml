@@ -27,6 +27,8 @@ spec:
   - 'from getpass import getpass'
   specFields:
   - fieldName: promptText
+    fieldDescription: |
+      The text to display on screen
     fieldType: str
     fieldRequired: false
     fieldDefaultValue: ''
@@ -35,8 +37,10 @@ spec:
     - fieldValueTypeMismatch: true
     - fieldValueIsNull: true
     customValidation: |
-      self.log(message='No custom validation', level='debug')
+      self.log(message='No custom validation for promptText', level='debug')
   - fieldName: promptCharacter
+    fieldDescription: |
+      The character for the actual prompt
     fieldType: str
     fieldRequired: false
     fieldDefaultValue: '> '
@@ -45,11 +49,13 @@ spec:
     - fieldValueTypeMismatch: true
     - fieldValueIsNull: true
     customValidation: |
-      self.log(message='Maximum length enforcement', level='debug')
+      self.log(message='Maximum length enforcement for promptCharacter', level='debug')
       if len(self.spec['promptCharacter']) > 64:
-        self.log(message='Maximum length of 64 characters exceeded', level='warning')
+        self.log(message='Maximum length of 64 characters exceeded for promptCharacter', level='warning')
         self.spec['promptCharacter'] = '> '
   - fieldName: valueExpires
+    fieldDescription: |
+        If set to true, the value will expire after `spec.valueTTL` seconds
     fieldType: bool
     fieldRequired: false
     fieldDefaultValue: false
@@ -58,4 +64,16 @@ spec:
     - fieldValueTypeMismatch: true
     - fieldValueIsNull: true
     customValidation: |
-      self.log(message='No custom validation', level='debug')
+      self.log(message='No custom validation for valueExpires', level='debug')
+  - fieldName: valueTTL
+    fieldDescription: |
+      If `spec.valueExpires` is used, use this value to fine tune the exact timeout period in seconds
+    fieldType: int
+    fieldRequired: false
+    fieldDefaultValue: 60
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for valueTTL', level='debug')
