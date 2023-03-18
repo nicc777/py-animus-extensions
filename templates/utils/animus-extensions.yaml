@@ -101,3 +101,15 @@ spec:
     - fieldValueIsNull: true
     customValidation: |
       self.log(message='No custom validation for maskInput', level='debug')
+  - fieldName: containsCredentials
+    fieldDescription: |
+      If true, set the `for_logging=True` parameter for the `Variable` holding the final value
+    fieldType: bool
+    fieldRequired: false
+    fieldDefaultValue: false
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for containsCredentials', level='debug')
