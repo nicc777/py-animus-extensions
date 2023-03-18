@@ -89,3 +89,15 @@ spec:
     - fieldValueIsNull: true
     customValidation: |
       self.log(message='No custom validation for convertEmptyInputToNone', level='debug')
+  - fieldName: maskInput
+    fieldDescription: |
+      If true, do not echo characters. This is suitable to ask for a password, for example
+    fieldType: bool
+    fieldRequired: false
+    fieldDefaultValue: false
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for maskInput', level='debug')
