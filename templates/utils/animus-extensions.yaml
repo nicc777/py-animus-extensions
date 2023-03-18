@@ -125,13 +125,17 @@ spec:
   description: |
     Executes a shell script.
 
-    Output from STDOUT will be stored in a `Variable` with `:STDOUT` appended to the variable name
+    Output from STDOUT will be stored in a `Variable` with `:STDOUT` appended to the 
+    variable name
 
-    Output from STDERR will be stored in a `Variable` with `:STDERR` appended to the variable name
+    Output from STDERR will be stored in a `Variable` with `:STDERR` appended to the
+    variable name
 
-    Both STDOUT and STDERR will be stored as strings. No output will result in an empty sting.
+    Both STDOUT and STDERR will be stored as strings. No output will result in an
+    empty sting.
 
-    The exit status will be stored in a `Variable` with `:EXIT_CODE` appended to the variable name
+    The exit status will be stored in a `Variable` with `:EXIT_CODE` appended to the
+    variable name
   kind: ShellScript
   version: v1
   versionChangelog: |
