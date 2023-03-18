@@ -77,3 +77,15 @@ spec:
     - fieldValueIsNull: true
     customValidation: |
       self.log(message='No custom validation for valueTTL', level='debug')
+  - fieldName: convertEmptyInputToNone
+    fieldDescription: |
+      If input is empty, convert the final value to NoneType
+    fieldType: bool
+    fieldRequired: false
+    fieldDefaultValue: true
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for convertEmptyInputToNone', level='debug')
