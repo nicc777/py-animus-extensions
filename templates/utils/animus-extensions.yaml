@@ -18,6 +18,10 @@ spec:
   supportedVersions:
   - 'v1'
   baseClass: ManifestBase
+  outputPaths:              # If any of these are null/NoneType, the global defaults will be used (which is this repo)
+    doc: null
+    examples: null
+    implementations: null
   pipRequirements:
   - 'py-animus'
   importStatements:
@@ -143,6 +147,10 @@ spec:
   supportedVersions:
   - 'v1'
   baseClass: ManifestBase
+  outputPaths:              # If any of these are null/NoneType, the global defaults will be used (which is this repo)
+    doc: null
+    examples: null
+    implementations: null
   pipRequirements:
   - 'py-animus'
   importStatements:
