@@ -56,7 +56,6 @@ class AnimusExtensionTemplate(ManifestBase):
             self,
             spec_path: str,
             value: str,
-            expected_type: type,
             default_val: str='',
             set_default_when_not_present: bool=True,        # If false and field is not present, raise exception
             set_default_when_type_mismatch: bool=False,     # By default and exception will be raised
@@ -90,7 +89,7 @@ class AnimusExtensionTemplate(ManifestBase):
             default_value_if_not_found=False,
             raise_exception_on_expired=False,
             raise_exception_on_not_found=False
-        ):
+        ) is False:
             
             self.log(message='Not Yet Validated', level='debug')
 
