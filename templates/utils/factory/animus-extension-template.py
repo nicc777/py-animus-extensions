@@ -52,10 +52,11 @@ class AnimusExtensionTemplate(ManifestBase):
             self.metadata['name']
         )
     
-    def _validate_str(
+    def _validate_str_or_list(
             self,
             spec_path: str,
             value: str,
+            value_type: type,
             default_val: str='',
             set_default_when_not_present: bool=True,        # If false and field is not present, raise exception
             set_default_when_type_mismatch: bool=False,     # By default and exception will be raised
@@ -66,15 +67,15 @@ class AnimusExtensionTemplate(ManifestBase):
             if set_default_when_not_present is True or set_default_when_null is True:
                 final_value = default_val
             else:
-                raise Exception('String value for field "{}" was NoneType or not present'.format(spec_path))
-        if isinstance(value, str) is False:
+                raise Exception('{} value for field "{}" was NoneType or not present'.format(type(value_type), spec_path))
+        if isinstance(value, value_type) is False:
             if set_default_when_type_mismatch is True:
                 final_value = None
             else:
-                raise Exception('String value for field "{}" was expected to be a string but found "{}"'.format(spec_path, type(value)))
+                raise Exception('{} value for field "{}" was expected to be a string but found "{}"'.format(type(value_type), spec_path, type(value)))
         else:
             final_value = value
-        self.log(message='Spec path "spec.{}" validated'.format(spec_path), level='debug')
+        self.log(message='Spec path "spec.{}" validated'.format(spec_path), level='info')
         return final_value
 
     def _validate(self, variable_cache: VariableCache=VariableCache()):
@@ -93,23 +94,51 @@ class AnimusExtensionTemplate(ManifestBase):
             
             self.log(message='Not Yet Validated', level='debug')
 
-            self.spec['description'] = self._validate_str(
-                spec_path='spec.description',
-                value=find_key(dot_notation_path='description', payload=self.spec),
-                default_val='',
-                set_default_when_not_present=True,
-                set_default_when_type_mismatch=True,
-                set_default_when_null=True
-            )
+            validation_config_for_string_fields = {
+                'description': {
+                    'default_val': '',
+                    'set_default_when_not_present': True,
+                    'set_default_when_type_mismatch': True,
+                    'set_default_when_null': True,
 
-            self.spec['kind'] = self._validate_str(
-                spec_path='spec.kind',
-                value=find_key(dot_notation_path='kind', payload=self.spec),
-                default_val=None,
-                set_default_when_not_present=False,
-                set_default_when_type_mismatch=False,
-                set_default_when_null=False
-            )
+                }, 
+                'kind': {
+                    'default_val': None,
+                    'set_default_when_not_present': False,
+                    'set_default_when_type_mismatch': False,
+                    'set_default_when_null': False,
+                }, 
+                'version': {
+                    'default_val': None,
+                    'set_default_when_not_present': False,
+                    'set_default_when_type_mismatch': False,
+                    'set_default_when_null': False,
+                }, 
+                'versionChangelog': {
+                    'default_val': '> **Note**\n> No changelog provided\n\n',
+                    'set_default_when_not_present': True,
+                    'set_default_when_type_mismatch': True,
+                    'set_default_when_null': True,
+                },
+                'baseClass': {
+                    'default_val': 'ManifestBase',
+                    'set_default_when_not_present': True,
+                    'set_default_when_type_mismatch': True,
+                    'set_default_when_null': True,
+                },
+            }
+
+            for spec_str_field, params in validation_config_for_string_fields.items():
+                self.spec[spec_str_field] = self._validate_str_or_list(
+                    spec_path=spec_str_field,
+                    value=find_key(dot_notation_path=spec_str_field, payload=self.spec),
+                    value_type=str,
+                    default_val=params['default_val'],
+                    set_default_when_not_present=params['set_default_when_not_present'],
+                    set_default_when_type_mismatch=params['set_default_when_type_mismatch'],
+                    set_default_when_null=params['set_default_when_null'],
+                )
+            
 
             self.log(message='Spec Validated', level='debug')
         else:
