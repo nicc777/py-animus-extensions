@@ -60,21 +60,25 @@ class AnimusExtensionTemplate(ManifestBase):
             default_val: str='',
             set_default_when_not_present: bool=True,        # If false and field is not present, raise exception
             set_default_when_type_mismatch: bool=False,     # By default and exception will be raised
-            set_default_when_null: bool=True                # If false and value is None, raise an exception
+            set_default_when_null: bool=True,               # If false and value is None, raise an exception
+            raise_exception_when_empty: bool=False
         )->object:
         final_value = default_val
         if value is None:
             if set_default_when_not_present is True or set_default_when_null is True:
                 final_value = default_val
             else:
-                raise Exception('{} value for field "{}" was NoneType or not present'.format(type(value_type), spec_path))
+                raise Exception('{} value for field "{}" was NoneType or not present'.format(value_type, spec_path))
         if isinstance(value, value_type) is False:
             if set_default_when_type_mismatch is True:
                 final_value = None
             else:
-                raise Exception('{} value for field "{}" was expected to be a string but found "{}"'.format(type(value_type), spec_path, type(value)))
+                raise Exception('{} value for field "{}" was expected to be a string but found "{}"'.format(value_type, spec_path, type(value)))
         else:
             final_value = value
+        if raise_exception_when_empty is True:
+            if len(final_value) == 0:
+                raise Exception('{} value for field "{}" was zero length'.format(value_type, spec_path))
         self.log(message='Spec path "spec.{}" validated'.format(spec_path), level='info')
         return final_value
 
@@ -94,49 +98,84 @@ class AnimusExtensionTemplate(ManifestBase):
             
             self.log(message='Not Yet Validated', level='debug')
 
-            validation_config_for_string_fields = {
+            validation_config_for_string_and_list_fields = {
                 'description': {
                     'default_val': '',
+                    'value_type': str,
                     'set_default_when_not_present': True,
                     'set_default_when_type_mismatch': True,
                     'set_default_when_null': True,
+                    'raise_exception_when_empty': False,
 
                 }, 
                 'kind': {
                     'default_val': None,
+                    'value_type': str,
                     'set_default_when_not_present': False,
                     'set_default_when_type_mismatch': False,
                     'set_default_when_null': False,
+                    'raise_exception_when_empty': False,
                 }, 
                 'version': {
                     'default_val': None,
+                    'value_type': str,
                     'set_default_when_not_present': False,
                     'set_default_when_type_mismatch': False,
                     'set_default_when_null': False,
+                    'raise_exception_when_empty': False,
                 }, 
                 'versionChangelog': {
                     'default_val': '> **Note**\n> No changelog provided\n\n',
+                    'value_type': str,
                     'set_default_when_not_present': True,
                     'set_default_when_type_mismatch': True,
                     'set_default_when_null': True,
+                    'raise_exception_when_empty': False,
                 },
                 'baseClass': {
                     'default_val': 'ManifestBase',
+                    'value_type': str,
                     'set_default_when_not_present': True,
                     'set_default_when_type_mismatch': True,
                     'set_default_when_null': True,
+                    'raise_exception_when_empty': False,
+                },
+                'supportedVersions': {
+                    'default_val': list(),
+                    'value_type': list,
+                    'set_default_when_not_present': False,
+                    'set_default_when_type_mismatch': False,
+                    'set_default_when_null': False,
+                    'raise_exception_when_empty': True,
+                },
+                'importStatements': {
+                    'default_val': ['from py_animus.manifest_management import *', 'from py_animus import get_logger', 'import traceback',],
+                    'value_type': list,
+                    'set_default_when_not_present': True,
+                    'set_default_when_type_mismatch': True,
+                    'set_default_when_null': True,
+                    'raise_exception_when_empty': True,
+                },
+                'specFields': {
+                    'default_val': list(),
+                    'value_type': list,
+                    'set_default_when_not_present': False,
+                    'set_default_when_type_mismatch': False,
+                    'set_default_when_null': False,
+                    'raise_exception_when_empty': True,
                 },
             }
 
-            for spec_str_field, params in validation_config_for_string_fields.items():
+            for spec_str_field, params in validation_config_for_string_and_list_fields.items():
                 self.spec[spec_str_field] = self._validate_str_or_list(
                     spec_path=spec_str_field,
                     value=find_key(dot_notation_path=spec_str_field, payload=self.spec),
-                    value_type=str,
+                    value_type=params['value_type'],
                     default_val=params['default_val'],
                     set_default_when_not_present=params['set_default_when_not_present'],
                     set_default_when_type_mismatch=params['set_default_when_type_mismatch'],
                     set_default_when_null=params['set_default_when_null'],
+                    raise_exception_when_empty=params['raise_exception_when_empty']
                 )
             
 
