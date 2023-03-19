@@ -55,6 +55,17 @@ spec:
       self.log(message='Validating shabang type', level='debug')
       if self.spec['promptCharacter'] not in SUPPORTED_SHELLS:
         raise Exception('Unsupported shell. Must be one of {}'.format(SUPPORTED_SHELLS))
+  - fieldName: source
+    fieldDescription: |
+      Defines the script source
+    fieldType: dict
+    fieldRequired: true
+    fieldDefaultValue: null
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: false
+    - fieldValueTypeMismatch: false
+    - fieldValueIsNull: false
+    customValidation: pass
   - fieldName: source.type
     fieldDescription: |
       Select the source type, which can be either `filePath` that points to an 

@@ -79,7 +79,7 @@ class AnimusExtensionTemplate(ManifestBase):
         if raise_exception_when_empty is True:
             if len(final_value) == 0:
                 raise Exception('{} value for field "{}" was zero length'.format(value_type, spec_path))
-        self.log(message='Spec path "spec.{}" validated'.format(spec_path), level='info')
+        self.log(message='Spec path "{}" validated'.format(spec_path), level='info')
         return final_value
 
     def _validate(self, variable_cache: VariableCache=VariableCache()):
@@ -166,6 +166,36 @@ class AnimusExtensionTemplate(ManifestBase):
                 },
             }
 
+            validation_specFields_for_string_and_list_fields = {
+                'fieldName': {
+                    'default_val': None,
+                    'value_type': str,
+                    'set_default_when_not_present': False,
+                    'set_default_when_type_mismatch': False,
+                    'set_default_when_null': False,
+                    'raise_exception_when_empty': True,
+
+                },
+                'fieldDescription': {
+                    'default_val': '',
+                    'value_type': str,
+                    'set_default_when_not_present': True,
+                    'set_default_when_type_mismatch': True,
+                    'set_default_when_null': True,
+                    'raise_exception_when_empty': False,
+
+                },
+                'fieldType': {
+                    'default_val': None,
+                    'value_type': str,
+                    'set_default_when_not_present': False,
+                    'set_default_when_type_mismatch': False,
+                    'set_default_when_null': False,
+                    'raise_exception_when_empty': True,
+
+                },
+            }
+
             for spec_str_field, params in validation_config_for_string_and_list_fields.items():
                 self.spec[spec_str_field] = self._validate_str_or_list(
                     spec_path=spec_str_field,
@@ -177,7 +207,24 @@ class AnimusExtensionTemplate(ManifestBase):
                     set_default_when_null=params['set_default_when_null'],
                     raise_exception_when_empty=params['raise_exception_when_empty']
                 )
-            
+
+            final_specFields_list = list()
+            for spec_field_dict in find_key(dot_notation_path='specFields', payload=self.spec):
+                self.log(message='---------- Validating specField "{}" ----------'.format(spec_field_dict['fieldName']), level='info')
+                for spec_str_field, params in validation_specFields_for_string_and_list_fields.items():
+                    final_specFields_list.append(
+                        self._validate_str_or_list(
+                            spec_path=spec_str_field,
+                            value=find_key(dot_notation_path=spec_str_field, payload=spec_field_dict),
+                            value_type=params['value_type'],
+                            default_val=params['default_val'],
+                            set_default_when_not_present=params['set_default_when_not_present'],
+                            set_default_when_type_mismatch=params['set_default_when_type_mismatch'],
+                            set_default_when_null=params['set_default_when_null'],
+                            raise_exception_when_empty=params['raise_exception_when_empty']
+                        )
+                    )
+            self.spec['specFields'] = copy.deepcopy(final_specFields_list)
 
             self.log(message='Spec Validated', level='debug')
         else:
