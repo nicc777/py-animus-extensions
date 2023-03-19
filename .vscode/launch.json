@@ -1,0 +1,74 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Run APPLY ALL",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/templates/utils/factory/animus-extension-template.py",
+            "args": [
+                "apply",
+                "-m", "${workspaceFolder}/templates/utils/extension-definitions/cli-input-prompt-v1.yaml",
+                "-m", "${workspaceFolder}/templates/utils/extension-definitions/shell-script-v1.yaml",
+                "-s", "${workspaceFolder}/templates/utils/factory"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "env": {
+                "DEBUG": "1"
+            }
+        },
+        {
+            "name": "Python: Run APPLY shell-script-v1",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/templates/utils/factory/animus-extension-template.py",
+            "args": [
+                "apply",
+                "-m", "${workspaceFolder}/templates/utils/extension-definitions/shell-script-v1.yaml",
+                "-s", "${workspaceFolder}/templates/utils/factory"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "env": {
+                "DEBUG": "1"
+            }
+        },
+        {
+            "name": "Python: Run DELETE ALL",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/templates/utils/factory/animus-extension-template.py",
+            "args": [
+                "delete",
+                "-m", "${workspaceFolder}/templates/utils/extension-definitions/cli-input-prompt-v1.yaml",
+                "-m", "${workspaceFolder}/templates/utils/extension-definitions/shell-script-v1.yaml",
+                "-s", "${workspaceFolder}/templates/utils/factory"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "DEBUG": "1"
+            }
+        },
+        {
+            "name": "Python: Run DELETE shell-script-v1",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/templates/utils/factory/animus-extension-template.py",
+            "args": [
+                "delete",
+                "-m", "${workspaceFolder}/templates/utils/extension-definitions/shell-script-v1.yaml",
+                "-s", "${workspaceFolder}/templates/utils/factory"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "DEBUG": "1"
+            }
+        }
+    ]
+}
