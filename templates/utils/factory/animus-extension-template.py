@@ -266,6 +266,22 @@ class AnimusExtensionTemplate(ManifestBase):
                             raise_exception_when_empty=params['raise_exception_when_empty']
                         )
                     )
+                conditions_found = 0
+                if spec_str_field == 'fieldSetDefaultValueConditions':
+                    conditions = spec_field_dict[spec_str_field]
+                    self.log(message='        conditions={}'.format(conditions), level='debug')
+                    for condition in conditions:
+                        for key in ('fieldDefinitionNotPresentInManifest', 'fieldValueTypeMismatch', 'fieldValueIsNull',):
+                            if key in condition:
+                                try:
+                                    if isinstance(condition[key], bool) is False:
+                                        raise Exception('{} field in spec.specFields.[].fieldSetDefaultValueConditions must be a boolean'.format(key))
+                                    conditions_found += 1
+                                except:
+                                    pass
+                if conditions_found != 3:
+                    raise Exception('When spec.specFields.[].fieldSetDefaultValueConditions is supplied, all three fields of fieldDefinitionNotPresentInManifest, fieldValueTypeMismatch, fieldValueIsNull must also be supplied.')
+
             self.spec['specFields'] = copy.deepcopy(final_specFields_list)
 
             self.log(message='Spec Validated', level='debug')
