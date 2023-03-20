@@ -7,6 +7,7 @@ from functools import reduce
 import re
 from typing import Any, Optional
 import sys
+from pathlib import Path
 
 
 DOC_BASE_PATH = '{}{}doc'.format(
@@ -340,6 +341,15 @@ class AnimusExtensionTemplate(ManifestBase):
     def implemented_manifest_differ_from_this_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache())->bool:
         self._validate(variable_cache=variable_cache)
         self._prep_file_path_variables(variable_cache=variable_cache)
+        files = (
+            Path(variable_cache.get_value(variable_name='{}:doc_file'.format(self._var_name()))),
+            Path(variable_cache.get_value(variable_name='{}:example_file'.format(self._var_name()))),
+            Path(variable_cache.get_value(variable_name='{}:implementation_file'.format(self._var_name()))),
+        )
+        for file in files:
+            if file.is_file() is False:
+                self.log(message='File {} not found - assuming not yet implemented'.format(file.name), level='info')
+                return True
         return False
 
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False):
