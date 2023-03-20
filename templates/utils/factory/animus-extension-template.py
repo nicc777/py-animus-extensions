@@ -212,6 +212,15 @@ class AnimusExtensionTemplate(ManifestBase):
                     'raise_exception_when_empty': False,
 
                 },
+                'customValidation': {
+                    'default_val': 'pass',
+                    'value_type': str,
+                    'set_default_when_not_present': True,
+                    'set_default_when_type_mismatch': True,
+                    'set_default_when_null': True,
+                    'raise_exception_when_empty': True,
+
+                },
             }
 
             for spec_str_field, params in validation_config_for_string_and_list_fields.items():
