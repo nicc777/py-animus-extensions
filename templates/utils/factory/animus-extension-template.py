@@ -52,7 +52,7 @@ class AnimusExtensionTemplate(ManifestBase):
             self.metadata['name']
         )
     
-    def _validate_str_or_list(
+    def _validate_str_or_list_or_boolean(
             self,
             spec_path: str,
             value: str,
@@ -194,10 +194,19 @@ class AnimusExtensionTemplate(ManifestBase):
                     'raise_exception_when_empty': True,
 
                 },
+                'fieldRequired': {
+                    'default_val': False,
+                    'value_type': bool,
+                    'set_default_when_not_present': True,
+                    'set_default_when_type_mismatch': True,
+                    'set_default_when_null': True,
+                    'raise_exception_when_empty': False,
+
+                },
             }
 
             for spec_str_field, params in validation_config_for_string_and_list_fields.items():
-                self.spec[spec_str_field] = self._validate_str_or_list(
+                self.spec[spec_str_field] = self._validate_str_or_list_or_boolean(
                     spec_path=spec_str_field,
                     value=find_key(dot_notation_path=spec_str_field, payload=self.spec),
                     value_type=params['value_type'],
@@ -213,7 +222,7 @@ class AnimusExtensionTemplate(ManifestBase):
                 self.log(message='---------- Validating specField "{}" ----------'.format(spec_field_dict['fieldName']), level='info')
                 for spec_str_field, params in validation_specFields_for_string_and_list_fields.items():
                     final_specFields_list.append(
-                        self._validate_str_or_list(
+                        self._validate_str_or_list_or_boolean(
                             spec_path=spec_str_field,
                             value=find_key(dot_notation_path=spec_str_field, payload=spec_field_dict),
                             value_type=params['value_type'],
