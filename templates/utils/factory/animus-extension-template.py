@@ -333,7 +333,9 @@ class AnimusExtensionTemplate(ManifestBase):
         )
 
     def _delete_file_path_variables(self, variable_cache: VariableCache=VariableCache()):
-        pass
+        variable_cache.delete_variable(variable_name='{}:doc_file'.format(self._var_name()))
+        variable_cache.delete_variable(variable_name='{}:example_file'.format(self._var_name()))
+        variable_cache.delete_variable(variable_name='{}:implementation_file'.format(self._var_name()))
 
     def implemented_manifest_differ_from_this_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache())->bool:
         self._validate(variable_cache=variable_cache)
@@ -354,8 +356,11 @@ class AnimusExtensionTemplate(ManifestBase):
     
     def delete_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False):
         self.log(message='DELETE CALLED', level='info')
-        self._delete_file_path_variables(variable_cache=variable_cache)
         self.log(message='Deleting Manifest', level='info')
+        
+        # TODO Delete files
+        
+        self._delete_file_path_variables(variable_cache=variable_cache)
         variable_cache.delete_variable(variable_name=self._var_name())
         return 
 
