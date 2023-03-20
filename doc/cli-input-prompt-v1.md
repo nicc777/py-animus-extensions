@@ -7,7 +7,7 @@ Stores final result in a `Variable` called `CliInputPrompt:<<name-from-manifest>
 May have some use where a user needs to supply information, but in these scenarios it will be hard to automate such a process.
 
 ```shell
-export EXTENSION_NAME="cli-input-prompt"
+export EXTENSION_NAME="cli-input-prompt-v1"
 ```
 
 # Spec fields
