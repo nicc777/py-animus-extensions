@@ -305,17 +305,21 @@ class AnimusExtensionTemplate(ManifestBase):
         variable_cache.store_variable(
             variable=Variable(
                 name='{}:example_dir'.format(self._var_name()),
-                initial_value='{}{}minimal'.format(EXAMPLES_BASE_PATH, os.sep),
+                initial_value='{}{}{}{}minimal'.format(EXAMPLES_BASE_PATH, os.sep, self.metadata['name'], os.sep),
                 ttl=-1,
                 logger=self.logger,
                 mask_in_logs=False
             ),
             overwrite_existing=False
         )
+        example_dir = variable_cache.get_value(variable_name='{}:example_dir'.format(self._var_name()))
         variable_cache.store_variable(
             variable=Variable(
                 name='{}:example_file'.format(self._var_name()),
-                initial_value='{}{}minimal{}{}.yaml'.format(EXAMPLES_BASE_PATH, os.sep, os.sep, self.metadata['name']),
+                initial_value='{}{}example.yaml'.format(
+                    example_dir,
+                    os.sep
+                ),
                 ttl=-1,
                 logger=self.logger,
                 mask_in_logs=False
@@ -342,14 +346,17 @@ class AnimusExtensionTemplate(ManifestBase):
         self._validate(variable_cache=variable_cache)
         self._prep_file_path_variables(variable_cache=variable_cache)
         files = (
-            Path(variable_cache.get_value(variable_name='{}:doc_file'.format(self._var_name()))),
-            Path(variable_cache.get_value(variable_name='{}:example_file'.format(self._var_name()))),
-            Path(variable_cache.get_value(variable_name='{}:implementation_file'.format(self._var_name()))),
+            variable_cache.get_value(variable_name='{}:doc_file'.format(self._var_name())),
+            variable_cache.get_value(variable_name='{}:example_file'.format(self._var_name())),
+            variable_cache.get_value(variable_name='{}:implementation_file'.format(self._var_name())),
         )
-        for file in files:
+        for file_path in files:
+            file = Path(file_path)
             if file.is_file() is False:
-                self.log(message='File {} not found - assuming not yet implemented'.format(file.name), level='info')
+                self.log(message='File {} not found - assuming not yet implemented'.format(file_path), level='info')
                 return True
+            else:
+                self.log(message='File {} found - source files may be manually modified, therefore no checksum comparisons will be done and it is assumed that this file was created previously by the factory'.format(file_path), level='warning')
         return False
 
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False):

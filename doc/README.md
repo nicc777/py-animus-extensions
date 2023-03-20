@@ -38,6 +38,6 @@ docker run --rm -e "DEBUG=1" -it \
 
 # Extensions
 
-| Name                                     | Kind             | Description                                             |
-|------------------------------------------|------------------|---------------------------------------------------------|
-| [cli-input-prompt](cli-input-prompt.md)  | CliInputPrompt   | Get input from a prompt on the command line from a user |
+| Name                                           | Kind             | Description                                             |
+|------------------------------------------------|------------------|---------------------------------------------------------|
+| [cli-input-prompt-v1](cli-input-prompt-v1.md)  | CliInputPrompt   | Get input from a prompt on the command line from a user |
