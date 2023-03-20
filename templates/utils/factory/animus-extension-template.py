@@ -221,6 +221,21 @@ class AnimusExtensionTemplate(ManifestBase):
                     'raise_exception_when_empty': True,
 
                 },
+                'fieldSetDefaultValueConditions': {
+                    'default_val': [
+                        {
+                            'fieldDefinitionNotPresentInManifest': True,
+                            'fieldValueTypeMismatch': True,
+                            'fieldValueIsNull': True,
+                        },
+                    ],
+                    'value_type': list,
+                    'set_default_when_not_present': True,
+                    'set_default_when_type_mismatch': True,
+                    'set_default_when_null': True,
+                    'raise_exception_when_empty': True,
+
+                },
             }
 
             for spec_str_field, params in validation_config_for_string_and_list_fields.items():
