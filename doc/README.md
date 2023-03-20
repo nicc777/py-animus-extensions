@@ -6,7 +6,7 @@ All examples are in the directory `examples/` with each sub-directory having the
 
 ```text
 examples
-└── cli-input-prompt
+└── cli-input-prompt-v1
     ├── basic
     │   └── example.yaml
     ├── minimal
@@ -21,7 +21,7 @@ Therefore, when running an example, the following strategy could be used:
 
 ```shell
 # Use an environment variable to store the extension to test:
-export EXTENSION_NAME="cli-input-prompt"
+export EXTENSION_NAME="cli-input-prompt-v1"
 
 # Use an environment variable to store the scenario to test:
 export SCENARIO_NAME="minimal"
