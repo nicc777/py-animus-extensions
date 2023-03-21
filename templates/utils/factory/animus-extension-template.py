@@ -65,14 +65,14 @@ class AnimusExtensionTemplate(ManifestBase):
             raise_exception_when_empty: bool=False,
             log_indent_spaces: int=0
         )->object:
-        self.log(message='        + spec_path                      = {}'.format( spec_path                      ), level='debug')
-        self.log(message='        + value                          = {}'.format( value                          ), level='debug')
-        self.log(message='        + value_type                     = {}'.format( value_type                     ), level='debug')
-        self.log(message='        + default_val                    = {}'.format( default_val                    ), level='debug')
-        self.log(message='        + set_default_when_not_present   = {}'.format( set_default_when_not_present   ), level='debug')
-        self.log(message='        + set_default_when_type_mismatch = {}'.format( set_default_when_type_mismatch ), level='debug')
-        self.log(message='        + set_default_when_null          = {}'.format( set_default_when_null          ), level='debug')
-        self.log(message='        + raise_exception_when_empty     = {}'.format( raise_exception_when_empty     ), level='debug')
+        # self.log(message='        + spec_path                      = {}'.format( spec_path                      ), level='debug')
+        # self.log(message='        + value                          = {}'.format( value                          ), level='debug')
+        # self.log(message='        + value_type                     = {}'.format( value_type                     ), level='debug')
+        # self.log(message='        + default_val                    = {}'.format( default_val                    ), level='debug')
+        # self.log(message='        + set_default_when_not_present   = {}'.format( set_default_when_not_present   ), level='debug')
+        # self.log(message='        + set_default_when_type_mismatch = {}'.format( set_default_when_type_mismatch ), level='debug')
+        # self.log(message='        + set_default_when_null          = {}'.format( set_default_when_null          ), level='debug')
+        # self.log(message='        + raise_exception_when_empty     = {}'.format( raise_exception_when_empty     ), level='debug')
         final_value = default_val
         log_indent = ''
         if log_indent_spaces > 0:
