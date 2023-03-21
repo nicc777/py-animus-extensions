@@ -65,6 +65,14 @@ class AnimusExtensionTemplate(ManifestBase):
             raise_exception_when_empty: bool=False,
             log_indent_spaces: int=0
         )->object:
+        self.log(message='        + spec_path                      = {}'.format( spec_path                      ), level='debug')
+        self.log(message='        + value                          = {}'.format( value                          ), level='debug')
+        self.log(message='        + value_type                     = {}'.format( value_type                     ), level='debug')
+        self.log(message='        + default_val                    = {}'.format( default_val                    ), level='debug')
+        self.log(message='        + set_default_when_not_present   = {}'.format( set_default_when_not_present   ), level='debug')
+        self.log(message='        + set_default_when_type_mismatch = {}'.format( set_default_when_type_mismatch ), level='debug')
+        self.log(message='        + set_default_when_null          = {}'.format( set_default_when_null          ), level='debug')
+        self.log(message='        + raise_exception_when_empty     = {}'.format( raise_exception_when_empty     ), level='debug')
         final_value = default_val
         log_indent = ''
         if log_indent_spaces > 0:
@@ -82,7 +90,7 @@ class AnimusExtensionTemplate(ManifestBase):
                 raise Exception('{} value for field "{}" was expected to be a string but found "{}"'.format(value_type, spec_path, type(value)))
         else:
             final_value = value
-        if raise_exception_when_empty is True and final_value is not None:
+        if raise_exception_when_empty is True:
             if len(final_value) == 0:
                 raise Exception('{} value for field "{}" was zero length'.format(value_type, spec_path))
         self.log(message='{}Spec path "{}" validated'.format(log_indent, spec_path), level='info')
@@ -297,7 +305,7 @@ class AnimusExtensionTemplate(ManifestBase):
                     'set_default_when_not_present': True,
                     'set_default_when_type_mismatch': True,
                     'set_default_when_null': True,
-                    'raise_exception_when_empty': True,
+                    'raise_exception_when_empty': False,
                 },
                 'specData': {
                     'default_val': None,
@@ -310,10 +318,10 @@ class AnimusExtensionTemplate(ManifestBase):
                 'additionalMetadata': {
                     'default_val': None,
                     'value_type': str,
-                    'set_default_when_not_present': True,
-                    'set_default_when_type_mismatch': True,
-                    'set_default_when_null': True,
-                    'raise_exception_when_empty': False,
+                    'set_default_when_not_present': False,
+                    'set_default_when_type_mismatch': False,
+                    'set_default_when_null': False,
+                    'raise_exception_when_empty': True,
                 },
             }
 
@@ -365,6 +373,7 @@ class AnimusExtensionTemplate(ManifestBase):
 
             final_additionalExamples_list = list()
             for spec_field_dict in find_key(dot_notation_path='additionalExamples', payload=self.spec):
+                self.log(message='   spec_field_dict={}'.format(spec_field_dict), level='debug')
                 self.log(message='---------- Validating additionalExamples "{}" ----------'.format(spec_field_dict['exampleName']), level='info')
                 for spec_str_field, params in validation_additionalExamples_for_string_and_list_fields.items():
                     final_additionalExamples_list.append(
@@ -382,20 +391,19 @@ class AnimusExtensionTemplate(ManifestBase):
                     )
 
                     if spec_str_field == 'manifest':
-                        for spec_field_dict in find_key(dot_notation_path='manifest', payload=spec_field_dict):
-                            self.log(message='   ~~~ Validating Example Manifest Definition ~~~', level='info')
-                            for spec_str_field, params in validation_additionalExamples_manifest_for_string_and_list_fields.items():
-                                self._validate_str_or_list_or_boolean(
-                                    spec_path=spec_str_field,
-                                    value=find_key(dot_notation_path=spec_str_field, payload=spec_field_dict),
-                                    value_type=params['value_type'],
-                                    default_val=params['default_val'],
-                                    set_default_when_not_present=params['set_default_when_not_present'],
-                                    set_default_when_type_mismatch=params['set_default_when_type_mismatch'],
-                                    set_default_when_null=params['set_default_when_null'],
-                                    raise_exception_when_empty=params['raise_exception_when_empty'],
-                                    log_indent_spaces=6
-                                )
+                        self.log(message='      ~~~ Validating Example Manifest Definition ~~~', level='info')
+                        for spec_str_field2, params2 in validation_additionalExamples_manifest_for_string_and_list_fields.items():
+                            self._validate_str_or_list_or_boolean(
+                                spec_path=spec_str_field2,
+                                value=find_key(dot_notation_path=spec_str_field2, payload=spec_field_dict['manifest']),
+                                value_type=params2['value_type'],
+                                default_val=params2['default_val'],
+                                set_default_when_not_present=params2['set_default_when_not_present'],
+                                set_default_when_type_mismatch=params2['set_default_when_type_mismatch'],
+                                set_default_when_null=params2['set_default_when_null'],
+                                raise_exception_when_empty=params2['raise_exception_when_empty'],
+                                log_indent_spaces=6
+                            )
 
             if len(final_additionalExamples_list) == 0:
                 raise Exception('At least one example definition must be supplied')
