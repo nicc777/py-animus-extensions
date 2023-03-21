@@ -165,6 +165,14 @@ class AnimusExtensionTemplate(ManifestBase):
                     'set_default_when_null': False,
                     'raise_exception_when_empty': True,
                 },
+                'additionalExamples': {
+                    'default_val': list(),
+                    'value_type': list,
+                    'set_default_when_not_present': False,
+                    'set_default_when_type_mismatch': False,
+                    'set_default_when_null': False,
+                    'raise_exception_when_empty': True,
+                },
             }
 
             validation_specFields_for_string_and_list_fields = {
