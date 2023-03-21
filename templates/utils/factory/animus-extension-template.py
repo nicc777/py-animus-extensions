@@ -62,9 +62,14 @@ class AnimusExtensionTemplate(ManifestBase):
             set_default_when_not_present: bool=True,        # If false and field is not present, raise exception
             set_default_when_type_mismatch: bool=False,     # By default and exception will be raised
             set_default_when_null: bool=True,               # If false and value is None, raise an exception
-            raise_exception_when_empty: bool=False
+            raise_exception_when_empty: bool=False,
+            log_indent_spaces: int=0
         )->object:
         final_value = default_val
+        log_indent = ''
+        if log_indent_spaces > 0:
+            for i in range(0, log_indent_spaces):
+                log_indent = '{} '.format(log_indent)
         if value is None:
             if set_default_when_not_present is True or set_default_when_null is True:
                 final_value = default_val
@@ -77,10 +82,10 @@ class AnimusExtensionTemplate(ManifestBase):
                 raise Exception('{} value for field "{}" was expected to be a string but found "{}"'.format(value_type, spec_path, type(value)))
         else:
             final_value = value
-        if raise_exception_when_empty is True:
+        if raise_exception_when_empty is True and final_value is not None:
             if len(final_value) == 0:
                 raise Exception('{} value for field "{}" was zero length'.format(value_type, spec_path))
-        self.log(message='Spec path "{}" validated'.format(spec_path), level='info')
+        self.log(message='{}Spec path "{}" validated'.format(log_indent, spec_path), level='info')
         return final_value
 
     def _validate(self, variable_cache: VariableCache=VariableCache()):
@@ -166,11 +171,19 @@ class AnimusExtensionTemplate(ManifestBase):
                     'raise_exception_when_empty': True,
                 },
                 'additionalExamples': {
-                    'default_val': list(),
+                    'default_val': [
+                        {
+                            'exampleName': 'minimal', 
+                            'manifest': {
+                                'generated': True,
+                            }, 
+                            'explanatoryText': 'This is the absolute minimal example based on required values. Dummy random data was generated where required.'
+                        }
+                    ],
                     'value_type': list,
-                    'set_default_when_not_present': False,
-                    'set_default_when_type_mismatch': False,
-                    'set_default_when_null': False,
+                    'set_default_when_not_present': True,
+                    'set_default_when_type_mismatch': True,
+                    'set_default_when_null': True,
                     'raise_exception_when_empty': True,
                 },
             }
@@ -247,6 +260,63 @@ class AnimusExtensionTemplate(ManifestBase):
                 },
             }
 
+            validation_additionalExamples_for_string_and_list_fields = {
+                'exampleName': {
+                    'default_val': None,
+                    'value_type': str,
+                    'set_default_when_not_present': False,
+                    'set_default_when_type_mismatch': False,
+                    'set_default_when_null': False,
+                    'raise_exception_when_empty': False,
+
+                },
+                'manifest': {
+                    'default_val': {'generated': True},
+                    'value_type': dict,
+                    'set_default_when_not_present': True,
+                    'set_default_when_type_mismatch': True,
+                    'set_default_when_null': True,
+                    'raise_exception_when_empty': True,
+
+                },
+                'explanatoryText': {
+                    'default_val': 'This is the absolute minimal example based on required values. Dummy random data was generated where required.',
+                    'value_type': str,
+                    'set_default_when_not_present': True,
+                    'set_default_when_type_mismatch': True,
+                    'set_default_when_null': True,
+                    'raise_exception_when_empty': True,
+
+                },
+            }
+
+            validation_additionalExamples_manifest_for_string_and_list_fields = {
+                'generated': {
+                    'default_val': False,
+                    'value_type': bool,
+                    'set_default_when_not_present': True,
+                    'set_default_when_type_mismatch': True,
+                    'set_default_when_null': True,
+                    'raise_exception_when_empty': True,
+                },
+                'specData': {
+                    'default_val': None,
+                    'value_type': str,
+                    'set_default_when_not_present': True,
+                    'set_default_when_type_mismatch': True,
+                    'set_default_when_null': True,
+                    'raise_exception_when_empty': False,
+                },
+                'additionalMetadata': {
+                    'default_val': None,
+                    'value_type': str,
+                    'set_default_when_not_present': True,
+                    'set_default_when_type_mismatch': True,
+                    'set_default_when_null': True,
+                    'raise_exception_when_empty': False,
+                },
+            }
+
             for spec_str_field, params in validation_config_for_string_and_list_fields.items():
                 self.spec[spec_str_field] = self._validate_str_or_list_or_boolean(
                     spec_path=spec_str_field,
@@ -272,7 +342,8 @@ class AnimusExtensionTemplate(ManifestBase):
                             set_default_when_not_present=params['set_default_when_not_present'],
                             set_default_when_type_mismatch=params['set_default_when_type_mismatch'],
                             set_default_when_null=params['set_default_when_null'],
-                            raise_exception_when_empty=params['raise_exception_when_empty']
+                            raise_exception_when_empty=params['raise_exception_when_empty'],
+                            log_indent_spaces=3
                         )
                     )
                 conditions_found = 0
@@ -290,6 +361,44 @@ class AnimusExtensionTemplate(ManifestBase):
                                     pass
                 if conditions_found != 3:
                     raise Exception('When spec.specFields.[].fieldSetDefaultValueConditions is supplied, all three fields of fieldDefinitionNotPresentInManifest, fieldValueTypeMismatch, fieldValueIsNull must also be supplied.')
+
+
+            final_additionalExamples_list = list()
+            for spec_field_dict in find_key(dot_notation_path='additionalExamples', payload=self.spec):
+                self.log(message='---------- Validating additionalExamples "{}" ----------'.format(spec_field_dict['exampleName']), level='info')
+                for spec_str_field, params in validation_additionalExamples_for_string_and_list_fields.items():
+                    final_additionalExamples_list.append(
+                        self._validate_str_or_list_or_boolean(
+                            spec_path=spec_str_field,
+                            value=find_key(dot_notation_path=spec_str_field, payload=spec_field_dict),
+                            value_type=params['value_type'],
+                            default_val=params['default_val'],
+                            set_default_when_not_present=params['set_default_when_not_present'],
+                            set_default_when_type_mismatch=params['set_default_when_type_mismatch'],
+                            set_default_when_null=params['set_default_when_null'],
+                            raise_exception_when_empty=params['raise_exception_when_empty'],
+                            log_indent_spaces=3
+                        )
+                    )
+
+                    if spec_str_field == 'manifest':
+                        for spec_field_dict in find_key(dot_notation_path='manifest', payload=spec_field_dict):
+                            self.log(message='   ~~~ Validating Example Manifest Definition ~~~', level='info')
+                            for spec_str_field, params in validation_additionalExamples_manifest_for_string_and_list_fields.items():
+                                self._validate_str_or_list_or_boolean(
+                                    spec_path=spec_str_field,
+                                    value=find_key(dot_notation_path=spec_str_field, payload=spec_field_dict),
+                                    value_type=params['value_type'],
+                                    default_val=params['default_val'],
+                                    set_default_when_not_present=params['set_default_when_not_present'],
+                                    set_default_when_type_mismatch=params['set_default_when_type_mismatch'],
+                                    set_default_when_null=params['set_default_when_null'],
+                                    raise_exception_when_empty=params['raise_exception_when_empty'],
+                                    log_indent_spaces=6
+                                )
+
+            if len(final_additionalExamples_list) == 0:
+                raise Exception('At least one example definition must be supplied')
 
             self.spec['specFields'] = copy.deepcopy(final_specFields_list)
 
