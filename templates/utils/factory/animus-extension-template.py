@@ -369,6 +369,19 @@ class AnimusExtensionTemplate(ManifestBase):
         self.log(message='      Documentation File         : {}'.format(variable_cache.get_value(variable_name='{}:doc_file'.format(self._var_name()))), level='info')
         self.log(message='      Minimal Example File       : {}'.format(variable_cache.get_value(variable_name='{}:example_file'.format(self._var_name()))), level='info')
         self.log(message='      Implementation Source File : {}'.format(variable_cache.get_value(variable_name='{}:implementation_file'.format(self._var_name()))), level='info')
+
+        ###
+        ### Prepare Documentation
+        ###
+
+        ###
+        ### Prepare Example Manifest
+        ###
+
+        ###
+        ### Prepare Initial Source File
+        ###
+
         return 
     
     def delete_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False):
