@@ -427,30 +427,35 @@ class AnimusExtensionTemplate(ManifestBase):
             ),
             overwrite_existing=False
         )
+
+        example_files = dict()
+        for ex_data in self.spec['additionalExamples']:
+            ex_name = ex_data['exampleName']
+            ex_dir = '{}{}{}{}{}'.format(
+                EXAMPLES_BASE_PATH,
+                os.sep,
+                self.metadata['name'],
+                os.sep,
+                ex_data['exampleName']
+            )
+            ex_file = '{}{}example.yaml'.format(
+                ex_dir,
+                os.sep
+            )
+            example_files[ex_name] = dict()
+            example_files[ex_name]['directory'] = ex_dir
+            example_files[ex_name]['file'] = ex_file
         variable_cache.store_variable(
             variable=Variable(
-                name='{}:example_dir'.format(self._var_name()),
-                initial_value='{}{}{}{}minimal'.format(EXAMPLES_BASE_PATH, os.sep, self.metadata['name'], os.sep),
+                name='{}:example_files'.format(self._var_name()),
+                initial_value=example_files,
                 ttl=-1,
                 logger=self.logger,
                 mask_in_logs=False
             ),
             overwrite_existing=False
         )
-        example_dir = variable_cache.get_value(variable_name='{}:example_dir'.format(self._var_name()))
-        variable_cache.store_variable(
-            variable=Variable(
-                name='{}:example_file'.format(self._var_name()),
-                initial_value='{}{}example.yaml'.format(
-                    example_dir,
-                    os.sep
-                ),
-                ttl=-1,
-                logger=self.logger,
-                mask_in_logs=False
-            ),
-            overwrite_existing=False
-        )
+
         variable_cache.store_variable(
             variable=Variable(
                 name='{}:implementation_file'.format(self._var_name()),
@@ -470,30 +475,80 @@ class AnimusExtensionTemplate(ManifestBase):
     def implemented_manifest_differ_from_this_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache())->bool:
         self._validate(variable_cache=variable_cache)
         self._prep_file_path_variables(variable_cache=variable_cache)
-        files = (
-            variable_cache.get_value(variable_name='{}:doc_file'.format(self._var_name())),
-            variable_cache.get_value(variable_name='{}:example_file'.format(self._var_name())),
-            variable_cache.get_value(variable_name='{}:implementation_file'.format(self._var_name())),
-        )
-        for file_path in files:
-            file = Path(file_path)
-            if file.is_file() is False:
-                self.log(message='File {} not found - assuming not yet implemented'.format(file_path), level='info')
-                return True
+        command = variable_cache.get_value(variable_name='{}:command'.format(self._var_name()))
+        
+        actions = list()
+
+        dirs = (DOC_BASE_PATH, IMPLEMENTATIONS_BASE_PATH)
+        for d in dirs:
+            d_path = Path(DOC_BASE_PATH)
+            if d_path.exists() is False:
+                if command == 'delete':
+                    self.log(message='Directory {} not found - no action required'.format(d), level='info')
+                else:
+                    self.log(message='Directory {} not found - create_dir action recorded'.format(d), level='info')
+                    actions.append({'create_dir': d})
             else:
-                self.log(message='File {} found - source files may be manually modified, therefore no checksum comparisons will be done and it is assumed that this file was created previously by the factory'.format(file_path), level='warning')
+                self.log(message='Directory {} found - no action required'.format(d), level='info')
+
+        ex_dir = '{}{}{}'.format(
+            EXAMPLES_BASE_PATH,
+            os.sep,
+            self.metadata['name']
+        )
+        d_path = Path(ex_dir)
+        if d_path.exists() is False:
+            if command == 'delete':
+                self.log(message='Directory {} not found - no action required'.format(ex_dir), level='info')
+            else:
+                self.log(message='Directory {} not found - create_dir action recorded'.format(d), level='info')
+                actions.append({'create_dir': d})
+        else:
+            if command == 'delete':
+                self.log(message='Directory {} found - delete_dir_recursively action recorded'.format(ex_dir), level='info')
+                actions.append({'delete_dir_recursively': ex_dir})
+            else:
+                self.log(message='Directory {} not found - no action required'.format(ex_dir), level='info')
+
+        # files = (
+        #     variable_cache.get_value(variable_name='{}:doc_file'.format(self._var_name())),
+        #     variable_cache.get_value(variable_name='{}:example_file'.format(self._var_name())),
+        #     variable_cache.get_value(variable_name='{}:implementation_file'.format(self._var_name())),
+        # )
+        # for file_path in files:
+        #     file = Path(file_path)
+        #     if file.is_file() is False:
+        #         self.log(message='File {} not found - assuming not yet implemented'.format(file_path), level='info')
+        #     else:
+        #         self.log(message='File {} found - source files may be manually modified, therefore no checksum comparisons will be done and it is assumed that this file was created previously by the factory'.format(file_path), level='warning')
+
+        variable_cache.store_variable(variable=Variable(name='{}:actions'.format(self._var_name()),initial_value=actions,ttl=-1,logger=self.logger,mask_in_logs=False),overwrite_existing=False)
+        if len(actions) > 0:
+            return True
         return False
 
+    def _action_create_dir(self, directory_name):
+        self.log(message='ACTION: Creating directory: {}'.format(directory_name), level='info')
+        pass
+
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False):
+        variable_cache.store_variable(variable=Variable(name='{}:command'.format(self._var_name()),initial_value='apply',ttl=-1,logger=self.logger,mask_in_logs=False),overwrite_existing=False)
         self.log(message='APPLY CALLED', level='info')
         if self.implemented_manifest_differ_from_this_manifest(manifest_lookup_function=manifest_lookup_function, variable_cache=variable_cache) is False:
             self.log(message='No changes detected', level='info')
             return
+        actions = variable_cache.get_value(variable_name='{}:actions'.format(self._var_name()), value_if_expired=list(), raise_exception_on_expired=False, raise_exception_on_not_found=False,default_value_if_not_found=list(), for_logging=False)
         self.log(message='Applying Manifest', level='info')
         self.log(message='   Implementation Name           : {}'.format(self.metadata['name']), level='info')
         self.log(message='      Documentation File         : {}'.format(variable_cache.get_value(variable_name='{}:doc_file'.format(self._var_name()))), level='info')
         self.log(message='      Minimal Example File       : {}'.format(variable_cache.get_value(variable_name='{}:example_file'.format(self._var_name()))), level='info')
         self.log(message='      Implementation Source File : {}'.format(variable_cache.get_value(variable_name='{}:implementation_file'.format(self._var_name()))), level='info')
+        self.log(message='      actions                    : {}'.format(variable_cache.get_value(variable_name='{}:implementation_file'.format(self._var_name()))), level='info')
+
+
+        ###
+        ### Create Directories
+        ### 
 
         ###
         ### Prepare Documentation
@@ -507,9 +562,12 @@ class AnimusExtensionTemplate(ManifestBase):
         ### Prepare Initial Source File
         ###
 
+        variable_cache.delete_variable(variable_name='{}:command'.format(self._var_name()))
+        variable_cache.store_variable(variable=Variable(name='{}'.format(self._var_name()),initial_value=True,ttl=-1,logger=self.logger,mask_in_logs=False),overwrite_existing=False)
         return 
     
     def delete_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False):
+        variable_cache.store_variable(variable=Variable(name='{}:command'.format(self._var_name()),initial_value='apply',ttl=-1,logger=self.logger,mask_in_logs=False),overwrite_existing=False)
         self.log(message='DELETE CALLED', level='info')
         self.log(message='Deleting Manifest', level='info')
         
@@ -517,6 +575,7 @@ class AnimusExtensionTemplate(ManifestBase):
         
         self._delete_file_path_variables(variable_cache=variable_cache)
         variable_cache.delete_variable(variable_name=self._var_name())
+        variable_cache.delete_variable(variable_name='{}:command'.format(self._var_name()))
         return 
 
 
