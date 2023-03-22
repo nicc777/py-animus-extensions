@@ -481,7 +481,7 @@ class AnimusExtensionTemplate(ManifestBase):
 
         dirs = (DOC_BASE_PATH, IMPLEMENTATIONS_BASE_PATH)
         for d in dirs:
-            d_path = Path(DOC_BASE_PATH)
+            d_path = Path(d)
             if d_path.exists() is False:
                 if command == 'delete':
                     self.log(message='Directory {} not found - no action required'.format(d), level='info')
