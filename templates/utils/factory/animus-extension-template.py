@@ -373,7 +373,7 @@ class AnimusExtensionTemplate(ManifestBase):
 
             final_additionalExamples_list = list()
             for spec_field_dict in find_key(dot_notation_path='additionalExamples', payload=self.spec):
-                self.log(message='   spec_field_dict={}'.format(spec_field_dict), level='debug')
+                # self.log(message='   spec_field_dict={}'.format(spec_field_dict), level='debug')
                 self.log(message='---------- Validating additionalExamples "{}" ----------'.format(spec_field_dict['exampleName']), level='info')
                 for spec_str_field, params in validation_additionalExamples_for_string_and_list_fields.items():
                     final_additionalExamples_list.append(
