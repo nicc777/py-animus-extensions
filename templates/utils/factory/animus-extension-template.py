@@ -542,12 +542,12 @@ class AnimusExtensionTemplate(ManifestBase):
             self.log(message='No changes detected', level='info')
             return
         actions = variable_cache.get_value(variable_name='{}:actions'.format(self._var_name()), value_if_expired=list(), raise_exception_on_expired=False, raise_exception_on_not_found=False,default_value_if_not_found=list(), for_logging=False)
+        self.log(message='actions : {}'.format(actions), level='debug')
         self.log(message='Applying Manifest', level='info')
         self.log(message='   Implementation Name           : {}'.format(self.metadata['name']), level='info')
-        self.log(message='      Documentation File         : {}'.format(variable_cache.get_value(variable_name='{}:doc_file'.format(self._var_name()))), level='info')
-        self.log(message='      Minimal Example File       : {}'.format(variable_cache.get_value(variable_name='{}:example_file'.format(self._var_name()))), level='info')
-        self.log(message='      Implementation Source File : {}'.format(variable_cache.get_value(variable_name='{}:implementation_file'.format(self._var_name()))), level='info')
-        self.log(message='      actions                    : {}'.format(variable_cache.get_value(variable_name='{}:implementation_file'.format(self._var_name()))), level='info')
+        for action in actions:
+            for action_name, dummy in action.items():
+                self.log(message='      action                     : {}'.format(action_name), level='info')
 
 
         ###
