@@ -527,8 +527,12 @@ class AnimusExtensionTemplate(ManifestBase):
             return True
         return False
 
-    def _action_create_dir(self, directory_name):
+    def _action_create_dir(self, directory_name: str):
         self.log(message='ACTION: Creating directory: {}'.format(directory_name), level='info')
+        pass
+
+    def _action_delete_dir_recursively(self, directory_name: str):
+        self.log(message='ACTION: Recursively deleting directory: {}'.format(directory_name), level='info')
         pass
 
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False):
@@ -549,6 +553,15 @@ class AnimusExtensionTemplate(ManifestBase):
         ###
         ### Create Directories
         ### 
+        remaining_actions = list()
+        for action in actions:
+            for action_name, action_data in action.items():
+                if action_name == 'create_dir':
+                    self._action_create_dir(directory_name=action_data)
+                else:
+                    remaining_actions.append(copy.deepcopy(action))
+        actions = copy.deepcopy(remaining_actions)
+        remaining_actions = list()
 
         ###
         ### Prepare Documentation
@@ -572,6 +585,19 @@ class AnimusExtensionTemplate(ManifestBase):
         self.log(message='Deleting Manifest', level='info')
         
         # TODO Delete files
+
+        ###
+        ### Recursively Delete Directories
+        ### 
+        remaining_actions = list()
+        for action in actions:
+            for action_name, action_data in action.items():
+                if action_name == 'delete_dir_recursively':
+                    self._action_delete_dir_recursively(directory_name=action_data)
+                else:
+                    remaining_actions.append(copy.deepcopy(action))
+        actions = copy.deepcopy(remaining_actions)
+        remaining_actions = list()
         
         self._delete_file_path_variables(variable_cache=variable_cache)
         variable_cache.delete_variable(variable_name=self._var_name())
