@@ -587,7 +587,7 @@ class AnimusExtensionTemplate(ManifestBase):
             action_command = 'delete_implementation_file'
         if command == 'apply':
             action_command = 'create_implementation_file'
-        self._determine_file_actions(
+        actions = self._determine_file_actions(
             file=implementation_file_name,
             existing_actions=actions,
             command=command,
@@ -618,6 +618,14 @@ class AnimusExtensionTemplate(ManifestBase):
 
     def _action_delete_dir_recursively(self, directory_name: str):
         self.log(message='ACTION: Recursively deleting directory: {}'.format(directory_name), level='info')
+        pass
+
+    def _action_create_implementation_file(self, file_name: str):
+        self.log(message='ACTION: Creating Implementation File: {}'.format(file_name), level='info')
+        pass
+
+    def _action_delete_implementation_file(self, file_name: str):
+        self.log(message='ACTION: Deleting Implementation File: {}'.format(file_name), level='info')
         pass
 
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False):
@@ -659,6 +667,14 @@ class AnimusExtensionTemplate(ManifestBase):
         ###
         ### Prepare Initial Source File
         ###
+        remaining_actions = list()
+        for action in actions:
+            for action_name, action_data in action.items():
+                if action_name == 'create_implementation_file':
+                    self._action_create_implementation_file(file_name=action_data)
+                else:
+                    remaining_actions.append(copy.deepcopy(action))
+        actions = copy.deepcopy(remaining_actions)
 
         variable_cache.delete_variable(variable_name='{}:command'.format(self._var_name()))
         variable_cache.store_variable(variable=Variable(name='{}'.format(self._var_name()),initial_value=True,ttl=-1,logger=self.logger,mask_in_logs=False),overwrite_existing=False)
@@ -669,7 +685,25 @@ class AnimusExtensionTemplate(ManifestBase):
         self.log(message='DELETE CALLED', level='info')
         self.log(message='Deleting Manifest', level='info')
         
-        # TODO Delete files
+        ###
+        ### Delete Source File
+        ###
+        remaining_actions = list()
+        for action in actions:
+            for action_name, action_data in action.items():
+                if action_name == 'delete_implementation_file':
+                    self._action_delete_implementation_file(file_name=action_data)
+                else:
+                    remaining_actions.append(copy.deepcopy(action))
+        actions = copy.deepcopy(remaining_actions)
+
+        ###
+        ### Delete Example Manifest
+        ###
+
+        ###
+        ### Delete Documentation
+        ###
 
         ###
         ### Recursively Delete Directories
