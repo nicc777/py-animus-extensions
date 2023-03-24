@@ -491,24 +491,24 @@ class AnimusExtensionTemplate(ManifestBase):
             else:
                 self.log(message='Directory {} found - no action required'.format(d), level='info')
 
-        ex_dir = '{}{}{}'.format(
+        examples_dir = '{}{}{}'.format(
             EXAMPLES_BASE_PATH,
             os.sep,
             self.metadata['name']
         )
-        d_path = Path(ex_dir)
+        d_path = Path(examples_dir)
         if d_path.exists() is False:
             if command == 'delete':
-                self.log(message='Directory {} not found - no action required'.format(ex_dir), level='info')
+                self.log(message='Directory {} not found - no action required'.format(examples_dir), level='info')
             else:
                 self.log(message='Directory {} not found - create_dir action recorded'.format(d), level='info')
                 actions.append({'create_dir': d})
         else:
             if command == 'delete':
-                self.log(message='Directory {} found - delete_dir_recursively action recorded'.format(ex_dir), level='info')
-                actions.append({'delete_dir_recursively': ex_dir})
+                self.log(message='Directory {} found - delete_dir_recursively action recorded'.format(examples_dir), level='info')
+                actions.append({'delete_dir_recursively': examples_dir})
             else:
-                self.log(message='Directory {} not found - no action required'.format(ex_dir), level='info')
+                self.log(message='Directory {} not found - no action required'.format(examples_dir), level='info')
 
         # files = (
         #     variable_cache.get_value(variable_name='{}:doc_file'.format(self._var_name())),
