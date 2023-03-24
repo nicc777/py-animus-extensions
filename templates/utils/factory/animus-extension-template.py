@@ -577,7 +577,7 @@ class AnimusExtensionTemplate(ManifestBase):
         ###
         ### Implementation File Actions
         ###
-        implementation_file_name = '{}{}{}.py'.format(
+        file_name = '{}{}{}.py'.format(
             IMPLEMENTATIONS_BASE_PATH,
             os.sep,
             self.metadata['name']
@@ -588,12 +588,31 @@ class AnimusExtensionTemplate(ManifestBase):
         if command == 'apply':
             action_command = 'create_implementation_file'
         actions = self._determine_file_actions(
-            file=implementation_file_name,
+            file=file_name,
             existing_actions=actions,
             command=command,
             action_command=action_command
         )
 
+        ###
+        ### Documentation File Actions
+        ###
+        file_name = '{}{}{}.md'.format(
+            DOC_BASE_PATH,
+            os.sep,
+            self.metadata['name']
+        )
+        action_command = 'no-action'
+        if command == 'delete':
+            action_command = 'delete_documentation_file'
+        if command == 'apply':
+            action_command = 'create_documentation_file'
+        actions = self._determine_file_actions(
+            file=file_name,
+            existing_actions=actions,
+            command=command,
+            action_command=action_command
+        )
         
         # files = (
         #     variable_cache.get_value(variable_name='{}:doc_file'.format(self._var_name())),
@@ -628,6 +647,14 @@ class AnimusExtensionTemplate(ManifestBase):
         self.log(message='ACTION: Deleting Implementation File: {}'.format(file_name), level='info')
         pass
 
+    def _action_create_documentation_file(self, file_name: str):
+        self.log(message='ACTION: Creating Documentation File: {}'.format(file_name), level='info')
+        pass
+
+    def _action_delete_documentation_file(self, file_name: str):
+        self.log(message='ACTION: Deleting Documentation File: {}'.format(file_name), level='info')
+        pass
+
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False):
         variable_cache.store_variable(variable=Variable(name='{}:command'.format(self._var_name()),initial_value='apply',ttl=-1,logger=self.logger,mask_in_logs=False),overwrite_existing=False)
         self.log(message='APPLY CALLED', level='info')
@@ -657,14 +684,6 @@ class AnimusExtensionTemplate(ManifestBase):
         remaining_actions = list()
 
         ###
-        ### Prepare Documentation
-        ###
-
-        ###
-        ### Prepare Example Manifest
-        ###
-
-        ###
         ### Prepare Initial Source File
         ###
         remaining_actions = list()
@@ -676,7 +695,27 @@ class AnimusExtensionTemplate(ManifestBase):
                     remaining_actions.append(copy.deepcopy(action))
         actions = copy.deepcopy(remaining_actions)
 
+        ###
+        ### Prepare Documentation
+        ###
+        remaining_actions = list()
+        for action in actions:
+            for action_name, action_data in action.items():
+                if action_name == 'create_documentation_file':
+                    self._action_create_documentation_file(file_name=action_data)
+                else:
+                    remaining_actions.append(copy.deepcopy(action))
+        actions = copy.deepcopy(remaining_actions)
+
+        ###
+        ### Prepare Example Manifest
+        ###
+
+        ###
+        ### DONE
+        ###
         variable_cache.delete_variable(variable_name='{}:command'.format(self._var_name()))
+        variable_cache.delete_variable(variable_name='{}:actions'.format(self._var_name()))
         variable_cache.store_variable(variable=Variable(name='{}'.format(self._var_name()),initial_value=True,ttl=-1,logger=self.logger,mask_in_logs=False),overwrite_existing=False)
         return 
     
@@ -698,11 +737,19 @@ class AnimusExtensionTemplate(ManifestBase):
         actions = copy.deepcopy(remaining_actions)
 
         ###
-        ### Delete Example Manifest
-        ###
+        ### Delete Documentation
+        ###        
+        remaining_actions = list()
+        for action in actions:
+            for action_name, action_data in action.items():
+                if action_name == 'delete_documentation_file':
+                    self._action_delete_documentation_file(file_name=action_data)
+                else:
+                    remaining_actions.append(copy.deepcopy(action))
+        actions = copy.deepcopy(remaining_actions)
 
         ###
-        ### Delete Documentation
+        ### Delete Example Manifest
         ###
 
         ###
@@ -718,9 +765,13 @@ class AnimusExtensionTemplate(ManifestBase):
         actions = copy.deepcopy(remaining_actions)
         remaining_actions = list()
         
+        ###
+        ### DONE
+        ###
         self._delete_file_path_variables(variable_cache=variable_cache)
         variable_cache.delete_variable(variable_name=self._var_name())
         variable_cache.delete_variable(variable_name='{}:command'.format(self._var_name()))
+        variable_cache.delete_variable(variable_name='{}:actions'.format(self._var_name()))
         return 
 
 
