@@ -474,19 +474,19 @@ class AnimusExtensionTemplate(ManifestBase):
 
     def _determine_directory_actions(self, directory: str, existing_actions: list, command: str)->list:
         actions = copy.deepcopy(existing_actions)
-        d_path = Path(existing_actions)
+        d_path = Path(directory)
         if d_path.exists() is False:
             if command == 'delete':
                 self.log(message='Directory {} not found - no action required'.format(existing_actions), level='info')
             else:
-                self.log(message='Directory {} not found - create_dir action recorded'.format(d), level='info')
-                actions.append({'create_dir': d})
+                self.log(message='Directory {} not found - create_dir action recorded'.format(directory), level='info')
+                actions.append({'create_dir': directory})
         else:
             if command == 'delete':
-                self.log(message='Directory {} found - delete_dir_recursively action recorded'.format(existing_actions), level='info')
-                actions.append({'delete_dir_recursively': existing_actions})
+                self.log(message='Directory {} found - delete_dir_recursively action recorded'.format(directory), level='info')
+                actions.append({'delete_dir_recursively': directory})
             else:
-                self.log(message='Directory {} not found - no action required'.format(existing_actions), level='info')
+                self.log(message='Directory {}  found - no action required'.format(directory), level='info')
         return actions
 
     def implemented_manifest_differ_from_this_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache())->bool:
