@@ -416,62 +416,6 @@ class AnimusExtensionTemplate(ManifestBase):
 
         variable_cache.store_variable(variable=Variable(name='{}:validated'.format(self._var_name()),logger=self.logger, initial_value=True), overwrite_existing=True)
 
-    def _prep_file_path_variables(self, variable_cache: VariableCache=VariableCache()):
-        variable_cache.store_variable(
-            variable=Variable(
-                name='{}:doc_file'.format(self._var_name()),
-                initial_value='{}{}{}.md'.format(DOC_BASE_PATH, os.sep, self.metadata['name']),
-                ttl=-1,
-                logger=self.logger,
-                mask_in_logs=False
-            ),
-            overwrite_existing=False
-        )
-
-        example_files = dict()
-        for ex_data in self.spec['additionalExamples']:
-            ex_name = ex_data['exampleName']
-            ex_dir = '{}{}{}{}{}'.format(
-                EXAMPLES_BASE_PATH,
-                os.sep,
-                self.metadata['name'],
-                os.sep,
-                ex_data['exampleName']
-            )
-            ex_file = '{}{}example.yaml'.format(
-                ex_dir,
-                os.sep
-            )
-            example_files[ex_name] = dict()
-            example_files[ex_name]['directory'] = ex_dir
-            example_files[ex_name]['file'] = ex_file
-        variable_cache.store_variable(
-            variable=Variable(
-                name='{}:example_files'.format(self._var_name()),
-                initial_value=example_files,
-                ttl=-1,
-                logger=self.logger,
-                mask_in_logs=False
-            ),
-            overwrite_existing=False
-        )
-
-        variable_cache.store_variable(
-            variable=Variable(
-                name='{}:implementation_file'.format(self._var_name()),
-                initial_value='{}{}{}.py'.format(IMPLEMENTATIONS_BASE_PATH, os.sep, self.metadata['name']),
-                ttl=-1,
-                logger=self.logger,
-                mask_in_logs=False
-            ),
-            overwrite_existing=False
-        )
-
-    def _delete_file_path_variables(self, variable_cache: VariableCache=VariableCache()):
-        variable_cache.delete_variable(variable_name='{}:doc_file'.format(self._var_name()))
-        variable_cache.delete_variable(variable_name='{}:example_file'.format(self._var_name()))
-        variable_cache.delete_variable(variable_name='{}:implementation_file'.format(self._var_name()))
-
     def _determine_directory_actions(self, directory: str, existing_actions: list, command: str)->list:
         actions = copy.deepcopy(existing_actions)
         d_path = Path(directory)
@@ -516,7 +460,6 @@ class AnimusExtensionTemplate(ManifestBase):
 
     def implemented_manifest_differ_from_this_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache())->bool:
         self._validate(variable_cache=variable_cache)
-        self._prep_file_path_variables(variable_cache=variable_cache)
         command = variable_cache.get_value(variable_name='{}:command'.format(self._var_name()))
         
         actions = list()
@@ -672,37 +615,37 @@ class AnimusExtensionTemplate(ManifestBase):
         return False
 
     def _action_create_dir(self, directory_name: str):
-        self.log(message='ACTION: Creating directory: {}'.format(directory_name), level='info')
+        self.log(message='      ACTION: Creating directory: {}'.format(directory_name), level='info')
         pass
 
     def _action_delete_dir_recursively(self, directory_name: str):
-        self.log(message='ACTION: Recursively deleting directory: {}'.format(directory_name), level='info')
+        self.log(message='      ACTION: Recursively deleting directory: {}'.format(directory_name), level='info')
         pass
 
     def _action_create_implementation_file(self, file_name: str):
-        self.log(message='ACTION: Creating Implementation File: {}'.format(file_name), level='info')
+        self.log(message='      ACTION: Creating Implementation File: {}'.format(file_name), level='info')
         pass
 
     def _action_delete_implementation_file(self, file_name: str):
-        self.log(message='ACTION: Deleting Implementation File: {}'.format(file_name), level='info')
+        self.log(message='      ACTION: Deleting Implementation File: {}'.format(file_name), level='info')
         pass
 
     def _action_create_documentation_file(self, file_name: str):
-        self.log(message='ACTION: Creating Documentation File: {}'.format(file_name), level='info')
+        self.log(message='      ACTION: Creating Documentation File: {}'.format(file_name), level='info')
         pass
 
     def _action_delete_documentation_file(self, file_name: str):
-        self.log(message='ACTION: Deleting Documentation File: {}'.format(file_name), level='info')
+        self.log(message='      ACTION: Deleting Documentation File: {}'.format(file_name), level='info')
         pass
 
     def _action_create_example_file(self, file_name: str):
         example_name = file_name.split(os.sep)[-2]
-        self.log(message='ACTION: Creating Example "{}" File: {}'.format(example_name, file_name), level='info')
+        self.log(message='      ACTION: Creating Example "{}" File: {}'.format(example_name, file_name), level='info')
         pass
 
     def _action_delete_example_file(self, file_name: str):
         example_name = file_name.split(os.sep)[-2]
-        self.log(message='ACTION: Deleting Example "{}" File: {}'.format(example_name, file_name), level='info')
+        self.log(message='      ACTION: Deleting Example "{}" File: {}'.format(example_name, file_name), level='info')
         pass
 
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False):
@@ -715,10 +658,6 @@ class AnimusExtensionTemplate(ManifestBase):
         self.log(message='actions : {}'.format(actions), level='debug')
         self.log(message='Applying Manifest', level='info')
         self.log(message='   Implementation Name           : {}'.format(self.metadata['name']), level='info')
-        for action in actions:
-            for action_name, dummy in action.items():
-                self.log(message='      action                     : {}'.format(action_name), level='info')
-
 
         ###
         ### Create Directories
@@ -784,6 +723,7 @@ class AnimusExtensionTemplate(ManifestBase):
         variable_cache.store_variable(variable=Variable(name='{}:command'.format(self._var_name()),initial_value='apply',ttl=-1,logger=self.logger,mask_in_logs=False),overwrite_existing=False)
         self.log(message='DELETE CALLED', level='info')
         self.log(message='Deleting Manifest', level='info')
+        self.log(message='   Implementation Name           : {}'.format(self.metadata['name']), level='info')
         
         ###
         ### Delete Source File
@@ -838,7 +778,6 @@ class AnimusExtensionTemplate(ManifestBase):
         if len(remaining_actions) > 0:
             self.log(message='Actions left over: {}'.format(remaining_actions), level='error')
 
-        self._delete_file_path_variables(variable_cache=variable_cache)
         variable_cache.delete_variable(variable_name=self._var_name())
         variable_cache.delete_variable(variable_name='{}:command'.format(self._var_name()))
         variable_cache.delete_variable(variable_name='{}:actions'.format(self._var_name()))
