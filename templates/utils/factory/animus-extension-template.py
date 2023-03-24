@@ -472,6 +472,23 @@ class AnimusExtensionTemplate(ManifestBase):
         variable_cache.delete_variable(variable_name='{}:example_file'.format(self._var_name()))
         variable_cache.delete_variable(variable_name='{}:implementation_file'.format(self._var_name()))
 
+    def _determine_directory_actions(self, directory: str, existing_actions: list, command: str)->list:
+        actions = copy.deepcopy(existing_actions)
+        d_path = Path(existing_actions)
+        if d_path.exists() is False:
+            if command == 'delete':
+                self.log(message='Directory {} not found - no action required'.format(existing_actions), level='info')
+            else:
+                self.log(message='Directory {} not found - create_dir action recorded'.format(d), level='info')
+                actions.append({'create_dir': d})
+        else:
+            if command == 'delete':
+                self.log(message='Directory {} found - delete_dir_recursively action recorded'.format(existing_actions), level='info')
+                actions.append({'delete_dir_recursively': existing_actions})
+            else:
+                self.log(message='Directory {} not found - no action required'.format(existing_actions), level='info')
+        return actions
+
     def implemented_manifest_differ_from_this_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache())->bool:
         self._validate(variable_cache=variable_cache)
         self._prep_file_path_variables(variable_cache=variable_cache)
@@ -479,36 +496,60 @@ class AnimusExtensionTemplate(ManifestBase):
         
         actions = list()
 
+        ###
+        ### Check Directories
+        ###
+
         dirs = (DOC_BASE_PATH, IMPLEMENTATIONS_BASE_PATH)
         for d in dirs:
-            d_path = Path(d)
-            if d_path.exists() is False:
-                if command == 'delete':
-                    self.log(message='Directory {} not found - no action required'.format(d), level='info')
-                else:
-                    self.log(message='Directory {} not found - create_dir action recorded'.format(d), level='info')
-                    actions.append({'create_dir': d})
-            else:
-                self.log(message='Directory {} found - no action required'.format(d), level='info')
+            actions = self._determine_directory_actions(
+                directory=d,
+                existing_actions=actions,
+                command=command
+            )
 
         examples_dir = '{}{}{}'.format(
             EXAMPLES_BASE_PATH,
             os.sep,
             self.metadata['name']
         )
-        d_path = Path(examples_dir)
-        if d_path.exists() is False:
-            if command == 'delete':
-                self.log(message='Directory {} not found - no action required'.format(examples_dir), level='info')
-            else:
-                self.log(message='Directory {} not found - create_dir action recorded'.format(d), level='info')
-                actions.append({'create_dir': d})
-        else:
-            if command == 'delete':
-                self.log(message='Directory {} found - delete_dir_recursively action recorded'.format(examples_dir), level='info')
-                actions.append({'delete_dir_recursively': examples_dir})
-            else:
-                self.log(message='Directory {} not found - no action required'.format(examples_dir), level='info')
+        actions = self._determine_directory_actions(
+            directory=examples_dir,
+            existing_actions=actions,
+            command=command
+        )
+
+        minimal_override = False
+        if 'additionalExamples' in self.spec:
+            for additional_example_data in self.spec['additionalExamples']:
+                for field, value in additional_example_data.items():
+                    if field == 'exampleName':
+                        if value == 'minimal':
+                            minimal_override = True
+                        additional_example_directory = '{}{}{}'.format(
+                            examples_dir,
+                            os.sep,
+                            value
+                        )
+                        actions = self._determine_directory_actions(
+                            directory=additional_example_directory,
+                            existing_actions=actions,
+                            command=command
+                        )
+
+                        
+        if minimal_override is False:
+            # Check if minimal directory exists
+            minimal_example_dir = '{}{}minimal'.format(
+                examples_dir,
+                os.sep
+            )
+            actions = self._determine_directory_actions(
+                directory=minimal_example_dir,
+                existing_actions=actions,
+                command=command
+            )
+
 
         # files = (
         #     variable_cache.get_value(variable_name='{}:doc_file'.format(self._var_name())),
