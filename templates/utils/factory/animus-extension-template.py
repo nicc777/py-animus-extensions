@@ -613,22 +613,62 @@ class AnimusExtensionTemplate(ManifestBase):
             command=command,
             action_command=action_command
         )
+
+        ###
+        ### Example Files
+        ###
+        if 'additionalExamples' in self.spec:
+            for additional_example_data in self.spec['additionalExamples']:
+                for field, value in additional_example_data.items():
+                    if field == 'exampleName':
+                        if value != 'minimal':
+                            file_name = '{}{}{}{}{}{}example.yaml'.format(
+                                EXAMPLES_BASE_PATH,
+                                os.sep,
+                                self.metadata['name'],
+                                os.sep,
+                                value,
+                                os.sep,
+                            )
+                            action_command = 'no-action'
+                            if command == 'delete':
+                                action_command = 'delete_example_file'
+                            if command == 'apply':
+                                action_command = 'create_example_file'
+                            actions = self._determine_file_actions(
+                                file=file_name,
+                                existing_actions=actions,
+                                command=command,
+                                action_command=action_command
+                            )
+        file_name = '{}{}{}{}minimal{}example.yaml'.format(
+            EXAMPLES_BASE_PATH,
+            os.sep,
+            self.metadata['name'],
+            os.sep,
+            os.sep,
+        )
+        action_command = 'no-action'
+        if command == 'delete':
+            action_command = 'delete_example_file'
+        if command == 'apply':
+            action_command = 'create_example_file'
+        actions = self._determine_file_actions(
+            file=file_name,
+            existing_actions=actions,
+            command=command,
+            action_command=action_command
+        )
         
-        # files = (
-        #     variable_cache.get_value(variable_name='{}:doc_file'.format(self._var_name())),
-        #     variable_cache.get_value(variable_name='{}:example_file'.format(self._var_name())),
-        #     variable_cache.get_value(variable_name='{}:implementation_file'.format(self._var_name())),
-        # )
-        # for file_path in files:
-        #     file = Path(file_path)
-        #     if file.is_file() is False:
-        #         self.log(message='File {} not found - assuming not yet implemented'.format(file_path), level='info')
-        #     else:
-        #         self.log(message='File {} found - source files may be manually modified, therefore no checksum comparisons will be done and it is assumed that this file was created previously by the factory'.format(file_path), level='warning')
+        
+        ###
+        ### DONE
+        ###
 
         variable_cache.store_variable(variable=Variable(name='{}:actions'.format(self._var_name()),initial_value=actions,ttl=-1,logger=self.logger,mask_in_logs=False),overwrite_existing=False)
         if len(actions) > 0:
             return True
+        
         return False
 
     def _action_create_dir(self, directory_name: str):
@@ -653,6 +693,16 @@ class AnimusExtensionTemplate(ManifestBase):
 
     def _action_delete_documentation_file(self, file_name: str):
         self.log(message='ACTION: Deleting Documentation File: {}'.format(file_name), level='info')
+        pass
+
+    def _action_create_example_file(self, file_name: str):
+        example_name = file_name.split(os.sep)[-2]
+        self.log(message='ACTION: Creating Example "{}" File: {}'.format(example_name, file_name), level='info')
+        pass
+
+    def _action_delete_example_file(self, file_name: str):
+        example_name = file_name.split(os.sep)[-2]
+        self.log(message='ACTION: Deleting Example "{}" File: {}'.format(example_name, file_name), level='info')
         pass
 
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False):
@@ -710,10 +760,21 @@ class AnimusExtensionTemplate(ManifestBase):
         ###
         ### Prepare Example Manifest
         ###
+        remaining_actions = list()
+        for action in actions:
+            for action_name, action_data in action.items():
+                if action_name == 'create_example_file':
+                    self._action_create_example_file(file_name=action_data)
+                else:
+                    remaining_actions.append(copy.deepcopy(action))
+        actions = copy.deepcopy(remaining_actions)
 
         ###
         ### DONE
         ###
+        if len(remaining_actions) > 0:
+            self.log(message='Actions left over: {}'.format(remaining_actions), level='error')
+
         variable_cache.delete_variable(variable_name='{}:command'.format(self._var_name()))
         variable_cache.delete_variable(variable_name='{}:actions'.format(self._var_name()))
         variable_cache.store_variable(variable=Variable(name='{}'.format(self._var_name()),initial_value=True,ttl=-1,logger=self.logger,mask_in_logs=False),overwrite_existing=False)
@@ -751,6 +812,14 @@ class AnimusExtensionTemplate(ManifestBase):
         ###
         ### Delete Example Manifest
         ###
+        remaining_actions = list()
+        for action in actions:
+            for action_name, action_data in action.items():
+                if action_name == 'delete_example_file':
+                    self._action_delete_example_file(file_name=action_data)
+                else:
+                    remaining_actions.append(copy.deepcopy(action))
+        actions = copy.deepcopy(remaining_actions)
 
         ###
         ### Recursively Delete Directories
@@ -762,12 +831,13 @@ class AnimusExtensionTemplate(ManifestBase):
                     self._action_delete_dir_recursively(directory_name=action_data)
                 else:
                     remaining_actions.append(copy.deepcopy(action))
-        actions = copy.deepcopy(remaining_actions)
-        remaining_actions = list()
         
         ###
         ### DONE
         ###
+        if len(remaining_actions) > 0:
+            self.log(message='Actions left over: {}'.format(remaining_actions), level='error')
+
         self._delete_file_path_variables(variable_cache=variable_cache)
         variable_cache.delete_variable(variable_name=self._var_name())
         variable_cache.delete_variable(variable_name='{}:command'.format(self._var_name()))
