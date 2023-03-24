@@ -477,16 +477,41 @@ class AnimusExtensionTemplate(ManifestBase):
         d_path = Path(directory)
         if d_path.exists() is False:
             if command == 'delete':
-                self.log(message='Directory {} not found - no action required'.format(existing_actions), level='info')
-            else:
+                self.log(message='Directory {} not found - no action required'.format(directory), level='info')
+            elif command == 'apply':
                 self.log(message='Directory {} not found - create_dir action recorded'.format(directory), level='info')
                 actions.append({'create_dir': directory})
+            else:
+                self.log(message='Directory {} not found - command not recognized - NO ACTIONS'.format(directory), level='warning')
         else:
             if command == 'delete':
                 self.log(message='Directory {} found - delete_dir_recursively action recorded'.format(directory), level='info')
                 actions.append({'delete_dir_recursively': directory})
+            elif command == 'apply':
+                self.log(message='Directory {} found - no action required'.format(directory), level='info')
             else:
-                self.log(message='Directory {}  found - no action required'.format(directory), level='info')
+                self.log(message='Directory {} found - command not recognized - NO ACTIONS'.format(directory), level='warning')
+        return actions
+    
+    def _determine_file_actions(self, file: str, existing_actions: list, command: str, action_command: str)->list:
+        actions = copy.deepcopy(existing_actions)
+        file_path_object = Path(file)
+        if file_path_object.exists() is False:
+            if command == 'delete':
+                self.log(message='File {} not found - no action required'.format(file), level='info')
+            elif command == 'apply':
+                self.log(message='File {} not found - {} action recorded'.format(file, action_command), level='info')
+                actions.append({action_command: file})
+            else:
+                self.log(message='File {} not found - command not recognized - NO ACTIONS'.format(file), level='warning')
+        else:
+            if command == 'delete':
+                self.log(message='File {} found - {} action recorded'.format(file, action_command), level='info')
+                actions.append({action_command: file})
+            elif command == 'apply':
+                self.log(message='File {} found - no action required'.format(file), level='info')
+            else:
+                self.log(message='File {} found - command not recognized - NO ACTIONS'.format(file), level='warning')
         return actions
 
     def implemented_manifest_differ_from_this_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache())->bool:
@@ -539,7 +564,6 @@ class AnimusExtensionTemplate(ManifestBase):
 
                         
         if minimal_override is False:
-            # Check if minimal directory exists
             minimal_example_dir = '{}{}minimal'.format(
                 examples_dir,
                 os.sep
@@ -550,7 +574,27 @@ class AnimusExtensionTemplate(ManifestBase):
                 command=command
             )
 
+        ###
+        ### Implementation File Actions
+        ###
+        implementation_file_name = '{}{}{}.py'.format(
+            IMPLEMENTATIONS_BASE_PATH,
+            os.sep,
+            self.metadata['name']
+        )
+        action_command = 'no-action'
+        if command == 'delete':
+            action_command = 'delete_implementation_file'
+        if command == 'apply':
+            action_command = 'create_implementation_file'
+        self._determine_file_actions(
+            file=implementation_file_name,
+            existing_actions=actions,
+            command=command,
+            action_command=action_command
+        )
 
+        
         # files = (
         #     variable_cache.get_value(variable_name='{}:doc_file'.format(self._var_name())),
         #     variable_cache.get_value(variable_name='{}:example_file'.format(self._var_name())),
