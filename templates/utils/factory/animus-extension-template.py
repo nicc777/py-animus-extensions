@@ -416,7 +416,7 @@ class AnimusExtensionTemplate(ManifestBase):
 
         variable_cache.store_variable(variable=Variable(name='{}:validated'.format(self._var_name()),logger=self.logger, initial_value=True), overwrite_existing=True)
 
-    def _determine_directory_actions(self, directory: str, existing_actions: list, command: str)->list:
+    def _determine_directory_actions(self, directory: str, existing_actions: list, command: str, do_not_delete_recursively: bool= True)->list:
         actions = copy.deepcopy(existing_actions)
         d_path = Path(directory)
         if d_path.exists() is False:
@@ -429,8 +429,11 @@ class AnimusExtensionTemplate(ManifestBase):
                 self.log(message='Directory {} not found - command not recognized - NO ACTIONS'.format(directory), level='warning')
         else:
             if command == 'delete':
-                self.log(message='Directory {} found - delete_dir_recursively action recorded'.format(directory), level='info')
-                actions.append({'delete_dir_recursively': directory})
+                if do_not_delete_recursively is False:
+                    self.log(message='Directory {} found - delete_dir_recursively action recorded'.format(directory), level='info')
+                    actions.append({'delete_dir_recursively': directory})
+                else:
+                    self.log(message='Directory {} found - no action required because do_not_delete_recursively is True'.format(directory), level='info')
             elif command == 'apply':
                 self.log(message='Directory {} found - no action required'.format(directory), level='info')
             else:
@@ -484,7 +487,8 @@ class AnimusExtensionTemplate(ManifestBase):
         actions = self._determine_directory_actions(
             directory=examples_dir,
             existing_actions=actions,
-            command=command
+            command=command,
+            do_not_delete_recursively=False
         )
 
         minimal_override = False
@@ -502,7 +506,8 @@ class AnimusExtensionTemplate(ManifestBase):
                         actions = self._determine_directory_actions(
                             directory=additional_example_directory,
                             existing_actions=actions,
-                            command=command
+                            command=command,
+                            do_not_delete_recursively=False
                         )
 
                         
@@ -720,8 +725,12 @@ class AnimusExtensionTemplate(ManifestBase):
         return 
     
     def delete_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False):
-        variable_cache.store_variable(variable=Variable(name='{}:command'.format(self._var_name()),initial_value='apply',ttl=-1,logger=self.logger,mask_in_logs=False),overwrite_existing=False)
+        variable_cache.store_variable(variable=Variable(name='{}:command'.format(self._var_name()),initial_value='delete',ttl=-1,logger=self.logger,mask_in_logs=False),overwrite_existing=False)
         self.log(message='DELETE CALLED', level='info')
+        if self.implemented_manifest_differ_from_this_manifest(manifest_lookup_function=manifest_lookup_function, variable_cache=variable_cache) is False:
+            self.log(message='No changes detected', level='info')
+            return
+        actions = variable_cache.get_value(variable_name='{}:actions'.format(self._var_name()), value_if_expired=list(), raise_exception_on_expired=False, raise_exception_on_not_found=False,default_value_if_not_found=list(), for_logging=False)
         self.log(message='Deleting Manifest', level='info')
         self.log(message='   Implementation Name           : {}'.format(self.metadata['name']), level='info')
         
