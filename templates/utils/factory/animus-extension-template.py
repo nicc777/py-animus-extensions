@@ -9,6 +9,7 @@ from typing import Any, Optional
 import sys
 from pathlib import Path
 import shutil
+import inspect
 
 
 DOC_BASE_PATH = '{}{}doc'.format(
@@ -652,11 +653,31 @@ class AnimusExtensionTemplate(ManifestBase):
 
     def _action_create_implementation_file(self, file_name: str):
         self.log(message='      ACTION: Creating Implementation File: {}'.format(file_name), level='info')
-        pass
+        my_path = inspect.getfile(self.__class__)
+        self.log(message='         Running from file: {}'.format(my_path), level='debug')
+        source_file = os.sep.join(my_path.split(os.sep)[0:10])
+        source_file = '{}{}implementations{}source.py'.format(
+            source_file,
+            os.sep,
+            os.sep
+        )
+        self.log(message='         Loading Source Template from file: {}'.format(source_file), level='info')
+        data = ''
+        with open(source_file, 'r') as rf:
+            data = rf.read()
+        self.log(message='         Performing variable substitutions', level='info')
+        data = data.replace('__KIND__', self.spec['kind'])
+        data = data.replace('__BASE_CLASS__', self.spec['baseClass'])
+        data = data.replace('__IMPLEMENTATION_DESCRIPTION__', self.spec['description'])
+        data = data.replace('__VERSION__', self.spec['version'])
+        data = data.replace('__SUPPORTED_VERSIONS__', '{}'.format(self.spec['supportedVersions']))
+        self.log(message='         Writing data to target file: {}'.format(file_name), level='info')
+        with open(file_name, 'w') as wf:
+            wf.write(data)
 
     def _action_delete_implementation_file(self, file_name: str):
         self.log(message='      ACTION: Deleting Implementation File: {}'.format(file_name), level='info')
-        pass
+        os.unlink(file_name)
 
     def _action_create_documentation_file(self, file_name: str):
         self.log(message='      ACTION: Creating Documentation File: {}'.format(file_name), level='info')
