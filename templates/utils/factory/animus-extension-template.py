@@ -8,6 +8,7 @@ import re
 from typing import Any, Optional
 import sys
 from pathlib import Path
+import shutil
 
 
 DOC_BASE_PATH = '{}{}doc'.format(
@@ -630,11 +631,24 @@ class AnimusExtensionTemplate(ManifestBase):
 
     def _action_create_dir(self, directory_name: str):
         self.log(message='      ACTION: Creating directory: {}'.format(directory_name), level='info')
-        pass
+        os.mkdir(directory_name)
 
     def _action_delete_dir_recursively(self, directory_name: str):
         self.log(message='      ACTION: Recursively deleting directory: {}'.format(directory_name), level='info')
-        pass
+        succeeded = False
+        try:
+            os.remove(directory_name)
+            succeeded = True
+        except:
+            self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
+        try:
+            shutil.rmtree(directory_name)
+            succeeded = True
+        except:
+            self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
+        if succeeded is False:
+            # raise Exception('Failed to recursively delete directory "{}"'.format(directory_name))
+            self.log(message='Failed to recursively delete directory "{}" - manual action may be required'.format(directory_name), level='warning')
 
     def _action_create_implementation_file(self, file_name: str):
         self.log(message='      ACTION: Creating Implementation File: {}'.format(file_name), level='info')
