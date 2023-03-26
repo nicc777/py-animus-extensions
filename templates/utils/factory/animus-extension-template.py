@@ -65,15 +65,18 @@ class AnimusExtensionTemplate(ManifestBase):
             raise_exception_when_empty: bool=False,
             log_indent_spaces: int=0
         )->object:
-        # self.log(message='        + spec_path                      = {}'.format( spec_path                      ), level='debug')
-        # self.log(message='        + value                          = {}'.format( value                          ), level='debug')
-        # self.log(message='        + value_type                     = {}'.format( value_type                     ), level='debug')
-        # self.log(message='        + default_val                    = {}'.format( default_val                    ), level='debug')
-        # self.log(message='        + set_default_when_not_present   = {}'.format( set_default_when_not_present   ), level='debug')
-        # self.log(message='        + set_default_when_type_mismatch = {}'.format( set_default_when_type_mismatch ), level='debug')
-        # self.log(message='        + set_default_when_null          = {}'.format( set_default_when_null          ), level='debug')
-        # self.log(message='        + raise_exception_when_empty     = {}'.format( raise_exception_when_empty     ), level='debug')
+        self.log(message='        + spec_path                      = {}'.format( spec_path                      ), level='debug')
+        self.log(message='        + value                          = {}'.format( value                          ), level='debug')
+        self.log(message='        + value_type                     = {}'.format( value_type                     ), level='debug')
+        self.log(message='        + default_val                    = {}'.format( default_val                    ), level='debug')
+        self.log(message='        + set_default_when_not_present   = {}'.format( set_default_when_not_present   ), level='debug')
+        self.log(message='        + set_default_when_type_mismatch = {}'.format( set_default_when_type_mismatch ), level='debug')
+        self.log(message='        + set_default_when_null          = {}'.format( set_default_when_null          ), level='debug')
+        self.log(message='        + raise_exception_when_empty     = {}'.format( raise_exception_when_empty     ), level='debug')
         final_value = default_val
+        if value is not None:
+            final_value = value
+        self.log(message='           final_value (1) updated to    = {}   (type={})'.format( final_value, type(final_value) ), level='debug')
         log_indent = ''
         if log_indent_spaces > 0:
             for i in range(0, log_indent_spaces):
@@ -81,15 +84,21 @@ class AnimusExtensionTemplate(ManifestBase):
         if value is None:
             if set_default_when_not_present is True or set_default_when_null is True:
                 final_value = default_val
+                self.log(message='           final_value (2) updated to    = {}   (type={})'.format( final_value, type(final_value) ), level='debug')
             else:
                 raise Exception('{} value for field "{}" was NoneType or not present'.format(value_type, spec_path))
-        if isinstance(value, value_type) is False:
+        if isinstance(final_value, value_type) is False:
             if set_default_when_type_mismatch is True:
                 final_value = None
+                self.log(message='           final_value (3) updated to    = {}   (type={})'.format( final_value, type(final_value) ), level='debug')
             else:
                 raise Exception('{} value for field "{}" was expected to be a string but found "{}"'.format(value_type, spec_path, type(value)))
         else:
-            final_value = value
+            if value is None and set_default_when_null is True:
+                final_value = default_val
+                self.log(message='           final_value (4) updated to    = {}   (type={})'.format( final_value, type(final_value) ), level='debug')
+            elif value is None and set_default_when_null is False:
+                raise Exception('Value was NoneType and set_default_when_null is False')
         if raise_exception_when_empty is True:
             if len(final_value) == 0:
                 raise Exception('{} value for field "{}" was zero length'.format(value_type, spec_path))
@@ -316,12 +325,12 @@ class AnimusExtensionTemplate(ManifestBase):
                     'raise_exception_when_empty': False,
                 },
                 'additionalMetadata': {
-                    'default_val': None,
+                    'default_val': '',
                     'value_type': str,
-                    'set_default_when_not_present': False,
-                    'set_default_when_type_mismatch': False,
-                    'set_default_when_null': False,
-                    'raise_exception_when_empty': True,
+                    'set_default_when_not_present': True,
+                    'set_default_when_type_mismatch': True,
+                    'set_default_when_null': True,
+                    'raise_exception_when_empty': False,
                 },
             }
 
