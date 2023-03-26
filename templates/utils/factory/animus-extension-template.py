@@ -532,7 +532,7 @@ class AnimusExtensionTemplate(ManifestBase):
                 dirs.append(DOC_BASE_PATH)
             if 'implementations' in self.spec['outputPaths']:
                 self.log(message='Default IMPLEMENTATIONS_BASE_PATH was overridden with spec.outputPaths.implementations - value="{}"'.format(self.spec['outputPaths']['implementations']), level='info')
-                dirs.append(self.spec['outputPaths']['doc'])
+                dirs.append(self.spec['outputPaths']['implementations'])
             else:
                 self.log(message='Default IMPLEMENTATIONS_BASE_PATH used - value="{}"'.format(IMPLEMENTATIONS_BASE_PATH), level='info')
                 dirs.append(IMPLEMENTATIONS_BASE_PATH)
@@ -672,7 +672,7 @@ class AnimusExtensionTemplate(ManifestBase):
 
     def _action_create_dir(self, directory_name: str):
         self.log(message='      ACTION: Creating directory: {}'.format(directory_name), level='info')
-        os.mkdir(directory_name)
+        Path( directory_name ).mkdir( parents=True, exist_ok=True )
 
     def _action_delete_dir_recursively(self, directory_name: str):
         self.log(message='      ACTION: Recursively deleting directory: {}'.format(directory_name), level='info')
