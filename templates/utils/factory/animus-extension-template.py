@@ -472,6 +472,46 @@ class AnimusExtensionTemplate(ManifestBase):
                 self.log(message='File {} found - command not recognized - NO ACTIONS'.format(file), level='warning')
         return actions
 
+    def _determine_output_filename(self, file_name_no_extension: str, base_dir: str, component: str, output_file_extension: str, additional_sub_dir: str=None)->str:
+        file_name = '{}{}{}.{}'.format(
+            base_dir,
+            os.sep,
+            file_name_no_extension,
+            output_file_extension
+        )
+        if additional_sub_dir is not None:
+            file_name = '{}{}{}{}{}.{}'.format(
+                base_dir,
+                os.sep,
+                additional_sub_dir,
+                os.sep,
+                file_name_no_extension,
+                output_file_extension
+            )
+        if 'outputPaths' in self.spec:
+            if component in self.spec['outputPaths']:
+                file_name = '{}{}{}.{}'.format(
+                    self.spec['outputPaths'][component],
+                    os.sep,
+                    file_name_no_extension,
+                    output_file_extension
+                )
+                if additional_sub_dir is not None:
+                    file_name = '{}{}{}{}{}.{}'.format(
+                        self.spec['outputPaths'][component],
+                        os.sep,
+                        additional_sub_dir,
+                        os.sep,
+                        file_name_no_extension,
+                        output_file_extension
+                    )
+                self.log(message='Default {} output file was overridden with spec.outputPaths.doc - file_name="{}"'.format(component, file_name), level='info')
+            else:
+                self.log(message='Default {} output file used (2) - file_name="{}"'.format(component, file_name), level='info')
+        else:
+            self.log(message='Default {}} output file used (1) - file_name="{}"'.format(component, file_name), level='info')
+        return file_name
+
     def implemented_manifest_differ_from_this_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache())->bool:
         self._validate(variable_cache=variable_cache)
         command = variable_cache.get_value(variable_name='{}:command'.format(self._var_name()))
@@ -482,7 +522,22 @@ class AnimusExtensionTemplate(ManifestBase):
         ### Check Directories
         ###
 
-        dirs = (DOC_BASE_PATH, IMPLEMENTATIONS_BASE_PATH)
+        dirs = list()
+        if 'outputPaths' in self.spec:
+            if 'doc' in self.spec['outputPaths']:
+                self.log(message='Default DOC_BASE_PATH was overridden with spec.outputPaths.doc - value="{}"'.format(self.spec['outputPaths']['doc']), level='info')
+                dirs.append(self.spec['outputPaths']['doc'])
+            else:
+                self.log(message='Default DOC_BASE_PATH used - value="{}"'.format(DOC_BASE_PATH), level='info')
+                dirs.append(DOC_BASE_PATH)
+            if 'implementations' in self.spec['outputPaths']:
+                self.log(message='Default IMPLEMENTATIONS_BASE_PATH was overridden with spec.outputPaths.implementations - value="{}"'.format(self.spec['outputPaths']['implementations']), level='info')
+                dirs.append(self.spec['outputPaths']['doc'])
+            else:
+                self.log(message='Default IMPLEMENTATIONS_BASE_PATH used - value="{}"'.format(IMPLEMENTATIONS_BASE_PATH), level='info')
+                dirs.append(IMPLEMENTATIONS_BASE_PATH)
+        else:
+            dirs = (DOC_BASE_PATH, IMPLEMENTATIONS_BASE_PATH,)
         for d in dirs:
             actions = self._determine_directory_actions(
                 directory=d,
@@ -490,11 +545,15 @@ class AnimusExtensionTemplate(ManifestBase):
                 command=command
             )
 
-        examples_dir = '{}{}{}'.format(
-            EXAMPLES_BASE_PATH,
-            os.sep,
-            self.metadata['name']
-        )
+        examples_dir = '{}{}{}'.format(EXAMPLES_BASE_PATH,os.sep,self.metadata['name'])
+        if 'outputPaths' in self.spec:
+            if 'examples' in self.spec['outputPaths']:
+                self.log(message='Default EXAMPLES_BASE_PATH was overridden with spec.outputPaths.examples - value="{}"'.format(self.spec['outputPaths']['examples']), level='info')
+                dirs.append(self.spec['outputPaths']['doc'])
+            else:
+                self.log(message='Default EXAMPLES_BASE_PATH used (2) - value="{}"'.format(EXAMPLES_BASE_PATH), level='info')
+        else:
+            self.log(message='Default EXAMPLES_BASE_PATH used (1) - value="{}"'.format(EXAMPLES_BASE_PATH), level='info')
         actions = self._determine_directory_actions(
             directory=examples_dir,
             existing_actions=actions,
@@ -536,11 +595,8 @@ class AnimusExtensionTemplate(ManifestBase):
         ###
         ### Implementation File Actions
         ###
-        file_name = '{}{}{}.py'.format(
-            IMPLEMENTATIONS_BASE_PATH,
-            os.sep,
-            self.metadata['name']
-        )
+        file_name = self._determine_output_filename(file_name_no_extension=self.metadata['name'], base_dir=IMPLEMENTATIONS_BASE_PATH, component='implementations', output_file_extension='py', additional_sub_dir=None)
+
         action_command = 'no-action'
         if command == 'delete':
             action_command = 'delete_implementation_file'
@@ -556,11 +612,8 @@ class AnimusExtensionTemplate(ManifestBase):
         ###
         ### Documentation File Actions
         ###
-        file_name = '{}{}{}.md'.format(
-            DOC_BASE_PATH,
-            os.sep,
-            self.metadata['name']
-        )
+        file_name = self._determine_output_filename(file_name_no_extension=self.metadata['name'], base_dir=DOC_BASE_PATH, component='doc', output_file_extension='md', additional_sub_dir=None)
+
         action_command = 'no-action'
         if command == 'delete':
             action_command = 'delete_documentation_file'
@@ -581,14 +634,7 @@ class AnimusExtensionTemplate(ManifestBase):
                 for field, value in additional_example_data.items():
                     if field == 'exampleName':
                         if value != 'minimal':
-                            file_name = '{}{}{}{}{}{}example.yaml'.format(
-                                EXAMPLES_BASE_PATH,
-                                os.sep,
-                                self.metadata['name'],
-                                os.sep,
-                                value,
-                                os.sep,
-                            )
+                            file_name = self._determine_output_filename(file_name_no_extension='example', base_dir=EXAMPLES_BASE_PATH, component='examples', output_file_extension='yaml', additional_sub_dir=value)
                             action_command = 'no-action'
                             if command == 'delete':
                                 action_command = 'delete_example_file'
@@ -600,13 +646,7 @@ class AnimusExtensionTemplate(ManifestBase):
                                 command=command,
                                 action_command=action_command
                             )
-        file_name = '{}{}{}{}minimal{}example.yaml'.format(
-            EXAMPLES_BASE_PATH,
-            os.sep,
-            self.metadata['name'],
-            os.sep,
-            os.sep,
-        )
+        file_name = self._determine_output_filename(file_name_no_extension='example', base_dir=EXAMPLES_BASE_PATH, component='examples', output_file_extension='yaml', additional_sub_dir='minimal')
         action_command = 'no-action'
         if command == 'delete':
             action_command = 'delete_example_file'

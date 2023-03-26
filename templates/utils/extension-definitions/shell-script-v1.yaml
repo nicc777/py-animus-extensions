@@ -29,9 +29,9 @@ spec:
   - 'v1'
   baseClass: ManifestBase
   outputPaths:              # If any of these are null/NoneType, the global defaults will be used (which is this repo)
-    doc: null
-    examples: null
-    implementations: null
+    doc: '/tmp/test-01/doc'
+    examples: '/tmp/test-01/ex'
+    implementations: '/tmp/test-01/impl'
   pipRequirements:
   - 'py-animus'
   importStatements:
