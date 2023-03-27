@@ -14,10 +14,10 @@ __TABLE_ROW__
 
 # Example Usages
 
-## Basic Example
+## Example for `__SCENARIO__` scenarios
 
 ```shell
-export SCENARIO_NAME="minimal"
+export SCENARIO_NAME="__SCENARIO__"
 ```
 
 Example manifest:
@@ -26,7 +26,7 @@ Example manifest:
 __MINIMAL_TEMPLATE__
 ```
 
-A minimal manifest with default values.
+__SCENARIO_DESCRIPTION__
 
 # Versions and Changelog
 
