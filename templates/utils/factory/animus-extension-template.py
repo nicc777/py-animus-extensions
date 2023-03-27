@@ -27,6 +27,21 @@ IMPLEMENTATIONS_BASE_PATH = '{}{}implementations'.format(
     os.sep
 )
 
+DOC_TEMPLATE_SCENARIO_EXAMPLE = """## Example for `__SCENARIO__` scenarios
+
+```shell
+export SCENARIO_NAME="__SCENARIO__"
+```
+
+Example manifest:
+
+```yaml
+__MINIMAL_TEMPLATE__
+```
+
+__SCENARIO_DESCRIPTION__
+"""
+
 
 # From: https://stackoverflow.com/questions/12414821/checking-a-nested-dictionary-using-a-dot-notation-string-a-b-c-d-e-automatica
 def find_key(dot_notation_path: str, payload: dict) -> Any:
@@ -67,14 +82,14 @@ class AnimusExtensionTemplate(ManifestBase):
             raise_exception_when_empty: bool=False,
             log_indent_spaces: int=0
         )->object:
-        self.log(message='        + spec_path                      = {}'.format( spec_path                      ), level='debug')
-        self.log(message='        + value                          = {}'.format( value                          ), level='debug')
-        self.log(message='        + value_type                     = {}'.format( value_type                     ), level='debug')
-        self.log(message='        + default_val                    = {}'.format( default_val                    ), level='debug')
-        self.log(message='        + set_default_when_not_present   = {}'.format( set_default_when_not_present   ), level='debug')
-        self.log(message='        + set_default_when_type_mismatch = {}'.format( set_default_when_type_mismatch ), level='debug')
-        self.log(message='        + set_default_when_null          = {}'.format( set_default_when_null          ), level='debug')
-        self.log(message='        + raise_exception_when_empty     = {}'.format( raise_exception_when_empty     ), level='debug')
+        # self.log(message='        + spec_path                      = {}'.format( spec_path                      ), level='debug')
+        # self.log(message='        + value                          = {}'.format( value                          ), level='debug')
+        # self.log(message='        + value_type                     = {}'.format( value_type                     ), level='debug')
+        # self.log(message='        + default_val                    = {}'.format( default_val                    ), level='debug')
+        # self.log(message='        + set_default_when_not_present   = {}'.format( set_default_when_not_present   ), level='debug')
+        # self.log(message='        + set_default_when_type_mismatch = {}'.format( set_default_when_type_mismatch ), level='debug')
+        # self.log(message='        + set_default_when_null          = {}'.format( set_default_when_null          ), level='debug')
+        # self.log(message='        + raise_exception_when_empty     = {}'.format( raise_exception_when_empty     ), level='debug')
         final_value = default_val
         if value is not None:
             final_value = value
@@ -382,23 +397,24 @@ class AnimusExtensionTemplate(ManifestBase):
                     raise Exception('When spec.specFields.[].fieldSetDefaultValueConditions is supplied, all three fields of fieldDefinitionNotPresentInManifest, fieldValueTypeMismatch, fieldValueIsNull must also be supplied.')
 
 
-            final_additionalExamples_list = list()
+            minimal_override = False
+            final_examples_list = list()
             for spec_field_dict in find_key(dot_notation_path='additionalExamples', payload=self.spec):
                 # self.log(message='   spec_field_dict={}'.format(spec_field_dict), level='debug')
                 self.log(message='---------- Validating additionalExamples "{}" ----------'.format(spec_field_dict['exampleName']), level='info')
+                if spec_field_dict['exampleName'] == 'minimal':
+                    minimal_override = True
                 for spec_str_field, params in validation_additionalExamples_for_string_and_list_fields.items():
-                    final_additionalExamples_list.append(
-                        self._validate_str_or_list_or_boolean(
-                            spec_path=spec_str_field,
-                            value=find_key(dot_notation_path=spec_str_field, payload=spec_field_dict),
-                            value_type=params['value_type'],
-                            default_val=params['default_val'],
-                            set_default_when_not_present=params['set_default_when_not_present'],
-                            set_default_when_type_mismatch=params['set_default_when_type_mismatch'],
-                            set_default_when_null=params['set_default_when_null'],
-                            raise_exception_when_empty=params['raise_exception_when_empty'],
-                            log_indent_spaces=3
-                        )
+                    self._validate_str_or_list_or_boolean(
+                        spec_path=spec_str_field,
+                        value=find_key(dot_notation_path=spec_str_field, payload=spec_field_dict),
+                        value_type=params['value_type'],
+                        default_val=params['default_val'],
+                        set_default_when_not_present=params['set_default_when_not_present'],
+                        set_default_when_type_mismatch=params['set_default_when_type_mismatch'],
+                        set_default_when_null=params['set_default_when_null'],
+                        raise_exception_when_empty=params['raise_exception_when_empty'],
+                        log_indent_spaces=3
                     )
 
                     if spec_str_field == 'manifest':
@@ -415,11 +431,26 @@ class AnimusExtensionTemplate(ManifestBase):
                                 raise_exception_when_empty=params2['raise_exception_when_empty'],
                                 log_indent_spaces=6
                             )
+                final_examples_list.append(spec_field_dict)
 
-            if len(final_additionalExamples_list) == 0:
+            if minimal_override is False:
+                final_examples_list.append(
+                    {
+                        'exampleName': 'minimal',  # This will also be used to compile the the value of metadata.name
+                        'manifest':{
+                            'generated': True, # This will automatically generate an example spec data with the minimum required fields and default values
+                            'additionalMetadata': 'skipDeleteAll: true',
+                        },  
+                        'explanatoryText': 'This is the absolute minimal example based on required values. Dummy random data was generated where required.'
+                    }
+                )
+                
+
+            if len(final_examples_list) == 0:
                 raise Exception('At least one example definition must be supplied')
 
             self.spec['specFields'] = copy.deepcopy(final_specFields_list)
+            self.spec['additionalExamples'] = copy.deepcopy(final_examples_list)
 
             self.log(message='Spec Validated', level='debug')
         else:
@@ -721,32 +752,37 @@ class AnimusExtensionTemplate(ManifestBase):
 
     def _action_create_documentation_file(self, file_name: str):
         self.log(message='      ACTION: Creating Documentation File: {}'.format(file_name), level='info')
-        my_path = inspect.getfile(self.__class__)
-        self.log(message='         Running from file: {}'.format(my_path), level='debug')
-        source_file = os.sep.join(my_path.split(os.sep)[0:10])
-        source_file = '{}{}doc{}extension-template.md'.format(
-            source_file,
-            os.sep,
-            os.sep
-        )
-        self.log(message='         Loading Source Template from file: {}'.format(source_file), level='info')
-        data = ''
-        with open(source_file, 'r') as rf:
-            data = rf.read()
-        self.log(message='         Performing variable substitutions', level='info')
-        data = data.replace('__KIND__', self.spec['kind'])
+        self.log(message='         ** additionalExamples='.format(self.spec['additionalExamples']), level='debug')
+        # my_path = inspect.getfile(self.__class__)
+        # self.log(message='         Running from file: {}'.format(my_path), level='debug')
+        # source_file = os.sep.join(my_path.split(os.sep)[0:10])
+        # source_file = '{}{}doc{}extension-template.md'.format(
+        #     source_file,
+        #     os.sep,
+        #     os.sep
+        # )
+        # self.log(message='         Loading Source Template from file: {}'.format(source_file), level='info')
+        # data = ''
+        # with open(source_file, 'r') as rf:
+        #     data = rf.read()
+        # self.log(message='         Performing variable substitutions', level='info')
+        # data = data.replace('__KIND__', self.spec['kind'])
+        # data = data.replace('__DESCRIPTION__', self.spec['description'])
+        # data = data.replace('__EXTENSION_NAME__', self.metadata['name'])
 
-        data = data.replace('__DESCRIPTION__', self.spec['description'])
-        data = data.replace('__EXTENSION_NAME__', self.metadata['name'])
-        data = data.replace('__KIND__', self.spec['kind'])
-        data = data.replace('__KIND__', self.spec['kind'])
-        data = data.replace('__KIND__', self.spec['kind'])
-        data = data.replace('__KIND__', self.spec['kind'])
+        # # Replace __PER_SCENARIO_EXAMPLE__ using template DOC_TEMPLATE_SCENARIO_EXAMPLE for each scenario
+
+
+
+        # data = data.replace('__KIND__', self.spec['kind'])
+        # data = data.replace('__KIND__', self.spec['kind'])
+        # data = data.replace('__KIND__', self.spec['kind'])
+        # data = data.replace('__KIND__', self.spec['kind'])
         
 
-        self.log(message='         Writing data to target file: {}'.format(file_name), level='info')
-        with open(file_name, 'w') as wf:
-            wf.write(data)
+        # self.log(message='         Writing data to target file: {}'.format(file_name), level='info')
+        # with open(file_name, 'w') as wf:
+        #     wf.write(data)
 
     def _action_delete_documentation_file(self, file_name: str):
         self.log(message='      ACTION: Deleting Documentation File: {}'.format(file_name), level='info')

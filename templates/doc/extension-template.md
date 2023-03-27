@@ -14,19 +14,7 @@ __TABLE_ROW__
 
 # Example Usages
 
-## Example for `__SCENARIO__` scenarios
-
-```shell
-export SCENARIO_NAME="__SCENARIO__"
-```
-
-Example manifest:
-
-```yaml
-__MINIMAL_TEMPLATE__
-```
-
-__SCENARIO_DESCRIPTION__
+__PER_SCENARIO_EXAMPLE__
 
 # Versions and Changelog
 
