@@ -725,7 +725,7 @@ class AnimusExtensionTemplate(ManifestBase):
 
     def _action_delete_documentation_file(self, file_name: str):
         self.log(message='      ACTION: Deleting Documentation File: {}'.format(file_name), level='info')
-        pass
+        os.unlink(file_name)
 
     def _action_create_example_file(self, file_name: str):
         example_name = file_name.split(os.sep)[-2]
@@ -735,7 +735,7 @@ class AnimusExtensionTemplate(ManifestBase):
     def _action_delete_example_file(self, file_name: str):
         example_name = file_name.split(os.sep)[-2]
         self.log(message='      ACTION: Deleting Example "{}" File: {}'.format(example_name, file_name), level='info')
-        pass
+        os.unlink(file_name)
 
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False):
         variable_cache.store_variable(variable=Variable(name='{}:command'.format(self._var_name()),initial_value='apply',ttl=-1,logger=self.logger,mask_in_logs=False),overwrite_existing=False)
