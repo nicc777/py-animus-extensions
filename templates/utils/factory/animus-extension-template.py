@@ -445,7 +445,7 @@ class AnimusExtensionTemplate(ManifestBase):
                     }
                 )
                 
-
+            self.log(message='final_examples_list={}'.format(final_examples_list), level='debug')
             if len(final_examples_list) == 0:
                 raise Exception('At least one example definition must be supplied')
 
@@ -576,29 +576,33 @@ class AnimusExtensionTemplate(ManifestBase):
                 command=command
             )
 
+        dirs = list()
         examples_dir = '{}{}{}'.format(EXAMPLES_BASE_PATH,os.sep,self.metadata['name'])
         if 'outputPaths' in self.spec:
             if 'examples' in self.spec['outputPaths']:
+                examples_dir = self.spec['outputPaths']['examples']
                 self.log(message='Default EXAMPLES_BASE_PATH was overridden with spec.outputPaths.examples - value="{}"'.format(self.spec['outputPaths']['examples']), level='info')
-                dirs.append(self.spec['outputPaths']['doc'])
+                dirs.append(self.spec['outputPaths']['examples'])
             else:
                 self.log(message='Default EXAMPLES_BASE_PATH used (2) - value="{}"'.format(EXAMPLES_BASE_PATH), level='info')
+                dirs.append(examples_dir)
         else:
             self.log(message='Default EXAMPLES_BASE_PATH used (1) - value="{}"'.format(EXAMPLES_BASE_PATH), level='info')
-        actions = self._determine_directory_actions(
-            directory=examples_dir,
-            existing_actions=actions,
-            command=command,
-            do_not_delete_recursively=False
-        )
+        for d in dirs:
+            actions = self._determine_directory_actions(
+                directory=d,
+                existing_actions=actions,
+                command=command,
+                do_not_delete_recursively=False
+            )
 
-        minimal_override = False
+        # minimal_override = False
         if 'additionalExamples' in self.spec:
             for additional_example_data in self.spec['additionalExamples']:
                 for field, value in additional_example_data.items():
                     if field == 'exampleName':
-                        if value == 'minimal':
-                            minimal_override = True
+                        # if value == 'minimal':
+                            # minimal_override = True
                         additional_example_directory = '{}{}{}'.format(
                             examples_dir,
                             os.sep,
@@ -610,18 +614,31 @@ class AnimusExtensionTemplate(ManifestBase):
                             command=command,
                             do_not_delete_recursively=False
                         )
+        self.log(message='No additionalExamples found in spec', level='warning')
 
-                        
-        if minimal_override is False:
-            minimal_example_dir = '{}{}minimal'.format(
-                examples_dir,
-                os.sep
-            )
-            actions = self._determine_directory_actions(
-                directory=minimal_example_dir,
-                existing_actions=actions,
-                command=command
-            )
+
+        # final_examples_list = list()            
+        # if minimal_override is False:
+        #     final_examples_list.append(
+        #         {
+        #             'exampleName': 'minimal',  # This will also be used to compile the the value of metadata.name
+        #             'manifest':{
+        #                 'generated': True, # This will automatically generate an example spec data with the minimum required fields and default values
+        #                 'additionalMetadata': 'skipDeleteAll: true',
+        #             },  
+        #             'explanatoryText': 'This is the absolute minimal example based on required values. Dummy random data was generated where required.'
+        #         }
+        #     )
+        #     self.spec['additionalExamples'] = copy.deepcopy(final_examples_list)
+        #     minimal_example_dir = '{}{}minimal'.format(
+        #         examples_dir,
+        #         os.sep
+        #     )
+        #     actions = self._determine_directory_actions(
+        #         directory=minimal_example_dir,
+        #         existing_actions=actions,
+        #         command=command
+        #     )
 
         ###
         ### Implementation File Actions
