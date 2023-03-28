@@ -794,7 +794,6 @@ class AnimusExtensionTemplate(ManifestBase):
             for field_name, field_data in example_data.items():
                 if field_name == 'exampleName':
                     if field_data == example_name:
-                        self.log(message='', level='info')
                         self.log(message='         Processing Data for "{}"'.format(example_name), level='debug')
         # TODO complete
 
