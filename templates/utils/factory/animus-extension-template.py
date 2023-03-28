@@ -367,35 +367,35 @@ class AnimusExtensionTemplate(ManifestBase):
             final_specFields_list = list()
             for spec_field_dict in find_key(dot_notation_path='specFields', payload=self.spec):
                 self.log(message='---------- Validating specField "{}" ----------'.format(spec_field_dict['fieldName']), level='info')
-                for spec_str_field, params in validation_specFields_for_string_and_list_fields.items():
-                    final_specFields_list.append(
-                        self._validate_str_or_list_or_boolean(
-                            spec_path=spec_str_field,
-                            value=find_key(dot_notation_path=spec_str_field, payload=spec_field_dict),
-                            value_type=params['value_type'],
-                            default_val=params['default_val'],
-                            set_default_when_not_present=params['set_default_when_not_present'],
-                            set_default_when_type_mismatch=params['set_default_when_type_mismatch'],
-                            set_default_when_null=params['set_default_when_null'],
-                            raise_exception_when_empty=params['raise_exception_when_empty'],
-                            log_indent_spaces=3
-                        )
-                    )
                 conditions_found = 0
-                if spec_str_field == 'fieldSetDefaultValueConditions':
-                    conditions = spec_field_dict[spec_str_field]
-                    self.log(message='        conditions={}'.format(conditions), level='debug')
-                    for condition in conditions:
-                        for key in ('fieldDefinitionNotPresentInManifest', 'fieldValueTypeMismatch', 'fieldValueIsNull',):
-                            if key in condition:
-                                try:
-                                    if isinstance(condition[key], bool) is False:
-                                        raise Exception('{} field in spec.specFields.[].fieldSetDefaultValueConditions must be a boolean'.format(key))
-                                    conditions_found += 1
-                                except:
-                                    pass
+                for spec_str_field, params in validation_specFields_for_string_and_list_fields.items():
+                    self._validate_str_or_list_or_boolean(
+                        spec_path=spec_str_field,
+                        value=find_key(dot_notation_path=spec_str_field, payload=spec_field_dict),
+                        value_type=params['value_type'],
+                        default_val=params['default_val'],
+                        set_default_when_not_present=params['set_default_when_not_present'],
+                        set_default_when_type_mismatch=params['set_default_when_type_mismatch'],
+                        set_default_when_null=params['set_default_when_null'],
+                        raise_exception_when_empty=params['raise_exception_when_empty'],
+                        log_indent_spaces=3
+                    )
+                
+                    if spec_str_field == 'fieldSetDefaultValueConditions':
+                        conditions = spec_field_dict[spec_str_field]
+                        self.log(message='        conditions={}'.format(conditions), level='debug')
+                        for condition in conditions:
+                            for key in ('fieldDefinitionNotPresentInManifest', 'fieldValueTypeMismatch', 'fieldValueIsNull',):
+                                if key in condition:
+                                    try:
+                                        if isinstance(condition[key], bool) is False:
+                                            raise Exception('{} field in spec.specFields.[].fieldSetDefaultValueConditions must be a boolean'.format(key))
+                                        conditions_found += 1
+                                    except:
+                                        pass
                 if conditions_found != 3:
                     raise Exception('When spec.specFields.[].fieldSetDefaultValueConditions is supplied, all three fields of fieldDefinitionNotPresentInManifest, fieldValueTypeMismatch, fieldValueIsNull must also be supplied.')
+                final_specFields_list.append(spec_field_dict)
 
 
             minimal_override = False
