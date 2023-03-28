@@ -790,11 +790,30 @@ class AnimusExtensionTemplate(ManifestBase):
     def _action_create_example_file(self, file_name: str):
         example_name = file_name.split(os.sep)[-2]
         self.log(message='      ACTION: Creating Example "{}" File: {}'.format(example_name, file_name), level='info')
+
+        base_template_data = dict()
+        base_template_data['kind'] = self.spec['kind']
+        base_template_data['version'] = self.spec['version']
+        base_template_data['metadata'] = dict()
+        base_template_data['metadata']['name'] = '{}-{}'.format(self.metadata['name'], example_name)
+
         for example_data in self.spec['additionalExamples']:
-            for field_name, field_data in example_data.items():
-                if field_name == 'exampleName':
-                    if field_data == example_name:
-                        self.log(message='         Processing Data for "{}"'.format(example_name), level='debug')
+            if example_data['exampleName'] == example_name:
+                self.log(message='         Processing Data for "{}"'.format(example_name), level='debug')
+                generated = True
+                if 'generated' in example_data['manifest']:
+                    generated = example_data['manifest']['generated']
+                template_data = copy.deepcopy(base_template_data)
+                if generated is True:
+                    for spec_field in self.spec['specFields']:
+                        if spec_field['fieldDefaultValue'] is not None:
+                            if 'spec' not in template_data:
+                                template_data['spec'] = dict()
+                            template_data['spec'][spec_field['fieldName']] = spec_field['fieldDefaultValue']
+                
+                self.log(message='             template_data as JSON: {}'.format(json.dumps(template_data)), level='info')
+                    
+                                    
         # TODO complete
 
     def _action_delete_example_file(self, file_name: str):
