@@ -692,6 +692,7 @@ class AnimusExtensionTemplate(ManifestBase):
         ###
         ### DONE
         ###
+        self.log(message='** spec as JSON: {}'.format(json.dumps(self.spec)), level='debug')
 
         self.log(message='-------------------- DONE running implemented_manifest_differ_from_this_manifest() --------------------', level='info')
         variable_cache.store_variable(variable=Variable(name='{}:actions'.format(self._var_name()),initial_value=actions,ttl=-1,logger=self.logger,mask_in_logs=False),overwrite_existing=False)
@@ -751,7 +752,6 @@ class AnimusExtensionTemplate(ManifestBase):
 
     def _action_create_documentation_file(self, file_name: str):
         self.log(message='      ACTION: Creating Documentation File: {}'.format(file_name), level='info')
-        self.log(message='         ** additionalExamples='.format(self.spec['additionalExamples']), level='debug')
         # my_path = inspect.getfile(self.__class__)
         # self.log(message='         Running from file: {}'.format(my_path), level='debug')
         # source_file = os.sep.join(my_path.split(os.sep)[0:10])
@@ -790,7 +790,13 @@ class AnimusExtensionTemplate(ManifestBase):
     def _action_create_example_file(self, file_name: str):
         example_name = file_name.split(os.sep)[-2]
         self.log(message='      ACTION: Creating Example "{}" File: {}'.format(example_name, file_name), level='info')
-        pass
+        for example_data in self.spec['additionalExamples']:
+            for field_name, field_data in example_data.items():
+                if field_name == 'exampleName':
+                    if field_data == example_name:
+                        self.log(message='', level='info')
+                        self.log(message='         Processing Data for "{}"'.format(example_name), level='debug')
+        # TODO complete
 
     def _action_delete_example_file(self, file_name: str):
         example_name = file_name.split(os.sep)[-2]
