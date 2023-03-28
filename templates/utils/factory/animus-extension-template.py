@@ -10,6 +10,7 @@ import sys
 from pathlib import Path
 import shutil
 import inspect
+import json
 
 
 DOC_BASE_PATH = '{}{}doc'.format(
@@ -547,6 +548,9 @@ class AnimusExtensionTemplate(ManifestBase):
         self._validate(variable_cache=variable_cache)
         command = variable_cache.get_value(variable_name='{}:command'.format(self._var_name()))
         
+        self.log(message='----------------------- running implemented_manifest_differ_from_this_manifest() ----------------------', level='info')
+        self.log(message='spec as JSON: {}'.format(json.dumps(self.spec)), level='debug')
+
         actions = list()
 
         ###
@@ -596,13 +600,10 @@ class AnimusExtensionTemplate(ManifestBase):
                 do_not_delete_recursively=False
             )
 
-        # minimal_override = False
         if 'additionalExamples' in self.spec:
             for additional_example_data in self.spec['additionalExamples']:
                 for field, value in additional_example_data.items():
                     if field == 'exampleName':
-                        # if value == 'minimal':
-                            # minimal_override = True
                         additional_example_directory = '{}{}{}'.format(
                             examples_dir,
                             os.sep,
@@ -614,31 +615,8 @@ class AnimusExtensionTemplate(ManifestBase):
                             command=command,
                             do_not_delete_recursively=False
                         )
-        self.log(message='No additionalExamples found in spec', level='warning')
-
-
-        # final_examples_list = list()            
-        # if minimal_override is False:
-        #     final_examples_list.append(
-        #         {
-        #             'exampleName': 'minimal',  # This will also be used to compile the the value of metadata.name
-        #             'manifest':{
-        #                 'generated': True, # This will automatically generate an example spec data with the minimum required fields and default values
-        #                 'additionalMetadata': 'skipDeleteAll: true',
-        #             },  
-        #             'explanatoryText': 'This is the absolute minimal example based on required values. Dummy random data was generated where required.'
-        #         }
-        #     )
-        #     self.spec['additionalExamples'] = copy.deepcopy(final_examples_list)
-        #     minimal_example_dir = '{}{}minimal'.format(
-        #         examples_dir,
-        #         os.sep
-        #     )
-        #     actions = self._determine_directory_actions(
-        #         directory=minimal_example_dir,
-        #         existing_actions=actions,
-        #         command=command
-        #     )
+        else:
+            self.log(message='No additionalExamples found in spec (1)', level='warning')
 
         ###
         ### Implementation File Actions
@@ -682,7 +660,7 @@ class AnimusExtensionTemplate(ManifestBase):
                 for field, value in additional_example_data.items():
                     if field == 'exampleName':
                         if value != 'minimal':
-                            file_name = self._determine_output_filename(file_name_no_extension='example', base_dir=EXAMPLES_BASE_PATH, component='examples', output_file_extension='yaml', additional_sub_dir=value)
+                            file_name = self._determine_output_filename(file_name_no_extension='example', base_dir=examples_dir, component='examples', output_file_extension='yaml', additional_sub_dir=value)
                             action_command = 'no-action'
                             if command == 'delete':
                                 action_command = 'delete_example_file'
@@ -694,7 +672,10 @@ class AnimusExtensionTemplate(ManifestBase):
                                 command=command,
                                 action_command=action_command
                             )
-        file_name = self._determine_output_filename(file_name_no_extension='example', base_dir=EXAMPLES_BASE_PATH, component='examples', output_file_extension='yaml', additional_sub_dir='minimal')
+        else:
+            self.log(message='No additionalExamples found in spec (1)', level='warning')
+
+        file_name = self._determine_output_filename(file_name_no_extension='example', base_dir=examples_dir, component='examples', output_file_extension='yaml', additional_sub_dir='minimal')
         action_command = 'no-action'
         if command == 'delete':
             action_command = 'delete_example_file'
@@ -712,6 +693,7 @@ class AnimusExtensionTemplate(ManifestBase):
         ### DONE
         ###
 
+        self.log(message='-------------------- DONE running implemented_manifest_differ_from_this_manifest() --------------------', level='info')
         variable_cache.store_variable(variable=Variable(name='{}:actions'.format(self._var_name()),initial_value=actions,ttl=-1,logger=self.logger,mask_in_logs=False),overwrite_existing=False)
         if len(actions) > 0:
             return True
