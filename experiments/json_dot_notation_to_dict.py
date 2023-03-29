@@ -45,13 +45,14 @@ def nest_data(key_dotted_notation: str, value: object)->dict:
     return d
 
 
-def merge_dicts(d1: dict, d2: dict)->dict:
-    for k, v in d2.items():
-        if k in d1:
-            d1 = {**d1[k], **d2[k]}
+def merge_dicts(A: dict, B: dict)->dict:
+    # FROM https://stackoverflow.com/questions/29241228/how-can-i-merge-two-nested-dictionaries-together (Vivek Sable)
+    for i, j in B.items(): 
+        if i in A:
+            A[i].update(j)
         else:
-            d1[k] = v
-    return d1
+            A[i] = j
+    return A
 
 
 spec = copy.deepcopy(template_data['spec'])
@@ -59,7 +60,8 @@ for dotted_key in list(spec.keys()):
     data_dict = nest_data(key_dotted_notation=dotted_key, value=spec[dotted_key])
     print('source_type_data={}'.format(data_dict))
     spec.pop(dotted_key)
-    spec = merge_dicts(d1=spec, d2=data_dict)
+    spec = merge_dicts(A=copy.deepcopy(spec), B=copy.deepcopy(data_dict))
+    # print('** {}'.format(merge_dicts(A=spec, B=data_dict)))
 
 template_data['spec'] = copy.deepcopy(spec)
 
