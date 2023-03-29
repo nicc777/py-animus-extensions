@@ -40,16 +40,24 @@ def nest_data(key_dotted_notation: str, value: object)->dict:
     return d
 
 
+def merge_dicts(d1: dict, d2: dict)->dict:
+    for k, v in d2.items():
+        if k in d1:
+            d1 = {**d1[k], **d2[k]}
+        else:
+            d1[k] = v
+    return d1
+
+
 for dotted_key in ('source.type', 'source.value', ):
-    #dotted_key = 'source.type'
     spec = template_data['spec']
-    source_type_data = nest_data(key_dotted_notation=dotted_key, value=spec[dotted_key])
-    print('source_type_data={}'.format(source_type_data))
+    data_dict = nest_data(key_dotted_notation=dotted_key, value=spec[dotted_key])
+    print('source_type_data={}'.format(data_dict))
     template_data['spec'].pop(dotted_key)
-    template_data['spec'] = {**template_data['spec'], **source_type_data}
+    template_data['spec'] = merge_dicts(d1=spec, d2=data_dict)
 
 print(json.dumps(template_data))
 
 
-            
+
 
