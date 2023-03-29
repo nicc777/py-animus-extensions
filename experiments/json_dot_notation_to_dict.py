@@ -16,30 +16,38 @@ template_data = {
 }
 
 
-def nest_data(current_dict: dict, key_dotted_notation: str, value: object)->dict:
+def add_parent_key_to_dict(current_dict: dict, parent_key: str):
+    new_dict = dict()
+    new_dict[parent_key] = current_dict
+    return new_dict
+
+
+def nest_data(key_dotted_notation: str, value: object)->dict:
     keys = key_dotted_notation.split('.')
-    if len(keys) == 1:
-        current_dict[key_dotted_notation] = value
-        return current_dict
     idx = 0
     d = dict()
     last_key = ''
     while len(keys) > 0:
         idx += 1
         key = keys.pop()
+        print('idx={}   len(keys)={}'.format(idx, len(keys)))
         last_key = copy.deepcopy(key)
         if idx == 1:
             d[key] = value
         else:
-            d[key] = d
-    current_dict[last_key] = d
-    return current_dict    
+            d = add_parent_key_to_dict(current_dict=d, parent_key=key)
+        print('* d={}'.format(d))
+    return d
 
-spec = template_data['spec']
-dotted_key = 'source.type'
-source_type_data = nest_data(current_dict=spec, key_dotted_notation=dotted_key, value=spec[dotted_key])
-spec.pop(dotted_key)
-template_data['spec'] = spec
+
+for dotted_key in ('source.type', 'source.value', ):
+    #dotted_key = 'source.type'
+    spec = template_data['spec']
+    source_type_data = nest_data(key_dotted_notation=dotted_key, value=spec[dotted_key])
+    print('source_type_data={}'.format(source_type_data))
+    template_data['spec'].pop(dotted_key)
+    template_data['spec'] = {**template_data['spec'], **source_type_data}
+
 print(json.dumps(template_data))
 
 
