@@ -1,5 +1,5 @@
 from py_animus.manifest_management import *
-from py_animus import get_logger
+from py_animus import get_logger, parse_raw_yaml_data
 from py_animus.py_animus import run_main
 import traceback
 import os
@@ -809,8 +809,26 @@ class AnimusExtensionTemplate(ManifestBase):
                         if spec_field['fieldDefaultValue'] is not None:
                             if 'spec' not in template_data:
                                 template_data['spec'] = dict()
+                            # FIXME split some.field.name into nested dict
                             template_data['spec'][spec_field['fieldName']] = spec_field['fieldDefaultValue']
-                
+                if 'specData' in example_data['manifest']:
+                    spec_data_as_dict = parse_raw_yaml_data(yaml_data=example_data['manifest']['specData'], logger=self.logger)
+                    if spec_data_as_dict is not None:
+                        if isinstance(spec_data_as_dict, dict):
+                            if len(spec_data_as_dict) > 0:
+                                if 'spec' not in template_data:
+                                    template_data['spec'] = dict()
+                                for part, part_data in spec_data_as_dict.items():
+                                    for k,v in part_data.items():
+                                        template_data['spec'][k] = v
+                if 'additionalMetadata' in example_data['manifest']:
+                    additional_metadata_as_dict = parse_raw_yaml_data(yaml_data=example_data['manifest']['additionalMetadata'], logger=self.logger)
+                    if additional_metadata_as_dict is not None:
+                        if isinstance(additional_metadata_as_dict, dict):
+                            if len(additional_metadata_as_dict) > 0:
+                                for part, part_data in additional_metadata_as_dict.items():
+                                    for k,v in part_data.items():
+                                        template_data['metadata'][k] = v
                 self.log(message='             template_data as JSON: {}'.format(json.dumps(template_data)), level='info')
                     
                                     
