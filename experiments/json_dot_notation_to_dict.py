@@ -81,7 +81,7 @@ for dotted_key in list(spec.keys()):
     print('source_type_data={}'.format(data_dict))
     spec.pop(dotted_key)
     spec = merge_dicts(A=copy.deepcopy(spec), B=copy.deepcopy(data_dict))
-    # print('** {}'.format(merge_dicts(A=spec, B=data_dict)))
+
 
 template_data['spec'] = copy.deepcopy(spec)
 
