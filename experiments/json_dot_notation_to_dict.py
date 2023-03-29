@@ -30,13 +30,18 @@ def nest_data(key_dotted_notation: str, value: object)->dict:
     while len(keys) > 0:
         idx += 1
         key = keys.pop()
-        print('idx={}   len(keys)={}'.format(idx, len(keys)))
+        # print('idx={}   len(keys)={}'.format(idx, len(keys)))
         last_key = copy.deepcopy(key)
         if idx == 1:
             d[key] = value
+            if len(keys) > 1:
+                d = add_parent_key_to_dict(current_dict=d, parent_key=keys[-1])
         else:
             d = add_parent_key_to_dict(current_dict=d, parent_key=key)
-        print('* d={}'.format(d))
+            if len(keys) > 1:
+                d = add_parent_key_to_dict(current_dict=d, parent_key=keys[-1])
+        # print('* d={}'.format(d))
+    print('-> d={}'.format(d))
     return d
 
 
@@ -49,12 +54,15 @@ def merge_dicts(d1: dict, d2: dict)->dict:
     return d1
 
 
-for dotted_key in ('source.type', 'source.value', ):
-    spec = template_data['spec']
+spec = copy.deepcopy(template_data['spec'])
+for dotted_key in list(spec.keys()):
     data_dict = nest_data(key_dotted_notation=dotted_key, value=spec[dotted_key])
     print('source_type_data={}'.format(data_dict))
-    template_data['spec'].pop(dotted_key)
-    template_data['spec'] = merge_dicts(d1=spec, d2=data_dict)
+    spec.pop(dotted_key)
+    spec = merge_dicts(d1=spec, d2=data_dict)
+
+template_data['spec'] = copy.deepcopy(spec)
+
 
 print(json.dumps(template_data))
 
