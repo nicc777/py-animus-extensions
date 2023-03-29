@@ -1,19 +1,24 @@
 import json
 import copy
 
-template_data = {
+
+original_data = '''{
     "kind": "ShellScript",
     "version": "v1",
     "metadata": {
         "name": "shell-script-v1-minimal",
-        "skipDeleteAll": True
+        "skipDeleteAll": true
     },
     "spec": {
         "shellInterpreter": "sh",
         "source.type": "inLine",
-        "source.value": "echo \"Not Yet Implemented\""
+        "source.value": "echo \\"Not Yet Implemented\\""
     }
 }
+'''
+
+
+template_data = json.loads(original_data)
 
 
 def add_parent_key_to_dict(current_dict: dict, parent_key: str):
