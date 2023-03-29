@@ -77,10 +77,9 @@ def merge_dicts(A: dict, B: dict)->dict:
 
 spec = copy.deepcopy(template_data['spec'])
 for dotted_key in list(spec.keys()):
-    data_dict = nest_data(key_dotted_notation=dotted_key, value=spec[dotted_key])
-    print('source_type_data={}'.format(data_dict))
+    nested_data = nest_data(key_dotted_notation=dotted_key, value=spec[dotted_key])
     spec.pop(dotted_key)
-    spec = merge_dicts(A=copy.deepcopy(spec), B=copy.deepcopy(data_dict))
+    spec = merge_dicts(A=copy.deepcopy(spec), B=copy.deepcopy(nested_data))
 
 
 template_data['spec'] = copy.deepcopy(spec)
