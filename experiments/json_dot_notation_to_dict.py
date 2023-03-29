@@ -37,7 +37,7 @@ original_data2 = '''{
 '''
 
 
-template_data = json.loads(original_data1)
+template_data = json.loads(original_data2)
 
 
 def add_parent_key_to_dict(current_dict: dict, parent_key: str):
