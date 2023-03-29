@@ -2,7 +2,8 @@ import json
 import copy
 
 
-original_data = '''{
+# WORKING
+original_data1 = '''{
     "kind": "ShellScript",
     "version": "v1",
     "metadata": {
@@ -17,8 +18,26 @@ original_data = '''{
 }
 '''
 
+# FIXME  NOT WORKING YET
+original_data2 = '''{
+    "kind": "ShellScript",
+    "version": "v1",
+    "metadata": {
+        "name": "shell-script-v1-minimal",
+        "skipDeleteAll": true
+    },
+    "spec": {
+        "shellInterpreter": "sh",
+        "source.type": "inLine",
+        "source.value": "echo \\"Not Yet Implemented\\"",
+        "source.test.alt1": "111",
+        "source.test.alt2": "222"
+    }
+}
+'''
 
-template_data = json.loads(original_data)
+
+template_data = json.loads(original_data1)
 
 
 def add_parent_key_to_dict(current_dict: dict, parent_key: str):
@@ -31,12 +50,9 @@ def nest_data(key_dotted_notation: str, value: object)->dict:
     keys = key_dotted_notation.split('.')
     idx = 0
     d = dict()
-    last_key = ''
     while len(keys) > 0:
         idx += 1
         key = keys.pop()
-        # print('idx={}   len(keys)={}'.format(idx, len(keys)))
-        last_key = copy.deepcopy(key)
         if idx == 1:
             d[key] = value
             if len(keys) > 1:
@@ -45,7 +61,6 @@ def nest_data(key_dotted_notation: str, value: object)->dict:
             d = add_parent_key_to_dict(current_dict=d, parent_key=key)
             if len(keys) > 1:
                 d = add_parent_key_to_dict(current_dict=d, parent_key=keys[-1])
-        # print('* d={}'.format(d))
     print('-> d={}'.format(d))
     return d
 
