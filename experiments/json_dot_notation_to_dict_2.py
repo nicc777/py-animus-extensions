@@ -77,13 +77,27 @@ def merge_dicts(A: dict, B: dict)->dict:
 
 
 spec = copy.deepcopy(template_data['spec'])
+final_spec = dict()
 for dotted_key in list(spec.keys()):
+    current_value = spec[dotted_key]
     nested_data = nest_data(key_dotted_notation=dotted_key, value=spec[dotted_key])
-    spec.pop(dotted_key)
-    spec = merge_dicts(A=copy.deepcopy(spec), B=copy.deepcopy(nested_data))
+
+    nested_data_base_key = list(nested_data.keys())[0]
+    if dotted_key != nested_data_base_key:
+        if nested_data_base_key not in final_spec:
+            final_spec[nested_data_base_key] = nested_data[nested_data_base_key]
+        else:
+            current_dict = copy.deepcopy(final_spec[nested_data_base_key])
+            final_spec[nested_data_base_key] = {**current_dict, **nested_data[nested_data_base_key]}
+    else:
+        final_spec[dotted_key] = current_value
+
+    # spec.pop(dotted_key)
+    # spec = merge_dicts(A=copy.deepcopy(spec), B=copy.deepcopy(nested_data))
+template_data['spec'] = copy.deepcopy(final_spec)
 
 
-template_data['spec'] = copy.deepcopy(spec)
+# template_data['spec'] = copy.deepcopy(spec)
 
 
 print(json.dumps(template_data))
