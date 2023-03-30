@@ -47,22 +47,7 @@ def add_parent_key_to_dict(current_dict: dict, parent_key: str):
 
 
 def nest_data(key_dotted_notation: str, value: object)->dict:
-    keys = key_dotted_notation.split('.')
-    idx = 0
-    d = dict()
-    while len(keys) > 0:
-        idx += 1
-        key = keys.pop()
-        if idx == 1:
-            d[key] = value
-            if len(keys) > 1:
-                d = add_parent_key_to_dict(current_dict=d, parent_key=keys[-1])
-        else:
-            d = add_parent_key_to_dict(current_dict=d, parent_key=key)
-            if len(keys) > 1:
-                d = add_parent_key_to_dict(current_dict=d, parent_key=keys[-1])
-    print('-> d={}'.format(d))
-    return d
+    pass
 
 
 def merge_dicts(A: dict, B: dict)->dict:
