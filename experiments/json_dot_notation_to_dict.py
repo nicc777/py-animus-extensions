@@ -44,7 +44,7 @@ The original_data2 transformed will now look like this:
 """
 
 
-template_data = json.loads(input_data)        
+input_data_converted = json.loads(input_data)        
 
 
 class Field:
@@ -83,21 +83,21 @@ def merge_dicts(A: dict, B: dict)->dict:
 
 
 output_data = dict()
-for t_field_name, t_field_data in template_data.items():
-    spec = copy.deepcopy(template_data[t_field_name])
-    new_spec = dict()
+for t_field_name, t_field_data in input_data_converted.items():
+    spec = copy.deepcopy(input_data_converted[t_field_name])
+    converted_t_field_data = dict()
     if isinstance(spec, dict):
         for field_name, field_data in spec.items():
             embedded_field = embed_field(dotted_name=field_name, value=copy.deepcopy(field_data))
             for k,v in embedded_field.to_dict().items():
-                if k not in new_spec:
-                    new_spec[k] = v
+                if k not in converted_t_field_data:
+                    converted_t_field_data[k] = v
                 else:
                     if isinstance(v, dict):
-                        new_spec[k] = merge_dicts(A=new_spec[k], B=v)
+                        converted_t_field_data[k] = merge_dicts(A=converted_t_field_data[k], B=v)
                     else:
-                        new_spec[k] = v
-        output_data[t_field_name] = new_spec
+                        converted_t_field_data[k] = v
+        output_data[t_field_name] = converted_t_field_data
     else:
         output_data[t_field_name] = t_field_data    
     
