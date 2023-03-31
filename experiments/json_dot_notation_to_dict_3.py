@@ -52,7 +52,7 @@ spec = template_data['spec']
 for field_name, field_data in spec.items():
     field_names = field_name.split('.')
     if len(field_names) > 1:
-        pass
+        spec_dict.fields.append(embed_field(dotted_name=field_name, value=copy.deepcopy(field_data)))
     else:
         spec_dict.fields.append(Field(name=field_name, value=copy.deepcopy(field_data)))
     
