@@ -2,7 +2,7 @@ import json
 import copy
 
 
-original_data2 = '''{
+input_data = '''{
     "kind": "ShellScript",
     "version": "v1",
     "metadata": {
@@ -19,8 +19,32 @@ original_data2 = '''{
 }
 '''
 
+"""
+The original_data2 transformed will now look like this:
 
-template_data = json.loads(original_data2)        
+{
+    "kind": "ShellScript",
+    "version": "v1",
+    "metadata": {
+        "name": "shell-script-v1-minimal",
+        "skipDeleteAll": true
+    },
+    "spec": {
+        "shellInterpreter": "sh",
+        "source": {
+            "type": "inLine",
+            "value": "echo \"Not Yet Implemented\"",
+            "test": {
+                "alt1": "111",
+                "alt2": "222"
+            }
+        }
+    }
+}
+"""
+
+
+template_data = json.loads(input_data)        
 
 
 class Field:
@@ -58,7 +82,7 @@ def merge_dicts(A: dict, B: dict)->dict:
     return A
 
 
-final_template_data = dict()
+output_data = dict()
 for t_field_name, t_field_data in template_data.items():
     spec = copy.deepcopy(template_data[t_field_name])
     new_spec = dict()
@@ -73,9 +97,9 @@ for t_field_name, t_field_data in template_data.items():
                         new_spec[k] = merge_dicts(A=new_spec[k], B=v)
                     else:
                         new_spec[k] = v
-        final_template_data[t_field_name] = new_spec
+        output_data[t_field_name] = new_spec
     else:
-        final_template_data[t_field_name] = t_field_data    
+        output_data[t_field_name] = t_field_data    
     
     
-print(json.dumps(final_template_data))
+print(json.dumps(output_data))
