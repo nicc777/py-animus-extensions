@@ -43,6 +43,16 @@ class ComplexDict:
     def __init__(self):
         self.fields = list()
 
+    def add_field(self, f: Field):
+        found = False
+        for current_field in self.fields:
+            if current_field.name == f.name:
+                current_field.children.append(f)
+                current_field.value = None
+                found = True
+        if found is False:
+            self.fields.append(f)
+
     def to_dict(self):
         d = dict()
         for field in self.fields:
@@ -56,17 +66,32 @@ def embed_field(dotted_name: str, value: object)->Field:
     field_names = dotted_name.split('.')
     if len(field_names) > 1:
         next_dotted_name = '.'.join(field_names[1:])
-        field = Field(name=field_name, value=embed_field(dotted_name=next_dotted_name, value=value))
+        field = Field(name=field_names[0], value=embed_field(dotted_name=next_dotted_name, value=value))
     else:
-        field = Field(name=field_name, value=copy.deepcopy(field_data))
+        field = Field(name=field_names[0], value=copy.deepcopy(field_data))
     return field
+
+
+def add_data_to_dict(d: dict, data: object):
+    pass
+
 
 
 spec_dict = ComplexDict()
 spec = template_data['spec']
+new_spec = dict()
 for field_name, field_data in spec.items():
-    spec_dict.fields.append(embed_field(dotted_name=field_name, value=copy.deepcopy(field_data)))
-    print('spec_dict={}'.format(spec_dict.to_dict()))
+    # spec_dict.fields.append(embed_field(dotted_name=field_name, value=copy.deepcopy(field_data)))
+    embedded_field = embed_field(dotted_name=field_name, value=copy.deepcopy(field_data))
+    print('embedded_field={}'.format(embedded_field.to_dict()))
+    for k,v in embedded_field.to_dict().items():
+        if k not in new_spec:
+            new_spec[k] = v
+        else:
+            if isinstance(v, dict):
+                new_spec[k] = {**new_spec[k], **v}
+            else:
+                new_spec[k] = v
     
-template_data['spec'] = spec_dict.to_dict()
+template_data['spec'] = new_spec
 print(json.dumps(template_data))
