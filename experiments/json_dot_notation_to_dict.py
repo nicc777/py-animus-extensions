@@ -84,8 +84,8 @@ def merge_dicts(A: dict, B: dict)->dict:
 
 output_data = dict()
 for t_field_name, t_field_data in input_data_converted.items():
-    converted_t_field_data = dict()
     if isinstance(t_field_data, dict):
+        converted_t_field_data = dict()
         for field_name, field_data in t_field_data.items():
             embedded_field = embed_field(dotted_name=field_name, value=copy.deepcopy(field_data))
             for k,v in embedded_field.to_dict().items():
