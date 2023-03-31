@@ -31,12 +31,29 @@ class Field:
         self.value = value
 
 
-class Dict:
+class ComplexDict:
 
     def __init__(self):
         self.fields = list()
 
 
+def embed_field(dotted_name: str, value: object)->Field:
+    field_names = field_name.split('.')
+    if len(field_names) > 1:
+        next_dotted_name = '.'.join(field_names[1:])
+        field = Field(name=field_name, value=embed_field(dotted_name=next_dotted_name, value=value))
+    else:
+        field = Field(name=field_name, value=copy.deepcopy(field_data))
+    return field
 
+
+spec_dict = ComplexDict()
+spec = template_data['spec']
+for field_name, field_data in spec.items():
+    field_names = field_name.split('.')
+    if len(field_names) > 1:
+        pass
+    else:
+        spec_dict.fields.append(Field(name=field_name, value=copy.deepcopy(field_data)))
     
 
