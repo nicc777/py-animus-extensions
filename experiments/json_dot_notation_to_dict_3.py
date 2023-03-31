@@ -30,11 +30,24 @@ class Field:
         self.children = list()
         self.value = value
 
+    def to_dict(self):
+        if self.value is None:
+            return {self.name: None}
+        elif self.__class__.__name__ == 'Field':
+            return {self.name: self.value.to_dict()}
+        return {self.name: self.value}
+
 
 class ComplexDict:
 
     def __init__(self):
         self.fields = list()
+
+    def to_dict(self):
+        d = dict()
+        for field in self.fields:
+            d[field.name] = d.to_dict()
+        return d
 
 
 def embed_field(dotted_name: str, value: object)->Field:
@@ -56,4 +69,5 @@ for field_name, field_data in spec.items():
     else:
         spec_dict.fields.append(Field(name=field_name, value=copy.deepcopy(field_data)))
     
-
+template_data['spec'] = spec_dict.to_dict()
+print(json.dumps(template_data))
