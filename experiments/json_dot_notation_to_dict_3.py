@@ -2,20 +2,6 @@ import json
 import copy
 
 
-class Field:
-
-    def __init__(self, name: str, value: object=None):
-        self.name = name
-        self.children = list()
-        self.value = value
-
-
-class Dict:
-
-    def __init__(self):
-        self.fields = list()
-
-
 original_data2 = '''{
     "kind": "ShellScript",
     "version": "v1",
@@ -35,6 +21,22 @@ original_data2 = '''{
 
 
 template_data = json.loads(original_data2)        
+
+
+class Field:
+
+    def __init__(self, name: str, value: object=None):
+        self.name = name
+        self.children = list()
+        self.value = value
+
+
+class Dict:
+
+    def __init__(self):
+        self.fields = list()
+
+
 
     
 
