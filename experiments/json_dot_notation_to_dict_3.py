@@ -51,7 +51,7 @@ class ComplexDict:
 
 
 def embed_field(dotted_name: str, value: object)->Field:
-    field_names = field_name.split('.')
+    field_names = dotted_name.split('.')
     if len(field_names) > 1:
         next_dotted_name = '.'.join(field_names[1:])
         field = Field(name=field_name, value=embed_field(dotted_name=next_dotted_name, value=value))
