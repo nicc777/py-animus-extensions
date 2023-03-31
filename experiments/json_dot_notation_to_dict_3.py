@@ -72,9 +72,14 @@ def embed_field(dotted_name: str, value: object)->Field:
     return field
 
 
-def add_data_to_dict(d: dict, data: object):
-    pass
-
+def merge_dicts(A: dict, B: dict)->dict:
+    # FROM https://stackoverflow.com/questions/29241228/how-can-i-merge-two-nested-dictionaries-together (Vivek Sable)
+    for i, j in B.items(): 
+        if i in A:
+            A[i].update(j)
+        else:
+            A[i] = j
+    return A
 
 
 spec_dict = ComplexDict()
@@ -89,7 +94,7 @@ for field_name, field_data in spec.items():
             new_spec[k] = v
         else:
             if isinstance(v, dict):
-                new_spec[k] = {**new_spec[k], **v}
+                new_spec[k] = merge_dicts(A=new_spec[k], B=v)
             else:
                 new_spec[k] = v
     
