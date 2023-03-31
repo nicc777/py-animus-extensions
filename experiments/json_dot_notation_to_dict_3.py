@@ -46,7 +46,8 @@ class ComplexDict:
     def to_dict(self):
         d = dict()
         for field in self.fields:
-            for k,v in field.to_dict():
+            field_dict = field.to_dict()
+            for k,v in field_dict.items():
                 d[k] = v
         return d
 
@@ -65,6 +66,7 @@ spec_dict = ComplexDict()
 spec = template_data['spec']
 for field_name, field_data in spec.items():
     spec_dict.fields.append(embed_field(dotted_name=field_name, value=copy.deepcopy(field_data)))
+    print('spec_dict={}'.format(spec_dict.to_dict()))
     
 template_data['spec'] = spec_dict.to_dict()
 print(json.dumps(template_data))
