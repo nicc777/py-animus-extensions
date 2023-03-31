@@ -33,7 +33,7 @@ class Field:
     def to_dict(self):
         if self.value is None:
             return {self.name: None}
-        elif self.__class__.__name__ == 'Field':
+        elif self.value.__class__.__name__ == 'Field':
             return {self.name: self.value.to_dict()}
         return {self.name: self.value}
 
@@ -46,7 +46,8 @@ class ComplexDict:
     def to_dict(self):
         d = dict()
         for field in self.fields:
-            d[field.name] = d.to_dict()
+            for k,v in field.to_dict():
+                d[k] = v
         return d
 
 
@@ -63,11 +64,7 @@ def embed_field(dotted_name: str, value: object)->Field:
 spec_dict = ComplexDict()
 spec = template_data['spec']
 for field_name, field_data in spec.items():
-    field_names = field_name.split('.')
-    if len(field_names) > 1:
-        spec_dict.fields.append(embed_field(dotted_name=field_name, value=copy.deepcopy(field_data)))
-    else:
-        spec_dict.fields.append(Field(name=field_name, value=copy.deepcopy(field_data)))
+    spec_dict.fields.append(embed_field(dotted_name=field_name, value=copy.deepcopy(field_data)))
     
 template_data['spec'] = spec_dict.to_dict()
 print(json.dumps(template_data))
