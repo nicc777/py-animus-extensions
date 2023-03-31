@@ -62,11 +62,11 @@ class Field:
         return {self.name: self.value}
 
 
-def embed_field(dotted_name: str, value: object)->Field:
+def create_field(dotted_name: str, value: object)->Field:
     field_names = dotted_name.split('.')
     if len(field_names) > 1:
         next_dotted_name = '.'.join(field_names[1:])
-        field = Field(name=field_names[0], value=embed_field(dotted_name=next_dotted_name, value=value))
+        field = Field(name=field_names[0], value=create_field(dotted_name=next_dotted_name, value=value))
     else:
         field = Field(name=field_names[0], value=copy.deepcopy(field_data))
     return field
@@ -87,8 +87,8 @@ for t_field_name, t_field_data in input_data_converted.items():
     if isinstance(t_field_data, dict):
         converted_t_field_data = dict()
         for field_name, field_data in t_field_data.items():
-            embedded_field = embed_field(dotted_name=field_name, value=copy.deepcopy(field_data))
-            for k,v in embedded_field.to_dict().items():
+            root_field = create_field(dotted_name=field_name, value=copy.deepcopy(field_data))
+            for k,v in root_field.to_dict().items():
                 if k not in converted_t_field_data:
                     converted_t_field_data[k] = v
                 else:
