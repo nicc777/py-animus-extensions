@@ -38,30 +38,6 @@ class Field:
         return {self.name: self.value}
 
 
-class ComplexDict:
-
-    def __init__(self):
-        self.fields = list()
-
-    def add_field(self, f: Field):
-        found = False
-        for current_field in self.fields:
-            if current_field.name == f.name:
-                current_field.children.append(f)
-                current_field.value = None
-                found = True
-        if found is False:
-            self.fields.append(f)
-
-    def to_dict(self):
-        d = dict()
-        for field in self.fields:
-            field_dict = field.to_dict()
-            for k,v in field_dict.items():
-                d[k] = v
-        return d
-
-
 def embed_field(dotted_name: str, value: object)->Field:
     field_names = dotted_name.split('.')
     if len(field_names) > 1:
@@ -82,7 +58,6 @@ def merge_dicts(A: dict, B: dict)->dict:
     return A
 
 
-spec_dict = ComplexDict()
 spec = template_data['spec']
 new_spec = dict()
 for field_name, field_data in spec.items():
