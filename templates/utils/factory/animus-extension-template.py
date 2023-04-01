@@ -1,5 +1,6 @@
 from py_animus.manifest_management import *
 from py_animus import get_logger, parse_raw_yaml_data
+from py_animus.utils import *
 from py_animus.py_animus import run_main
 import traceback
 import os
@@ -809,7 +810,6 @@ class AnimusExtensionTemplate(ManifestBase):
                         if spec_field['fieldDefaultValue'] is not None:
                             if 'spec' not in template_data:
                                 template_data['spec'] = dict()
-                            # FIXME split some.field.name into nested dict
                             template_data['spec'][spec_field['fieldName']] = spec_field['fieldDefaultValue']
                 if 'specData' in example_data['manifest']:
                     spec_data_as_dict = parse_raw_yaml_data(yaml_data=example_data['manifest']['specData'], logger=self.logger)
@@ -829,6 +829,25 @@ class AnimusExtensionTemplate(ManifestBase):
                                 for part, part_data in additional_metadata_as_dict.items():
                                     for k,v in part_data.items():
                                         template_data['metadata'][k] = v
+                # Normalize the the template_data by converted dotted notation fields to proper complex data structures.
+                output_data = dict()
+                for t_field_name, t_field_data in template_data.items():
+                    if isinstance(t_field_data, dict):
+                        converted_t_field_data = dict()
+                        for field_name, field_data in t_field_data.items():
+                            root_field = create_field(dotted_name=field_name, value=copy.deepcopy(field_data))
+                            for k,v in root_field.to_dict().items():
+                                if k not in converted_t_field_data:
+                                    converted_t_field_data[k] = v
+                                else:
+                                    if isinstance(v, dict):
+                                        converted_t_field_data[k] = merge_dicts(A=converted_t_field_data[k], B=v)
+                                    else:
+                                        converted_t_field_data[k] = v
+                        output_data[t_field_name] = converted_t_field_data
+                    else:
+                        output_data[t_field_name] = t_field_data
+                template_data = copy.deepcopy(output_data)
                 self.log(message='             template_data as JSON: {}'.format(json.dumps(template_data)), level='info')
                     
                                     
