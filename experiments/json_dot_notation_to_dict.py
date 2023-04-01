@@ -68,7 +68,7 @@ def create_field(dotted_name: str, value: object)->Field:
         next_dotted_name = '.'.join(field_names[1:])
         field = Field(name=field_names[0], value=create_field(dotted_name=next_dotted_name, value=value))
     else:
-        field = Field(name=field_names[0], value=copy.deepcopy(field_data))
+        field = Field(name=field_names[0], value=copy.deepcopy(value))
     return field
 
 
