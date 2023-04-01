@@ -797,6 +797,7 @@ class AnimusExtensionTemplate(ManifestBase):
         base_template_data['version'] = self.spec['version']
         base_template_data['metadata'] = dict()
         base_template_data['metadata']['name'] = '{}-{}'.format(self.metadata['name'], example_name)
+        final_template_data = dict()
 
         for example_data in self.spec['additionalExamples']:
             if example_data['exampleName'] == example_name:
@@ -847,11 +848,12 @@ class AnimusExtensionTemplate(ManifestBase):
                         output_data[t_field_name] = converted_t_field_data
                     else:
                         output_data[t_field_name] = t_field_data
-                template_data = copy.deepcopy(output_data)
-                self.log(message='             template_data as JSON: {}'.format(json.dumps(template_data)), level='info')
-                    
-                                    
-        # TODO complete
+                final_template_data = copy.deepcopy(output_data)
+                self.log(message='             final_template_data as JSON: {}'.format(json.dumps(final_template_data)), level='info')
+
+        if len(final_template_data) > 0:
+            with open(file_name, "w") as f:
+                f.write(yaml.dump(final_template_data))
 
     def _action_delete_example_file(self, file_name: str):
         example_name = file_name.split(os.sep)[-2]
