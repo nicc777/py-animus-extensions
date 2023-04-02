@@ -753,22 +753,26 @@ class AnimusExtensionTemplate(ManifestBase):
 
     def _action_create_documentation_file(self, file_name: str):
         self.log(message='      ACTION: Creating Documentation File: {}'.format(file_name), level='info')
-        # my_path = inspect.getfile(self.__class__)
-        # self.log(message='         Running from file: {}'.format(my_path), level='debug')
-        # source_file = os.sep.join(my_path.split(os.sep)[0:10])
-        # source_file = '{}{}doc{}extension-template.md'.format(
-        #     source_file,
-        #     os.sep,
-        #     os.sep
-        # )
-        # self.log(message='         Loading Source Template from file: {}'.format(source_file), level='info')
-        # data = ''
-        # with open(source_file, 'r') as rf:
-        #     data = rf.read()
-        # self.log(message='         Performing variable substitutions', level='info')
-        # data = data.replace('__KIND__', self.spec['kind'])
-        # data = data.replace('__DESCRIPTION__', self.spec['description'])
-        # data = data.replace('__EXTENSION_NAME__', self.metadata['name'])
+        my_path = inspect.getfile(self.__class__)
+        self.log(message='         Running from file: {}'.format(my_path), level='debug')
+        source_file = os.sep.join(my_path.split(os.sep)[0:10])
+        source_file = '{}{}doc{}extension-template.md'.format(
+            source_file,
+            os.sep,
+            os.sep
+        )
+        self.log(message='          Loading Source Template from file: {}'.format(source_file), level='info')
+        data = ''
+        with open(source_file, 'r') as rf:
+            data = rf.read()
+        self.log(message='         Performing variable substitutions', level='info')
+        data = data.replace('__KIND__', self.spec['kind'])
+        data = data.replace('__DESCRIPTION__', self.spec['description'])
+        data = data.replace('__EXTENSION_NAME__', self.metadata['name'])
+        data = data.replace('__VERSION__', self.spec['version'])
+
+        
+
 
         # # Replace __PER_SCENARIO_EXAMPLE__ using template DOC_TEMPLATE_SCENARIO_EXAMPLE for each scenario
 
@@ -780,9 +784,9 @@ class AnimusExtensionTemplate(ManifestBase):
         # data = data.replace('__KIND__', self.spec['kind'])
         
 
-        # self.log(message='         Writing data to target file: {}'.format(file_name), level='info')
-        # with open(file_name, 'w') as wf:
-        #     wf.write(data)
+        self.log(message='         Writing data to target file: {}'.format(file_name), level='info')
+        with open(file_name, 'w') as wf:
+            wf.write(data)
 
     def _action_delete_documentation_file(self, file_name: str):
         self.log(message='      ACTION: Deleting Documentation File: {}'.format(file_name), level='info')

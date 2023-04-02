@@ -10,7 +10,7 @@ export EXTENSION_NAME="__EXTENSION_NAME__"
 
 | Field | Type    | Required | In Versions | Description  |
 |-------|:-------:|:--------:|:-----------:|--------------|
-__TABLE_ROW__
+__TABLE_ROWS__
 
 # Example Usages
 
@@ -18,6 +18,6 @@ __PER_SCENARIO_EXAMPLE__
 
 # Versions and Changelog
 
-## __INITIAL_VERSION__
+## Version __VERSION__
 
-Initial version
+Initial content for version __VERSION__
