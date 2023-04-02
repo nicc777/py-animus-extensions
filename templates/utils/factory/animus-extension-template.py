@@ -751,7 +751,7 @@ class AnimusExtensionTemplate(ManifestBase):
         self.log(message='      ACTION: Deleting Implementation File: {}'.format(file_name), level='info')
         os.unlink(file_name)
 
-    def _action_create_documentation_file(self, file_name: str):
+    def _action_create_documentation_file(self, file_name: str, variable_cache: VariableCache=VariableCache()):
         self.log(message='      ACTION: Creating Documentation File: {}'.format(file_name), level='info')
         my_path = inspect.getfile(self.__class__)
         self.log(message='         Running from file: {}'.format(my_path), level='debug')
@@ -762,6 +762,10 @@ class AnimusExtensionTemplate(ManifestBase):
             os.sep
         )
         self.log(message='          Loading Source Template from file: {}'.format(source_file), level='info')
+
+        ###
+        ### COMMON FIELDS
+        ###
         data = ''
         with open(source_file, 'r') as rf:
             data = rf.read()
@@ -771,6 +775,9 @@ class AnimusExtensionTemplate(ManifestBase):
         data = data.replace('__EXTENSION_NAME__', self.metadata['name'])
         data = data.replace('__VERSION__', self.spec['version'])
 
+        ###
+        ### FIELD TABLE
+        ###
         field_required_value_map = {
             True: 'Yes',
             False: 'No',
@@ -793,16 +800,72 @@ class AnimusExtensionTemplate(ManifestBase):
         data = data.replace('__TABLE_ROWS__', field_rows_text)
 
 
-        # # Replace __PER_SCENARIO_EXAMPLE__ using template DOC_TEMPLATE_SCENARIO_EXAMPLE for each scenario
+        ###
+        ### EXAMPLES
+        ###
+
+        examples_lines = ''
+        example_template = '''## Example: __EXAMPLE_NAME__
+
+```shell
+export SCENARIO_NAME="__EXAMPLE_NAME__"
+```
+
+Example manifest: [__EXAMPLE_MANIFEST_FILE_NAME__](__PATH_TO_EXAMPLE_MANIFEST__)
+
+__EXAMPLE_DESCRIPTION__
+        '''        
+        minimal_example_override = False
+        if 'additionalExamples' in self.spec:
+            for additional_example_data in self.spec['additionalExamples']:
+                example_text = copy.deepcopy(example_template)
+                example_name = additional_example_data['exampleName']
+                if example_name == 'minimal':
+                    minimal_example_override = True
+                example_file = variable_cache.get_value(
+                    variable_name='{}:example.{}.file'.format(self._var_name(), example_name),
+                    value_if_expired=None,
+                    raise_exception_on_expired=False,
+                    raise_exception_on_not_found=False,
+                    default_value_if_not_found=None,
+                    for_logging=False
+                )
+                if example_file is not None:
+                    example_text = example_text.replace('__EXAMPLE_NAME__', example_name)
+                    example_text = example_text.replace('__PATH_TO_EXAMPLE_MANIFEST__', example_file)
+                    example_text = example_text.replace('__EXAMPLE_MANIFEST_FILE_NAME__', example_file.split(os.sep)[-1])
+                    example_text = example_text.replace('__EXAMPLE_DESCRIPTION__', additional_example_data['explanatoryText'])
+                    examples_lines = '{}\n\n{}'.format(
+                        examples_lines,
+                        example_text
+                    )
+        if minimal_example_override is False:
+            example_text = copy.deepcopy(example_template)
+            example_name = 'minimal'
+            example_file = variable_cache.get_value(
+                variable_name='{}:example.minimal.file'.format(self._var_name(), example_name),
+                value_if_expired=None,
+                raise_exception_on_expired=False,
+                raise_exception_on_not_found=False,
+                default_value_if_not_found=None,
+                for_logging=False
+            )
+            if example_file is not None:
+                example_text = example_text.replace('__EXAMPLE_NAME__', example_name)
+                example_text = example_text.replace('__PATH_TO_EXAMPLE_MANIFEST__', example_file)
+                example_text = example_text.replace('__EXAMPLE_MANIFEST_FILE_NAME__', example_file.split(os.sep)[-1])
+                example_text = example_text.replace('__EXAMPLE_DESCRIPTION__', 'This is a simple minimal example for this manifest kind')
+                examples_lines = '{}\n\n{}'.format(
+                    examples_lines,
+                    example_text
+                )
+
+        data = data.replace('__PER_SCENARIO_EXAMPLE__', examples_lines)
 
 
-
-        # data = data.replace('__KIND__', self.spec['kind'])
-        # data = data.replace('__KIND__', self.spec['kind'])
-        # data = data.replace('__KIND__', self.spec['kind'])
-        # data = data.replace('__KIND__', self.spec['kind'])
-        
-
+        ###
+        ### DONE
+        ###
         self.log(message='         Writing data to target file: {}'.format(file_name), level='info')
         with open(file_name, 'w') as wf:
             wf.write(data)
@@ -811,9 +874,17 @@ class AnimusExtensionTemplate(ManifestBase):
         self.log(message='      ACTION: Deleting Documentation File: {}'.format(file_name), level='info')
         os.unlink(file_name)
 
-    def _action_create_example_file(self, file_name: str):
+    def _action_create_example_file(self, file_name: str, variable_cache: VariableCache=VariableCache()):
         example_name = file_name.split(os.sep)[-2]
         self.log(message='      ACTION: Creating Example "{}" File: {}'.format(example_name, file_name), level='info')
+        variable_cache.store_variable(
+            variable=Variable(
+                name='{}:example.{}.file'.format(self._var_name(), example_name),
+                initial_value=copy.deepcopy(file_name),
+                logger=self.logger
+            ),
+            overwrite_existing=True
+        )
 
         base_template_data = dict()
         base_template_data['kind'] = self.spec['kind']
@@ -920,25 +991,25 @@ class AnimusExtensionTemplate(ManifestBase):
         actions = copy.deepcopy(remaining_actions)
 
         ###
-        ### Prepare Documentation
-        ###
-        remaining_actions = list()
-        for action in actions:
-            for action_name, action_data in action.items():
-                if action_name == 'create_documentation_file':
-                    self._action_create_documentation_file(file_name=action_data)
-                else:
-                    remaining_actions.append(copy.deepcopy(action))
-        actions = copy.deepcopy(remaining_actions)
-
-        ###
         ### Prepare Example Manifest
         ###
         remaining_actions = list()
         for action in actions:
             for action_name, action_data in action.items():
                 if action_name == 'create_example_file':
-                    self._action_create_example_file(file_name=action_data)
+                    self._action_create_example_file(file_name=action_data, variable_cache=variable_cache)
+                else:
+                    remaining_actions.append(copy.deepcopy(action))
+        actions = copy.deepcopy(remaining_actions)
+
+        ###
+        ### Prepare Documentation
+        ###
+        remaining_actions = list()
+        for action in actions:
+            for action_name, action_data in action.items():
+                if action_name == 'create_documentation_file':
+                    self._action_create_documentation_file(file_name=action_data, variable_cache=variable_cache)
                 else:
                     remaining_actions.append(copy.deepcopy(action))
         actions = copy.deepcopy(remaining_actions)
