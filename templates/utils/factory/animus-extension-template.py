@@ -771,7 +771,26 @@ class AnimusExtensionTemplate(ManifestBase):
         data = data.replace('__EXTENSION_NAME__', self.metadata['name'])
         data = data.replace('__VERSION__', self.spec['version'])
 
-        
+        field_required_value_map = {
+            True: 'Yes',
+            False: 'No',
+        }
+        field_rows_text = ''
+        for field_data in self.spec['specFields']:
+            field_description = '{}'.format(field_data['fieldDescription'])
+            field_description = field_description.replace('\n', '')
+            field_description = field_description.replace('\r', '')
+            field_description = field_description.strip()
+
+            field_rows_text = '{}| `{}` | {} | {} | {} | {} |\n'.format(
+                field_rows_text,
+                field_data['fieldName'],
+                field_data['fieldType'],
+                field_required_value_map[field_data['fieldRequired']],
+                self.spec['version'],
+                field_description
+            )
+        data = data.replace('__TABLE_ROWS__', field_rows_text)
 
 
         # # Replace __PER_SCENARIO_EXAMPLE__ using template DOC_TEMPLATE_SCENARIO_EXAMPLE for each scenario
