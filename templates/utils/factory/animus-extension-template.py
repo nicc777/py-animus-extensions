@@ -813,6 +813,10 @@ export SCENARIO_NAME="__EXAMPLE_NAME__"
 
 Example manifest: [__EXAMPLE_MANIFEST_FILE_NAME__](__PATH_TO_EXAMPLE_MANIFEST__)
 
+```yaml
+___EXAMPLE_MANIFEST__
+```
+
 __EXAMPLE_DESCRIPTION__
         '''        
         minimal_example_override = False
@@ -835,6 +839,11 @@ __EXAMPLE_DESCRIPTION__
                     example_text = example_text.replace('__PATH_TO_EXAMPLE_MANIFEST__', example_file)
                     example_text = example_text.replace('__EXAMPLE_MANIFEST_FILE_NAME__', example_file.split(os.sep)[-1])
                     example_text = example_text.replace('__EXAMPLE_DESCRIPTION__', additional_example_data['explanatoryText'])
+                    if os.path.exists(example_file):
+                        with open(example_file, 'r') as exmf:
+                            example_text = example_text.replace('___EXAMPLE_MANIFEST__', exmf.read())
+                    else:
+                        example_text = example_text.replace('___EXAMPLE_MANIFEST__', '# NO EXAMPLE FILE FOUND...')
                     examples_lines = '{}\n\n{}'.format(
                         examples_lines,
                         example_text
@@ -855,6 +864,11 @@ __EXAMPLE_DESCRIPTION__
                 example_text = example_text.replace('__PATH_TO_EXAMPLE_MANIFEST__', example_file)
                 example_text = example_text.replace('__EXAMPLE_MANIFEST_FILE_NAME__', example_file.split(os.sep)[-1])
                 example_text = example_text.replace('__EXAMPLE_DESCRIPTION__', 'This is a simple minimal example for this manifest kind')
+                if os.path.exists(example_file):
+                    with open(example_file, 'r') as exmf:
+                        example_text = example_text.replace('___EXAMPLE_MANIFEST__', exmf.read())
+                else:
+                    example_text = example_text.replace('___EXAMPLE_MANIFEST__', '# NO EXAMPLE FILE FOUND...')
                 examples_lines = '{}\n\n{}'.format(
                     examples_lines,
                     example_text
