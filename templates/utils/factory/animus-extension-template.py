@@ -900,6 +900,8 @@ __EXAMPLE_DESCRIPTION__
             overwrite_existing=True
         )
 
+        # FIXME - Add kind name in example manifest path
+
         base_template_data = dict()
         base_template_data['kind'] = self.spec['kind']
         base_template_data['version'] = self.spec['version']
