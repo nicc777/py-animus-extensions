@@ -582,7 +582,7 @@ class AnimusExtensionTemplate(ManifestBase):
             )
 
         dirs = list()
-        examples_dir = '{}{}{}'.format(EXAMPLES_BASE_PATH,os.sep,self.metadata['name'])
+        examples_dir = '{}{}{}'.format(EXAMPLES_BASE_PATH, os.sep, self.metadata['name'])
         if 'outputPaths' in self.spec:
             if 'examples' in self.spec['outputPaths']:
                 examples_dir = self.spec['outputPaths']['examples']
@@ -899,8 +899,6 @@ __EXAMPLE_DESCRIPTION__
             ),
             overwrite_existing=True
         )
-
-        # FIXME - Add kind name in example manifest path
 
         base_template_data = dict()
         base_template_data['kind'] = self.spec['kind']
