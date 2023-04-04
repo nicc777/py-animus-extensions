@@ -3,8 +3,8 @@
 - [General Technical Guide](#general-technical-guide)
   - [Introduction](#introduction)
   - [Using py-animus to create the extension template](#using-py-animus-to-create-the-extension-template)
-    - [Create an extension template](#create-an-extension-template)
-    - [CReate the skeleton extension artifacts](#create-the-skeleton-extension-artifacts)
+    - [Create an extension manifest](#create-an-extension-manifest)
+    - [Create the skeleton extension artifacts](#create-the-skeleton-extension-artifacts)
     - [Update the implementation](#update-the-implementation)
     - [Test the Implementation](#test-the-implementation)
   - [Making your extension useful](#making-your-extension-useful)
@@ -67,13 +67,35 @@ What will happen when we use `py-animus` to _**delete**_ this manifest is the fo
 
 This repository includes some basic tools to create the necessary files to start the process of creating an extension.
 
-TODO - complete...
+The basic steps to create a new extensions is:
 
-### Create an extension template
+1. Create a template manifest
+2. the supplied tool in `templates/utils/factory/animus-extension-template.py` to create the initial extension files: source file, documentation and some example manifests
+3. Edit the generated files
 
-TODO
+### Create an extension manifest
 
-### CReate the skeleton extension artifacts
+To create extensions, the extension manifest of kind `AnimusExtensionTemplate` must be used.
+
+The extension manifest has the following fields:
+
+| Field                              | Type    | Required | In Versions | Description                                                                                                                                                                                                          |
+|------------------------------------|:-------:|:--------:|:-----------:|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `kind`                             | String  | Yes      | `v1`        | Must be `AnimusExtensionTemplate`                                                                                                                                                                                    |
+| `version`                          | String  | Yes      | `v1`        | Currently `v1` is the only option                                                                                                                                                                                    |
+| `metadata.name`                    | String  | Yes      | `v1`        | Name of the extension. A good practice is to include the version at the end of the file name, for example `create-text-file-v1`.                                                                                     |
+| `metadata.skipApplyAll`            | Boolean | No       | `v1`        | Probably never used in the context of `AnimusExtensionTemplate`                                                                                                                                                      |
+| `metadata.skipDeleteAll`           | Boolean | No       | `v1`        | Can be set to `true` once the extension skeleton has been created and it must be locked prevent deleting it. Keep value `false` while creating and testing the extension `AnimusExtensionTemplate` file.             |
+| `metadata.dependencies.apply`      | List    | No       | `v1`        | Probably never used in the context of `AnimusExtensionTemplate`                                                                                                                                                      |
+| `metadata.dependencies.delete`     | List    | No       | `v1`        | Probably never used in the context of `AnimusExtensionTemplate`                                                                                                                                                      |
+| `metadata.executeOnlyOnceOnApply`  | Boolean | No       | `v1`        | Always set to `true` in the context of `AnimusExtensionTemplate`                                                                                                                                                     |
+| `metadata.executeOnlyOnceOnDelete` | Boolean | No       | `v1`        | Always set to `true` in the context of `AnimusExtensionTemplate`                                                                                                                                                     |
+| `spec.<dict>`                      | Dict    | Yes      | `v1`        | Define the extension attributes in te spec                                                                                                                                                                           |
+| `spec.description`                 | String  | No       | `v1`        | If not set or when the value is `null`, will be converted to an empty string. A text description of the extension that will be put in the documentation text as well.                                                |
+
+
+
+### Create the skeleton extension artifacts
 
 TODO
 
