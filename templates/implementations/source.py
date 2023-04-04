@@ -1,6 +1,4 @@
-from py_animus.manifest_management import *
-from py_animus import get_logger
-import traceback
+__IMPORTS__
 
 
 class __KIND__(__BASE_CLASS__):

@@ -738,6 +738,18 @@ class AnimusExtensionTemplate(ManifestBase):
         with open(source_file, 'r') as rf:
             data = rf.read()
         self.log(message='         Performing variable substitutions', level='info')
+
+        imports_text = ''
+        import_statements = list()
+        if 'importStatements' not in self.spec:
+            import_statements = ['from py_animus.manifest_management import *', 'from py_animus import get_logger', 'import traceback',]
+        else:
+            import_statements = self.spec['importStatements']
+        for import_line in import_statements:
+            imports_text = '{}\n{}'.format(imports_text,import_line)
+        imports_text = '{}\n\n'.format(imports_text)
+
+        data = data.replace('__IMPORTS__', imports_text)
         data = data.replace('__KIND__', self.spec['kind'])
         data = data.replace('__BASE_CLASS__', self.spec['baseClass'])
         data = data.replace('__IMPLEMENTATION_DESCRIPTION__', self.spec['description'])
