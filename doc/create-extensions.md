@@ -115,6 +115,42 @@ The extension manifest has the following fields:
 | `spec.specFields.fieldSetDefaultValueConditions.[].fieldValueIsNull`                           | Boolean | No       | not-used-yet | If `false` and value is None, raise an exception, else use the default value. NOT CURRENTLY USED. The intention is to inject this into the source file to add the custom field validation functionality when the extension file is created.                                                                         |
 | `spec.specFields.customValidation`                                                             | String  | No       | not-used-yet | Optional Python code for custom field validation. NOT CURRENTLY USED. The intention is to inject this into the source file to add the custom field validation functionality when the extension file is created.                                                                                                     |
 
+Based on the above definition, a basic `AnimusExtensionTemplate` manifest for defining the extension `CreateTextFile` may look like this:
+
+```yaml
+---
+kind: AnimusExtensionTemplate
+version: v1
+metadata:
+  name: create-text-file-v1
+  skipDeleteAll: false          # Once the implementation is done, we can set this to `true`
+  executeOnlyOnceOnApply: true
+  executeOnlyOnceOnDelete: true
+spec:
+  description: Create/Update a text file with specified content
+  kind: CreateTextFile
+  version: v1
+  versionChangelog: |
+    This is the initial version
+  supportedVersions:
+  - 'v1'
+  outputPaths:              # If any of these are null/NoneType, the global defaults will be used (which is this repo)
+    doc: '/tmp/test-create-text-file-v1/doc'
+    examples: '/tmp/test-create-text-file-v1/ex'
+    implementations: '/tmp/test-create-text-file-v1/impl'
+  specFields:
+  - fieldName: outputFile
+    fieldDescription: The path to the output file that needs to contain the specified content.
+    fieldType: str
+    fieldRequired: true
+    fieldDefaultValue: null  
+  - fieldName: content
+    fieldDescription: The content of the file as a string. If omitted, an empty file will be created.
+    fieldType: str
+    fieldRequired: false
+    fieldDefaultValue: ''
+```
+
 ### Create the skeleton extension artifacts
 
 TODO
