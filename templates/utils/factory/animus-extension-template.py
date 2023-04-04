@@ -281,11 +281,9 @@ class AnimusExtensionTemplate(ManifestBase):
                 },
                 'fieldSetDefaultValueConditions': {
                     'default_val': [
-                        {
-                            'fieldDefinitionNotPresentInManifest': True,
-                            'fieldValueTypeMismatch': True,
-                            'fieldValueIsNull': True,
-                        },
+                        { 'fieldDefinitionNotPresentInManifest': True },
+                        { 'fieldValueTypeMismatch'             : True },
+                        { 'fieldValueIsNull'                   : True },
                     ],
                     'value_type': list,
                     'set_default_when_not_present': True,
