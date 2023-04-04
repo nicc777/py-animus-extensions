@@ -918,6 +918,7 @@ __EXAMPLE_DESCRIPTION__
         base_template_data['metadata']['name'] = '{}-{}'.format(self.metadata['name'], example_name)
         final_template_data = dict()
 
+        # FIXME When a field is required, but has no default value, set some possible value appropriate to the type.
         for example_data in self.spec['additionalExamples']:
             if example_data['exampleName'] == example_name:
                 self.log(message='         Processing Data for "{}"'.format(example_name), level='debug')
