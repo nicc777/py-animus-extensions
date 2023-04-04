@@ -151,9 +151,35 @@ spec:
     fieldDefaultValue: ''
 ```
 
+For using the example, save the file somewhere like `/tmp/templates/create-text-file-v1.yaml`
+
 ### Create the skeleton extension artifacts
 
-TODO
+For this part of the example, the assumption is that the terminal is open in the root directory of this cloned repository.
+
+To create the initial extension files, run the following command:
+
+```shell
+python3 templates/utils/factory/animus-extension-template.py \
+  apply -m /tmp/templates/create-text-file-v1.yaml \
+  -s $PWD/templates/utils/factory
+```
+
+After the command is run, the following files would be created:
+
+```shell
+tree /tmp/test-create-text-file-v1 
+/tmp/test-create-text-file-v1
+├── doc
+│   └── create-text-file-v1.md
+├── ex
+│   └── minimal
+│       └── example.yaml
+└── impl
+    └── create-text-file-v1.py
+
+4 directories, 3 files
+```
 
 ### Update the implementation
 
