@@ -137,6 +137,12 @@ spec:
     doc: '/tmp/test-create-text-file-v1/doc'
     examples: '/tmp/test-create-text-file-v1/ex'
     implementations: '/tmp/test-create-text-file-v1/impl'
+  importStatements:
+  - 'from py_animus.manifest_management import *'
+  - 'from py_animus import get_logger'
+  - 'import traceback'
+  - 'from pathlib import Path'
+  - 'import os'
   specFields:
   - fieldName: outputFile
     fieldDescription: The path to the output file that needs to contain the specified content.
