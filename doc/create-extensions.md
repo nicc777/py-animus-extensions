@@ -143,6 +143,7 @@ spec:
   - 'import traceback'
   - 'from pathlib import Path'
   - 'import os'
+  - 'import hashlib'
   specFields:
   - fieldName: outputFile
     fieldDescription: The path to the output file that needs to contain the specified content.
