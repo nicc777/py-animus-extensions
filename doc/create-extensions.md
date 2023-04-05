@@ -130,8 +130,7 @@ spec:
   description: Create/Update a text file with specified content
   kind: CreateTextFile
   version: v1
-  versionChangelog: |
-    This is the initial version
+  versionChangelog: This is the initial version
   supportedVersions:
   - 'v1'
   outputPaths:              # If any of these are null/NoneType, the global defaults will be used (which is this repo)
@@ -143,12 +142,21 @@ spec:
     fieldDescription: The path to the output file that needs to contain the specified content.
     fieldType: str
     fieldRequired: true
-    fieldDefaultValue: null  
+    fieldDefaultValue: null
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: false
+    - fieldValueTypeMismatch: false
+    - fieldValueIsNull: false
   - fieldName: content
     fieldDescription: The content of the file as a string. If omitted, an empty file will be created.
     fieldType: str
     fieldRequired: false
     fieldDefaultValue: ''
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+
 ```
 
 For using the example, save the file somewhere like `/tmp/templates/create-text-file-v1.yaml`
@@ -181,9 +189,25 @@ tree /tmp/test-create-text-file-v1
 4 directories, 3 files
 ```
 
+There is a process of refining the manifest in `/tmp/templates/create-text-file-v1.yaml` and each time a refinement needs to be done, go through the following process:
+
+* Run the `apply` command
+* Inspect and verify result
+* Modify source Manifest
+* Run the `delete` command and start again until everything is just right
+
+> **Note**
+> AT some point in a future release of [py-animus](https://github.com/nicc777/py-animus) there will also be some kind of version control on the source manifest to detect changes and assist in the decision to apply changes. At the moment this is all still in the hands of the user.
+
 ### Update the implementation
 
-TODO
+The generated source files now needs to be updated.
+
+In this example, the following shows the final code for `/tmp/test-create-text-file-v1/impl/create-text-file-v1.py` generated after the `apply` command:
+
+```python
+# TODO
+```
 
 ### Test the Implementation
 
