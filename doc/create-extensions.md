@@ -272,7 +272,7 @@ class CreateTextFile(ManifestBase):
 
 #### The `apply_manifest()` method
 
-
+If it is determined by `implemented_manifest_differ_from_this_manifest()` that the file must be created, any potential previous file is first deleted, and then the content is written to the file as defined in the manifest.
 
 ```python
 class CreateTextFile(ManifestBase):
@@ -298,6 +298,8 @@ class CreateTextFile(ManifestBase):
 ```
 
 #### The `delete_manifest()` method
+
+The delete method is fairly straight forward by just deleting the file as specified in the manifest if it already exists
 
 ```python
 class CreateTextFile(ManifestBase):
