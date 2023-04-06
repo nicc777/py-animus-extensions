@@ -249,7 +249,7 @@ class CreateTextFile(ManifestBase):
             if f.is_file() is True:
                 file_hash = hashlib.sha256()
                 with open(self.spec['outputFile'], 'r') as of:
-                    while chunk := f.read(8192):
+                    while chunk := of.read(8192):
                         file_hash.update(chunk.encode('utf-8'))
                 file_content_checksum = file_hash.hexdigest()
         else:
@@ -323,7 +323,58 @@ class CreateTextFile(ManifestBase):
 
 ### Test the Implementation
 
-TODO
+To test the manifest, edit the created minimal example in `/tmp/test-create-text-file-v1/ex/minimal/example.yaml` to have the following content:
+
+```yaml
+---
+kind: CreateTextFile
+version: v1
+metadata:
+  name: create-text-file-v1-minimal
+spec:
+  outputFile: /tmp/minimal-test.txt
+  content: 'Hello World'
+```
+
+Apply the manifest and run some tests to see that it worked:
+
+```shell
+# Prepare our output directory
+mkdir mkdir /tmp/output  
+
+# Make sure the output file does not exist:
+rm -vf /tmp/output/minimal-test.txt
+
+# Apply the manifest
+docker run --rm -e "DEBUG=1" -it \
+  -v /tmp/test-create-text-file-v1/impl:/tmp/src \
+  -v /tmp/test-create-text-file-v1/ex/minimal:/tmp/data \
+  -v /tmp/output:/tmp/output \
+  ghcr.io/nicc777/py-animus:latest apply -m /tmp/data/example.yaml -s /tmp/src 
+
+# Test:
+cat /tmp/output/minimal-test.txt
+# EXPECT: Hello World
+```
+
+For the next test, run again - no changes should be made and the file should still be there with the original content
+
+Also test changes by updating the content and replace `hello world` with `Hello Mars`. When the content of the file is now inspected, the content must be observed.
+
+Next, make sure the delete functionality also works:
+
+```shell
+docker run --rm -e "DEBUG=1" -it \
+  -v /tmp/test-create-text-file-v1/impl:/tmp/src \
+  -v /tmp/test-create-text-file-v1/ex/minimal:/tmp/data \
+  -v /tmp/output:/tmp/output \
+  ghcr.io/nicc777/py-animus:latest delete -m /tmp/data/example.yaml -s /tmp/src 
+
+cat /tmp/output/minimal-test.txt
+# EXPECT cat: /tmp/output/minimal-test.txt: No such file or directory
+```
+
+The output file should no longer be on the filesystem:
 
 ## Making your extension useful 
 
