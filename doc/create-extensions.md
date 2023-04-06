@@ -272,6 +272,8 @@ class CreateTextFile(ManifestBase):
 
 #### The `apply_manifest()` method
 
+
+
 ```python
 class CreateTextFile(ManifestBase):
     
@@ -279,9 +281,7 @@ class CreateTextFile(ManifestBase):
 
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False):
         self.log(message='APPLY CALLED', level='info')
-        variable_cache.store_variable(variable=Variable(name='{}:executed'.format(self.metadata['name']),initial_value=True,logger=self.logger),overwrite_existing=True)
         variable_cache.store_variable(variable=Variable(name='{}:error'.format(self.metadata['name']),initial_value=False,logger=self.logger),overwrite_existing=True)
-        
         if self.implemented_manifest_differ_from_this_manifest(manifest_lookup_function=manifest_lookup_function, variable_cache=variable_cache) is True:
             # First, remove the current file
             self.delete_manifest(manifest_lookup_function=manifest_lookup_function, variable_cache=variable_cache)
@@ -293,6 +293,7 @@ class CreateTextFile(ManifestBase):
             except:
                 self.log(message='Failed to create file "{}". EXCEPTION: {}'.format(self.spec['outputFile'], traceback.format_exc()), level='error')
                 variable_cache.store_variable(variable=Variable(name='{}:error'.format(self.metadata['name']),initial_value=True,logger=self.logger),overwrite_existing=True)
+        variable_cache.store_variable(variable=Variable(name='{}:executed'.format(self.metadata['name']),initial_value=True,logger=self.logger),overwrite_existing=True)
         return 
 ```
 
