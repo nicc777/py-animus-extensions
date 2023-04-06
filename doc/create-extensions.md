@@ -290,6 +290,7 @@ class CreateTextFile(ManifestBase):
             try:
                 with open(self.spec['outputFile'], 'w') as f:
                     f.write(self.spec['content'])
+                self.log(message='Created file "{}"'.format(self.spec['outputFile']), level='info')
             except:
                 self.log(message='Failed to create file "{}". EXCEPTION: {}'.format(self.spec['outputFile'], traceback.format_exc()), level='error')
                 variable_cache.store_variable(variable=Variable(name='{}:error'.format(self.metadata['name']),initial_value=True,logger=self.logger),overwrite_existing=True)
