@@ -2,6 +2,7 @@
     "cSpell.words": [
         "exmf",
         "getpass",
+        "hexdigest",
         "pathlib",
         "shabang",
         "traceback"
