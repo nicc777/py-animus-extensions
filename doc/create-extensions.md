@@ -217,6 +217,12 @@ In this example, the following shows the final code for `/tmp/test-create-text-f
 
 #### The `implemented_manifest_differ_from_this_manifest()` method
 
+For this example, the change detection logic will go through the following steps:
+
+1. If any of the checks has already been done, just return (no further check required). This is done by checking if any old variables from a previous run exists.
+2. Next, check if the file exists. If it does exist, load the content and calculate the checksum.
+3. Finally, set variable values.
+
 ```python
 class CreateTextFile(ManifestBase):
     
@@ -323,7 +329,7 @@ class CreateTextFile(ManifestBase):
 class CreateTextFile(ManifestBase):
     
     # Some lines omitted
-    
+
     def delete_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False):
         self.log(message='DELETE CALLED', level='info')
         self.implemented_manifest_differ_from_this_manifest(manifest_lookup_function=manifest_lookup_function, variable_cache=variable_cache)
