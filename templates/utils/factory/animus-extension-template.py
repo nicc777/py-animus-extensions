@@ -928,10 +928,14 @@ __EXAMPLE_DESCRIPTION__
                 template_data = copy.deepcopy(base_template_data)
                 if generated is True:
                     for spec_field in self.spec['specFields']:
-                        if spec_field['fieldDefaultValue'] is not None:
+                        if spec_field['fieldDefaultValue'] is not None and spec_field['fieldRequired'] is True:
                             if 'spec' not in template_data:
                                 template_data['spec'] = dict()
                             template_data['spec'][spec_field['fieldName']] = spec_field['fieldDefaultValue']
+                        elif spec_field['fieldDefaultValue'] is None and spec_field['fieldRequired'] is True:
+                            if 'spec' not in template_data:
+                                template_data['spec'] = dict()
+                            template_data['spec'][spec_field['fieldName']] = 'a-value-of-type-{}'.format(spec_field['fieldType'])
                 if 'specData' in example_data['manifest']:
                     spec_data_as_dict = parse_raw_yaml_data(yaml_data=example_data['manifest']['specData'], logger=self.logger)
                     if spec_data_as_dict is not None:
