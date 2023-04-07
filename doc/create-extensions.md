@@ -11,6 +11,7 @@
       - [The `delete_manifest()` method](#the-delete_manifest-method)
     - [Test the Implementation](#test-the-implementation)
   - [Making your extension useful](#making-your-extension-useful)
+    - [Adding an example](#adding-an-example)
 - [Publishing Extensions](#publishing-extensions)
 
 
@@ -379,7 +380,39 @@ The output file should no longer be on the filesystem:
 
 ## Making your extension useful 
 
-TODO <!-- This will include how to document the extension and prepare examples  -->
+After the code changes have been made, the final steps include:
+
+* Adding examples as needed, via the manifest
+* Updating the documentation
+* Final testing and finally publishing
+
+### Adding an example
+
+Update the `/tmp/templates/create-text-file-v1.yaml` template to include additional examples (append at the end of the spec):
+
+```yaml
+# Header lines omitted
+spec:
+  # ... previous line omitted...
+  additionalExamples:
+  - exampleName: hello-world
+    manifest:
+      generated: false 
+      specData: |
+        outputFile: /tmp/output/custom-example-output.txt
+        content: |
+          Hello Venus
+      additionalMetadata: |
+        skipDeleteAll: true
+    explanatoryText: |
+      This is another example that could be used straight out of the box.
+
+      After applying the manifest the output file should contain the text `Hello Venus`. You can test with the following command:
+
+      ```shell
+      cat /tmp/output/custom-example-output.txt
+      ```
+```
 
 # Publishing Extensions
 

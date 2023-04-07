@@ -672,8 +672,12 @@ class AnimusExtensionTemplate(ManifestBase):
                                 command=command,
                                 action_command=action_command
                             )
+                        variable_cache.store_variable(
+                            variable=Variable(name='{}:example.{}.file'.format(self._var_name(), value), initial_value=copy.deepcopy(file_name), logger=self.logger), overwrite_existing=True)
         else:
             self.log(message='No additionalExamples found in spec (1)', level='warning')
+        variable_cache.store_variable(
+            variable=Variable(name='{}:example.minimal.file'.format(self._var_name()), initial_value=copy.deepcopy(file_name), logger=self.logger), overwrite_existing=False)
 
         file_name = self._determine_output_filename(file_name_no_extension='example', base_dir=examples_dir, component='examples', output_file_extension='yaml', additional_sub_dir='minimal')
         action_command = 'no-action'
@@ -835,8 +839,10 @@ __EXAMPLE_DESCRIPTION__
             for additional_example_data in self.spec['additionalExamples']:
                 example_text = copy.deepcopy(example_template)
                 example_name = additional_example_data['exampleName']
+                self.log(message='            Processing example named: {}'.format(example_name), level='info')
                 if example_name == 'minimal':
                     minimal_example_override = True
+                    self.log(message='               Minimal example will be used from Manifest definition', level='info')
                 example_file = variable_cache.get_value(
                     variable_name='{}:example.{}.file'.format(self._var_name(), example_name),
                     value_if_expired=None,
@@ -845,6 +851,7 @@ __EXAMPLE_DESCRIPTION__
                     default_value_if_not_found=None,
                     for_logging=False
                 )
+                self.log(message='               example_file={}'.format(example_file), level='info')
                 if example_file is not None:
                     example_text = example_text.replace('__EXAMPLE_NAME__', example_name)
                     example_text = example_text.replace('__PATH_TO_EXAMPLE_MANIFEST__', example_file)
@@ -859,6 +866,7 @@ __EXAMPLE_DESCRIPTION__
                         examples_lines,
                         example_text
                     )
+                    self.log(message='               len(examples_lines)={}'.format(len(examples_lines)), level='info')
         if minimal_example_override is False:
             example_text = copy.deepcopy(example_template)
             example_name = 'minimal'
