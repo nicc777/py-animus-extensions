@@ -27,6 +27,12 @@ mkdir -p /tmp/templates/ && \
   mkdir -p /tmp/test-create-text-file-v1/doc && \
   mkdir -p /tmp/test-create-text-file-v1/impl && \
   mkdir -p /tmp/test-create-text-file-v1/ex
+
+tree /tmp/test-create-text-file-v1
+# /tmp/test-create-text-file-v1
+# ├── doc
+# ├── ex
+# └── impl
 ```
 
 For this example, ensure the file `/tmp/templates/create-text-file-v1.yaml` contains the following content:
@@ -96,3 +102,61 @@ spec:
       cat /tmp/output/custom-example-output.txt
       ```
 ```
+
+As pre-requisite the [py-animus-extensions](https://github.com/nicc777/py-animus-extensions) repository must be cloned. For this example, it is assumed that the current working directory (`$PWD`) is the root of this repository.
+
+It is highly recommended to create a Python virtual environment and install the requirements:
+
+```shell
+# Assuming your $PWD is the root of the local clone of the py-animus-extensions github repository 
+python3 -m venv venv
+. venv/bin/activate
+pip3 install -r requirements.txt
+```
+
+Now, the bare-bones extension can be created with the command:
+
+```shell
+python3 templates/utils/factory/animus-extension-template.py apply -m /tmp/templates/create-text-file-v1.yaml -s $PWD/templates/utils/factory
+```
+
+After running this command, you should now have the following:
+
+```shell
+tree /tmp/test-create-text-file-v1 
+# /tmp/test-create-text-file-v1
+# ├── doc
+# │   └── create-text-file-v1.md
+# ├── ex
+# │   ├── hello-world
+# │   │   └── example.yaml
+# │   └── minimal
+# │       └── example.yaml
+# └── impl
+#     └── create-text-file-v1.py
+```
+
+The skeleton will already work, but it just wont do anything yet:
+
+```shell
+docker run --rm -e "DEBUG=0" -it \
+  -v /tmp/test-create-text-file-v1/impl:/tmp/src \
+  -v /tmp/test-create-text-file-v1/ex/hello-world:/tmp/data \
+  -v /tmp/output:/tmp/output \
+  ghcr.io/nicc777/py-animus:latest apply -m /tmp/data/example.yaml -s /tmp/src
+```
+
+You should see the following log on _**STDOUT**_:
+
+```text
+2023-04-08 10:16:23,623 INFO - ok
+2023-04-08 10:16:23,626 INFO - Returning CLI Argument Parser
+2023-04-08 10:16:23,628 INFO - Registered class kind "CreateTextFile" version "v1" supporting also versions "['v1']" of manifests
+2023-04-08 10:16:23,628 INFO - Registered classes: {"CreateTextFile": {"versions": ["v1"]}}
+2023-04-08 10:16:23,629 INFO - [CreateTextFile:not-yet-known:v1] Manifest version "v1" found in class supported versions
+2023-04-08 10:16:23,629 INFO - ManifestManager:parse_manifest(): NO direct dependency circular reference detected for manifest named "create-text-file-v1-hello-world"
+2023-04-08 10:16:23,629 INFO - ManifestManager:parse_manifest(): Stored parsed manifest instance "create-text-file-v1-hello-world:v1:18c74b5df340972e726d4e273a0d2a7245531fbd23448c92dd50d63644044f89"
+2023-04-08 10:16:23,629 INFO - Applying manifest named "create-text-file-v1-hello-world:v1:18c74b5df340972e726d4e273a0d2a7245531fbd23448c92dd50d63644044f89"
+2023-04-08 10:16:23,629 INFO - [CreateTextFile:create-text-file-v1-hello-world:v1] APPLY CALLED
+```
+
