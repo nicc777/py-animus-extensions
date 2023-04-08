@@ -205,5 +205,20 @@ cat /tmp/output/custom-example-output.txt
 > **Note** 
 > The file may be owned by `root` depending on your setup with Docker
 
+To test the delete function, run:
 
+```shell
+docker run --rm -e "DEBUG=0" -it \
+  -v /tmp/test-create-text-file-v1/impl:/tmp/src \
+  -v /tmp/test-create-text-file-v1/ex/hello-world:/tmp/data \
+  -v /tmp/output:/tmp/output \
+  ghcr.io/nicc777/py-animus:latest delete -m /tmp/data/example.yaml -s /tmp/src
+```
 
+Note the following log entry:
+
+```text
+2023-04-08 10:29:24,395 WARNING - ManifestManager:delete_manifest(): Manifest named "create-text-file-v1-hello-world" skipped because of skipDeleteAll setting
+```
+
+Because the default behavior for the `py-animus` command is to run `delete all`, the content in the file was preserved because of the `skipDeleteAll: false` setting in the `/tmp/test-create-text-file-v1/ex/hello-world/example.yaml` manifest.
