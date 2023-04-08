@@ -18,6 +18,7 @@ The key directories and files will be as follow:
 | `/tmp/test-create-text-file-v1/doc`       | Directory | The directory base for our private extension documentation                                            |
 | `/tmp/test-create-text-file-v1/impl`      | Directory | The directory for our private extension implementations                                               |
 | `/tmp/test-create-text-file-v1/ex`        | Directory | The directory for our examples for private extensions                                                 |
+| `/tmp/output`                             | Directory | Where generated output will be saved in files when the extension is tested                            |
 
 Make sure all the directories and files are created:
 
@@ -26,7 +27,8 @@ mkdir -p /tmp/templates/ && \
   touch /tmp/templates/create-text-file-v1.yaml && \
   mkdir -p /tmp/test-create-text-file-v1/doc && \
   mkdir -p /tmp/test-create-text-file-v1/impl && \
-  mkdir -p /tmp/test-create-text-file-v1/ex
+  mkdir -p /tmp/test-create-text-file-v1/ex && \
+  mkdir -p /tmp/output
 
 tree /tmp/test-create-text-file-v1
 # /tmp/test-create-text-file-v1
@@ -159,4 +161,49 @@ You should see the following log on _**STDOUT**_:
 2023-04-08 10:16:23,629 INFO - Applying manifest named "create-text-file-v1-hello-world:v1:18c74b5df340972e726d4e273a0d2a7245531fbd23448c92dd50d63644044f89"
 2023-04-08 10:16:23,629 INFO - [CreateTextFile:create-text-file-v1-hello-world:v1] APPLY CALLED
 ```
+
+You can now add the method code as described in the [main extensions documentation](./create-extensions.md).
+
+Assuming you are applying the `hello-world` example (file `/tmp/test-create-text-file-v1/ex/hello-world/example.yaml`), the following manifest will be applied:
+
+```yaml
+kind: CreateTextFile
+version: v1
+metadata:
+  name: create-text-file-v1-hello-world
+  skipDeleteAll: true
+spec:
+  content: 'Hello Venus
+
+    '
+  outputFile: /tmp/output/custom-example-output.txt
+```
+
+> **Note**
+> The exact file content may differ slightly
+
+The expectation for testing this example therefore is that the text file `/tmp/output/custom-example-output.txt` will be created containing the text `Hello Venus`. To test this, run:
+
+```shell
+docker run --rm -e "DEBUG=0" -it \
+  -v /tmp/test-create-text-file-v1/impl:/tmp/src \
+  -v /tmp/test-create-text-file-v1/ex/hello-world:/tmp/data \
+  -v /tmp/output:/tmp/output \
+  ghcr.io/nicc777/py-animus:latest apply -m /tmp/data/example.yaml -s /tmp/src
+```
+
+Verify:
+
+```shell
+ls -lahrt /tmp/output/custom-example-output.txt 
+# -rw-r--r-- 1 root root 12 Apr  8 12:26 /tmp/output/custom-example-output.txt
+
+cat /tmp/output/custom-example-output.txt
+# Hello Venus
+```
+
+> **Note** 
+> The file may be owned by `root` depending on your setup with Docker
+
+
 
