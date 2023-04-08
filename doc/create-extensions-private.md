@@ -225,3 +225,7 @@ Because the default behavior for the `py-animus` command is to run `delete all`,
 
 > **Note**
 > The `skipDeleteAll: false` setting in any manifest is a good way to prevent any accidental deletion of resources. If you look at the extension manifest, the value is actually set to `false` and once you have added code and edited your documentation, it is highly recommended setting this value to `true` to avoid accidental deletion of your extension code and other edits.
+
+Update the file `/tmp/templates/create-text-file-v1.yaml` and set `skipDeleteAll: true` in the manifest. The extension will now not be deleted by `py-animus`.
+
+At this point you have a working implementation and you can now create any text file with content by manifest definition.
