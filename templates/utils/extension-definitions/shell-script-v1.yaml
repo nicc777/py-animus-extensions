@@ -35,6 +35,7 @@ spec:
   - 'from py_animus import get_logger'
   - 'import traceback'
   - 'from pathlib import Path'
+  - 'import subprocess'
   specFields:
   - fieldName: shellInterpreter
     fieldDescription: |
@@ -96,6 +97,17 @@ spec:
         script_file = Path(self.spec['source']['value'])
         if script_file.is_file() is False:
             raise Exception('Expected file "{}" to exist'.format(self.spec['source']['value']))
+  - fieldName: workDir.path
+    fieldDescription: |
+      An optional path to a working directory. The extension will create 
+      temporary files (if needed) in this directory and execute them from here.
+    fieldType: str
+    fieldRequired: false
+    fieldDefaultValue: '/tmp/py-animus-shell-script-workdir'
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
   additionalExamples:
   - exampleName: minimal  # This will also be used to compile the the value of metadata.name
     manifest:
