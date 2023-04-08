@@ -841,6 +841,8 @@ __EXAMPLE_DESCRIPTION__
                 if example_name == 'minimal':
                     minimal_example_override = True
                     self.log(message='               Minimal example will be used from Manifest definition', level='info')
+                    var_name = '{}:example.{}.file'.format(self._var_name(), example_name)
+                    self.log(message='                  Looking up variable "{}"'.format(var_name), level='info')
                 example_file = variable_cache.get_value(
                     variable_name='{}:example.{}.file'.format(self._var_name(), example_name),
                     value_if_expired=None,
