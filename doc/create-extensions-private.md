@@ -221,4 +221,7 @@ Note the following log entry:
 2023-04-08 10:29:24,395 WARNING - ManifestManager:delete_manifest(): Manifest named "create-text-file-v1-hello-world" skipped because of skipDeleteAll setting
 ```
 
-Because the default behavior for the `py-animus` command is to run `delete all`, the content in the file was preserved because of the `skipDeleteAll: false` setting in the `/tmp/test-create-text-file-v1/ex/hello-world/example.yaml` manifest.
+Because the default behavior for the `py-animus` command is to run `delete all`, the content in the file was preserved because of the `skipDeleteAll: false` setting in the `/tmp/test-create-text-file-v1/ex/hello-world/example.yaml` manifest. To actually delete the output file, remove or comment out that line in the manifest and run the `delete` command again. The output file should now be deleted.
+
+> **Note**
+> The `skipDeleteAll: false` setting in any manifest is a good way to prevent any accidental deletion of resources. If you look at the extension manifest, the value is actually set to `false` and once you have added code and edited your documentation, it is highly recommended setting this value to `true` to avoid accidental deletion of your extension code and other edits.
