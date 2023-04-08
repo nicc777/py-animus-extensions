@@ -672,12 +672,10 @@ class AnimusExtensionTemplate(ManifestBase):
                                 command=command,
                                 action_command=action_command
                             )
-                        variable_cache.store_variable(
-                            variable=Variable(name='{}:example.{}.file'.format(self._var_name(), value), initial_value=copy.deepcopy(file_name), logger=self.logger), overwrite_existing=True)
+                        variable_cache.store_variable(variable=Variable(name='{}:example.{}.file'.format(self._var_name(), value), initial_value=copy.deepcopy(file_name), logger=self.logger), overwrite_existing=True)
         else:
             self.log(message='No additionalExamples found in spec (1)', level='warning')
-        variable_cache.store_variable(
-            variable=Variable(name='{}:example.minimal.file'.format(self._var_name()), initial_value=copy.deepcopy(file_name), logger=self.logger), overwrite_existing=False)
+        variable_cache.store_variable(variable=Variable(name='{}:example.minimal.file'.format(self._var_name()), initial_value=copy.deepcopy(file_name), logger=self.logger), overwrite_existing=True)
 
         file_name = self._determine_output_filename(file_name_no_extension='example', base_dir=examples_dir, component='examples', output_file_extension='yaml', additional_sub_dir='minimal')
         action_command = 'no-action'
