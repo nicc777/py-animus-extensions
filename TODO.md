@@ -1,8 +1,11 @@
 # Features To Implement
 
-| Feature                                  | Description                                                                           |
-|------------------------------------------|---------------------------------------------------------------------------------------|
-| * [ ] `spec.specFields.customValidation` | Include custom validation code in the template when creating the source file skeleton |
+| Feature                                                 | Issue           | Description                                                                           |
+|---------------------------------------------------------|-----------------|---------------------------------------------------------------------------------------|
+| `spec.specFields.customValidation`                      | Not yet created | Include custom validation code in the template when creating the source file skeleton |
+| `spec.specFields.fieldSetDefaultValueConditions` fields | Not yet created | Add validation logic                                                                  |
+| `spec.pipRequirements` logic                            | Not yet created | Handle specific external Python requirements                                          |
+
 
 # Upcoming or Planned Extensions
 
