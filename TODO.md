@@ -1,3 +1,9 @@
+# Features To Implement
+
+| Feature                                  | Description                                                                           |
+|------------------------------------------|---------------------------------------------------------------------------------------|
+| * [ ] `spec.specFields.customValidation` | Include custom validation code in the template when creating the source file skeleton |
+
 # Upcoming or Planned Extensions
 
 | Name/Kind                              | Description                                                                                                                                       | Status  |
