@@ -1,8 +1,11 @@
 {
     "cSpell.words": [
+        "Boto",
+        "Creds",
         "exmf",
         "getpass",
         "hexdigest",
+        "Kubeconfig",
         "pathlib",
         "shabang",
         "traceback"

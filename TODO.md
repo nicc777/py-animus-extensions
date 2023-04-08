@@ -40,7 +40,7 @@
 
 Notes:
 
-* #2 - Plan to have a `metadata.notify` field that points to kind `Notify` which in turn can send messages to various messaging end-points. The idea is multiple messaging end-points and audiences are defined in `Notify` depeding on events. Recipients are linked via various `Notification*Recipients` kinds.
+* #2 - Plan to have a `metadata.notify` field that points to kind `Notify` which in turn can send messages to various messaging end-points. The idea is multiple messaging end-points and audiences are defined in `Notify` depending on events. Recipients are linked via various `Notification*Recipients` kinds.
 
 Planned Docker Kinds (#1):
 
