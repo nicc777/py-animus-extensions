@@ -672,9 +672,10 @@ class AnimusExtensionTemplate(ManifestBase):
                                 command=command,
                                 action_command=action_command
                             )
-                        variable_cache.store_variable(variable=Variable(name='{}:example.{}.file'.format(self._var_name(), value), initial_value=copy.deepcopy(file_name), logger=self.logger), overwrite_existing=True)
+                            variable_cache.store_variable(variable=Variable(name='{}:example.{}.file'.format(self._var_name(), value), initial_value=copy.deepcopy(file_name), logger=self.logger), overwrite_existing=True)
         else:
             self.log(message='No additionalExamples found in spec (1)', level='warning')
+        file_name = self._determine_output_filename(file_name_no_extension='example', base_dir=examples_dir, component='examples', output_file_extension='yaml', additional_sub_dir='minimal')
         variable_cache.store_variable(variable=Variable(name='{}:example.minimal.file'.format(self._var_name()), initial_value=copy.deepcopy(file_name), logger=self.logger), overwrite_existing=True)
 
         file_name = self._determine_output_filename(file_name_no_extension='example', base_dir=examples_dir, component='examples', output_file_extension='yaml', additional_sub_dir='minimal')
@@ -766,6 +767,7 @@ class AnimusExtensionTemplate(ManifestBase):
 
     def _action_create_documentation_file(self, file_name: str, variable_cache: VariableCache=VariableCache()):
         self.log(message='      ACTION: Creating Documentation File: {}'.format(file_name), level='info')
+        self.log(message='         variable_cache as JSON: {}'.format(json.dumps(variable_cache.to_dict())), level='info')
         my_path = inspect.getfile(self.__class__)
         self.log(message='         Running from file: {}'.format(my_path), level='debug')
         source_file = os.sep.join(my_path.split(os.sep)[0:10])
