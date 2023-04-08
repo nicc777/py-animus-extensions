@@ -541,7 +541,7 @@ class AnimusExtensionTemplate(ManifestBase):
             else:
                 self.log(message='Default {} output file used (2) - file_name="{}"'.format(component, file_name), level='info')
         else:
-            self.log(message='Default {}} output file used (1) - file_name="{}"'.format(component, file_name), level='info')
+            self.log(message='Default {} output file used (1) - file_name="{}"'.format(component, file_name), level='info')
         return file_name
 
     def implemented_manifest_differ_from_this_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache())->bool:
