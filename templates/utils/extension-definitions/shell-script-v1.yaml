@@ -85,7 +85,7 @@ spec:
   - fieldName: source.value
     fieldDescription: |
       If `spec.source.type` has a value of `inLine` then the value here will be 
-      assumed to be the script content of that type. if `spec.source.type` has a value
+      assumed to be the script content of that type. if `spec.source.type` has a value 
       of `filePath` then this value must point to an existing file on the local filesystem
     fieldType: str
     fieldRequired: false
