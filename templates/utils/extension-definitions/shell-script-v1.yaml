@@ -3,7 +3,7 @@ kind: AnimusExtensionTemplate
 version: v1
 metadata:
   name: shell-script-v1
-  skipDeleteAll: false          # TODO: Once the implementation is done, we can set this to `true`
+  skipDeleteAll: true
   executeOnlyOnceOnApply: true
   executeOnlyOnceOnDelete: true
 spec:
