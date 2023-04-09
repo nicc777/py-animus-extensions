@@ -3,5 +3,7 @@ metadata:
   name: shell-script-v1-minimal
   skipDeleteAll: true
 spec:
-  source: a-value-of-type-dict
+  source:
+    type: inline
+    value: echo "not yet fully implemented"
 version: v1

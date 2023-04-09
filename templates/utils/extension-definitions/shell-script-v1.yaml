@@ -57,7 +57,9 @@ spec:
       Defines the script source
     fieldType: dict
     fieldRequired: true
-    fieldDefaultValue: null
+    fieldDefaultValue:
+      type: inline
+      value: echo "not yet fully implemented"
     fieldSetDefaultValueConditions:
     - fieldDefinitionNotPresentInManifest: false
     - fieldValueTypeMismatch: false

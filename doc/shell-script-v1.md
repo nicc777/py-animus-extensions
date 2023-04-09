@@ -21,13 +21,13 @@ export EXTENSION_NAME="shell-script-v1"
 
 # Spec fields
 
-| Field | Type    | Required | In Versions | Description  |
-|-------|:-------:|:--------:|:-----------:|--------------|
-| `shellInterpreter` | str | No | v1 | The shell interpreter to select in the shabang line. Supported values: `sh`, `zsh`, `perl`, `python` and `bash` |
-| `source` | dict | Yes | v1 | Defines the script source |
-| `source.type` | str | No | v1 | Select the source type, which can be either `filePath` that points to an existing script file on the local file system, or `inLine` with the script source defined in the `spec.source.value` field |
-| `source.value` | str | No | v1 | If `spec.source.type` has a value of `inLine` then the value here will be assumed to be the script content of that type. if `spec.source.type` has a valueof `filePath` then this value must point to an existing file on the local filesystem |
-| `workDir.path` | str | No | v1 | An optional path to a working directory. The extension will create temporary files (if needed) in this directory and execute them from here. |
+| Field              | Type  | Required | In Versions | Description                                                                                                                                                                                                                                    |
+| ------------------ | :---: | :------: | :---------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `shellInterpreter` |  str  |    No    |     v1      | The shell interpreter to select in the shabang line. Supported values: `sh`, `zsh`, `perl`, `python` and `bash`                                                                                                                                |
+| `source`           | dict  |   Yes    |     v1      | Defines the script source                                                                                                                                                                                                                      |
+| `source.type`      |  str  |    No    |     v1      | Select the source type, which can be either `filePath` that points to an existing script file on the local file system, or `inLine` with the script source defined in the `spec.source.value` field                                            |
+| `source.value`     |  str  |    No    |     v1      | If `spec.source.type` has a value of `inLine` then the value here will be assumed to be the script content of that type. if `spec.source.type` has a valueof `filePath` then this value must point to an existing file on the local filesystem |
+| `workDir.path`     |  str  |    No    |     v1      | An optional path to a working directory. The extension will create temporary files (if needed) in this directory and execute them from here.                                                                                                   |
 
 
 # Example Usages
@@ -65,7 +65,9 @@ metadata:
   name: shell-script-v1-minimal
   skipDeleteAll: true
 spec:
-  source: a-value-of-type-dict
+  source:
+    type: inline
+    value: echo "not yet fully implemented"
 version: v1
 
 ```
