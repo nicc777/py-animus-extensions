@@ -111,6 +111,17 @@ spec:
     - fieldDefinitionNotPresentInManifest: true
     - fieldValueTypeMismatch: true
     - fieldValueIsNull: true
+  - fieldName: convertOutputToText
+    fieldDescription: |
+      Normally the STDOUT and STDERR will be binary encoded. Setting this value to 
+      true will convert those values to a normal string.
+    fieldType: bool
+    fieldRequired: false
+    fieldDefaultValue: false
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
   additionalExamples:
   - exampleName: minimal  # This will also be used to compile the the value of metadata.name
     manifest:
