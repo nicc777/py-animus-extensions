@@ -127,7 +127,7 @@ variable name
         ###
         result = None
         try:
-            os.chmod(work_file, 700)
+            os.chmod(work_file, 0o700)
             result = subprocess.run('{}'.format(work_file), check=True, capture_output=True)   # Returns CompletedProcess
         except:
             self.log(message='   EXCEPTION in apply_manifest(): {}'.format(traceback.format_exc()), level='error')
