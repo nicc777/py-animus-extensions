@@ -62,17 +62,41 @@ variable name
         if 'source' in self.spec:
             if 'value' in self.spec['source']:
                 try:
-                    self.log(message='Loading script source from file "{}"'.format(self.spec['source']['value']), level='info')
+                    self.log(message='   Loading script source from file "{}"'.format(self.spec['source']['value']), level='info')
                     with open(self.spec['source']['value'], 'r') as f:
                         source = f.read()
                 except:
-                    self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
+                    self.log(message='   EXCEPTION: {}'.format(traceback.format_exc()), level='error')
         return source
     
     def _get_work_dir(self)->str:
-        work_dir = ''
-
+        work_dir = tempfile.gettempdir()
+        if 'workDir' in self.spec:
+            if 'path' in self.spec['workDir']:
+                work_dir = self.spec['workDir']['path']
+        self.log(message='   Workdir set to "{}"'.format(work_dir), level='info')
         return work_dir
+    
+    def _del_file(self, file: str):
+        try:
+            os.unlink(file)
+        except:
+            self.log(message='   EXCEPTION: {}'.format(traceback.format_exc()), level='error')
+
+    def _create_work_file(self, source:str)->str:
+        work_file = '{}{}{}'.format(
+            self._get_work_dir(),
+            os.sep,
+            self.metadata['name']
+        )
+        self.log(message='   Writing source code to file "{}"'.format(work_file), level='info')
+        self._del_file(file=work_file)
+        try:
+            with open(work_file, 'w') as f:
+                f.write(source)
+        except:
+            self.log(message='   EXCEPTION: {}'.format(traceback.format_exc()), level='error')
+        return work_file
 
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False):
         self.log(message='APPLY CALLED', level='info')
@@ -90,7 +114,9 @@ variable name
             )
         else:
             script_source = self._load_source_from_file()
-        
+        work_file = self._create_work_file(source=script_source)
+
+        self._del_file(file=work_file)
         return 
     
     def delete_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False):
