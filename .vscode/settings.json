@@ -8,6 +8,7 @@
         "Kubeconfig",
         "pathlib",
         "shabang",
+        "tempfile",
         "traceback",
         "workdir"
     ]

@@ -4,6 +4,7 @@ from py_animus import get_logger
 import traceback
 from pathlib import Path
 import subprocess
+import tempfile
 
 
 class ShellScript(ManifestBase):
@@ -67,6 +68,11 @@ variable name
                 except:
                     self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
         return source
+    
+    def _get_work_dir(self)->str:
+        work_dir = ''
+
+        return work_dir
 
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False):
         self.log(message='APPLY CALLED', level='info')

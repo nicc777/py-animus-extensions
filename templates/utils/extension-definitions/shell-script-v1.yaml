@@ -36,6 +36,7 @@ spec:
   - 'import traceback'
   - 'from pathlib import Path'
   - 'import subprocess'
+  - 'import tempfile'
   specFields:
   - fieldName: shellInterpreter
     fieldDescription: |
