@@ -118,6 +118,7 @@ variable name
             )
         else:
             script_source = self._load_source_from_file()
+        self.log(message='script_source:\n--------------------\n{}\n--------------------'.format(script_source), level='debug')
         work_file = self._create_work_file(source=script_source)
 
         ###
