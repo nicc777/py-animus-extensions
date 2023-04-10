@@ -108,7 +108,7 @@ variable name
         ### PREP SOURCE FILE
         ###
         script_source = 'exit 0'
-        if self._id_source == 'inline':
+        if self._id_source() == 'inline':
             shabang = '#!/bin/sh'
             if 'shellInterpreter' in self.spec:
                 shabang = self.spec['shellInterpreter']
