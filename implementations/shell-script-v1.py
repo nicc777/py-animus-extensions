@@ -41,6 +41,14 @@ variable name
         self.log(message='      returning True', level='debug')
         return True
 
+    def _id_source(self)->str:
+        source = 'inline'
+        if 'source' in self.spec:
+            if 'type' in self.spec['source']:
+                if self.spec['source']['type'] in ('inLine', 'filePath',):
+                    source = self.spec['source']['type']
+        return source
+
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False):
         self.log(message='APPLY CALLED', level='info')
         if self.implemented_manifest_differ_from_this_manifest(manifest_lookup_function=manifest_lookup_function, variable_cache=variable_cache) is False:
