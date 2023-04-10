@@ -103,6 +103,10 @@ variable name
         if self.implemented_manifest_differ_from_this_manifest(manifest_lookup_function=manifest_lookup_function, variable_cache=variable_cache) is False:
             self.log(message='   Script already executed', level='info')
             return
+        
+        ###
+        ### PREP SOURCE FILE
+        ###
         script_source = 'exit 0'
         if self._id_source == 'inline':
             shabang = '#!/bin/sh'
@@ -116,6 +120,58 @@ variable name
             script_source = self._load_source_from_file()
         work_file = self._create_work_file(source=script_source)
 
+        ###
+        ### EXECUTE
+        ###
+        result = None
+        try:
+            os.chmod(work_file, 700)
+            result = subprocess.run('{}'.format(work_file), check=True, capture_output=True)   # Returns CompletedProcess
+        except:
+            self.log(message='   EXCEPTION: {}'.format(traceback.format_exc()), level='error')
+
+        ###
+        ### STORE VALUES
+        ###
+        if result is not None:
+            try:
+                variable_cache.store_variable(
+                    variable=Variable(
+                        name='{}:EXIT_CODE'.format(self.metadata['name']),
+                        initial_value=result.returncode,
+                        logger=self.logger
+                    ),
+                    overwrite_existing=True
+                )
+                variable_cache.store_variable(
+                    variable=Variable(
+                        name='{}:STDOUT'.format(self.metadata['name']),
+                        initial_value=result.stdout,
+                        logger=self.logger
+                    ),
+                    overwrite_existing=True
+                )
+                variable_cache.store_variable(
+                    variable=Variable(
+                        name='{}:STDERR'.format(self.metadata['name']),
+                        initial_value=result.stderr,
+                        logger=self.logger
+                    ),
+                    overwrite_existing=True
+                )
+            except:
+                self.log(message='   EXCEPTION: {}'.format(traceback.format_exc()), level='error')
+        return_code = variable_cache.get_value(variable_name='{}:EXIT_CODE'.format(self.metadata['name']), value_if_expired=None, default_value_if_not_found=None, raise_exception_on_expired=False, raise_exception_on_not_found=False)
+        l = 'info'
+        if return_code is not None:
+            if isinstance(return_code, int):
+                if return_code != 0:
+                    l = 'error'
+        self.log(message='Return Code: {}'.format(return_code), level=l)
+
+        ###
+        ### DONE
+        ###
         self._del_file(file=work_file)
         return 
     
