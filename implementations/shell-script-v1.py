@@ -81,7 +81,7 @@ variable name
         try:
             os.unlink(file)
         except:
-            self.log(message='   EXCEPTION: {}'.format(traceback.format_exc()), level='error')
+            pass
 
     def _create_work_file(self, source:str)->str:
         work_file = '{}{}{}'.format(
@@ -94,8 +94,9 @@ variable name
         try:
             with open(work_file, 'w') as f:
                 f.write(source)
+            self.log(message='      DONE', level='info')
         except:
-            self.log(message='   EXCEPTION: {}'.format(traceback.format_exc()), level='error')
+            self.log(message='   EXCEPTION in _create_work_file(): {}'.format(traceback.format_exc()), level='error')
         return work_file
 
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False):
@@ -112,7 +113,7 @@ variable name
             shabang = '#!/bin/sh'
             if 'shellInterpreter' in self.spec:
                 shabang = self.spec['shellInterpreter']
-            script_source = '{}\n\n{}'.format(
+            script_source = '#!/usr/bin/env {}\n\n{}'.format(
                 shabang,
                 self._load_source_from_spec()
             )
@@ -129,13 +130,47 @@ variable name
             os.chmod(work_file, 700)
             result = subprocess.run('{}'.format(work_file), check=True, capture_output=True)   # Returns CompletedProcess
         except:
-            self.log(message='   EXCEPTION: {}'.format(traceback.format_exc()), level='error')
+            self.log(message='   EXCEPTION in apply_manifest(): {}'.format(traceback.format_exc()), level='error')
+            self.log(message='   Storing Variables', level='info')
+            try:
+                self.log(message='      Storing Exit Code', level='info')
+                variable_cache.store_variable(
+                    variable=Variable(
+                        name='{}:EXIT_CODE'.format(self.metadata['name']),
+                        initial_value=-999,
+                        logger=self.logger
+                    ),
+                    overwrite_existing=True
+                )
+                self.log(message='      Storing STDOUT', level='info')
+                variable_cache.store_variable(
+                    variable=Variable(
+                        name='{}:STDOUT'.format(self.metadata['name']),
+                        initial_value=None,
+                        logger=self.logger
+                    ),
+                    overwrite_existing=True
+                )
+                self.log(message='      Storing STDERR', level='info')
+                variable_cache.store_variable(
+                    variable=Variable(
+                        name='{}:STDERR'.format(self.metadata['name']),
+                        initial_value=None,
+                        logger=self.logger
+                    ),
+                    overwrite_existing=True
+                )
+                self.log(message='      Storing ALL DONE', level='info')
+            except:
+                self.log(message='   EXCEPTION in apply_manifest() when storing variables: {}'.format(traceback.format_exc()), level='error')
 
         ###
         ### STORE VALUES
         ###
         if result is not None:
+            self.log(message='   Storing Variables', level='info')
             try:
+                self.log(message='      Storing Exit Code', level='info')
                 variable_cache.store_variable(
                     variable=Variable(
                         name='{}:EXIT_CODE'.format(self.metadata['name']),
@@ -144,6 +179,7 @@ variable name
                     ),
                     overwrite_existing=True
                 )
+                self.log(message='      Storing STDOUT', level='info')
                 variable_cache.store_variable(
                     variable=Variable(
                         name='{}:STDOUT'.format(self.metadata['name']),
@@ -152,6 +188,7 @@ variable name
                     ),
                     overwrite_existing=True
                 )
+                self.log(message='      Storing STDERR', level='info')
                 variable_cache.store_variable(
                     variable=Variable(
                         name='{}:STDERR'.format(self.metadata['name']),
@@ -160,8 +197,9 @@ variable name
                     ),
                     overwrite_existing=True
                 )
+                self.log(message='      Storing ALL DONE', level='info')
             except:
-                self.log(message='   EXCEPTION: {}'.format(traceback.format_exc()), level='error')
+                self.log(message='   EXCEPTION in apply_manifest() when storing variables: {}'.format(traceback.format_exc()), level='error')
         return_code = variable_cache.get_value(variable_name='{}:EXIT_CODE'.format(self.metadata['name']), value_if_expired=None, default_value_if_not_found=None, raise_exception_on_expired=False, raise_exception_on_not_found=False)
         l = 'info'
         if return_code is not None:
