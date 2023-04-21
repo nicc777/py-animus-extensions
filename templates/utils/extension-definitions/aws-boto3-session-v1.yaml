@@ -1,0 +1,102 @@
+---
+kind: AnimusExtensionTemplate
+version: v1
+metadata:
+  name: aws-boto3-session-v1
+  skipDeleteAll: false
+  executeOnlyOnceOnApply: true
+  executeOnlyOnceOnDelete: true
+spec:
+  description: |
+    Provides a boto3 session object that can be used by other AWS manifests requiring AWS API access via Boto3.
+
+    The following variables will be set:
+
+    * `:CONNECTED` - A boolean value. If set to `True`, the session object can be used
+    * `:SESSION` - The Boto3 session object
+
+    > **Note**
+    > The IAM role used for the session must have the following minimum privileges required to set the `:CONNECTED` variable: `sts:GetCallerIdentity`
+
+    If the caller identity can be established, the session will be exposed for other services.
+  kind: AwsBoto3Session
+  version: v1
+  versionChangelog: |
+    This is the initial version
+  supportedVersions:
+  - 'v1'
+  baseClass: ManifestBase
+  outputPaths:              # If any of these are null/NoneType, the global defaults will be used (which is this repo)
+    doc: /tmp/dev-aws-boto3-session-v1/doc
+    examples: /tmp/dev-aws-boto3-session-v1/examples
+    implementations: /tmp/dev-aws-boto3-session-v1/impl
+  pipRequirements:
+  - 'py-animus'
+  - 'boto3'
+  importStatements:
+  - 'from py_animus.manifest_management import *'
+  - 'from py_animus import get_logger'
+  - 'import traceback'
+  - 'import boto3'
+  specFields:
+  - fieldName: awsRegion
+    fieldDescription: |
+      The region to set
+    fieldType: str
+    fieldRequired: false
+    fieldDefaultValue: 'eu-central-1'
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: profileName
+    fieldDescription: |
+      If set, use the named profile for the session authentication.
+
+      See https://boto3.amazonaws.com/v1/documentation/api/latest/guide/session.html for more information.
+    fieldType: str
+    fieldRequired: false
+    fieldDefaultValue: null
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: awsAccessKeyId
+    fieldDescription: |
+      If set together with `awsSecretAccessKey`, use the supplied credentials. The named profile, if set, will take preference for the session authentication.
+
+      See https://boto3.amazonaws.com/v1/documentation/api/latest/guide/session.html for more information.
+    fieldType: str
+    fieldRequired: false
+    fieldDefaultValue: null
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: awsSecretAccessKey.source
+    fieldDescription: |
+      Used with awsAccessKeyId
+
+      > **Warning**
+      > Use of sensitive information like credentials in manifests is highly discouraged. However, when a secrets store is
+      > used to retrieve credentials, these settings can be used. Using profiles is preferred.
+
+      In this implementation, the `source` points to a name of a variable that will contain the secret value. The variable is
+      typically set by another manifest which should be added as a dependency to this manifest when used in this way.
+
+      See https://boto3.amazonaws.com/v1/documentation/api/latest/guide/session.html for more information.
+    fieldType: str
+    fieldRequired: false
+    fieldDefaultValue: null
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
