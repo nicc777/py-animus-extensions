@@ -28,6 +28,8 @@ variable name
         super().__init__(logger=logger, post_parsing_method=post_parsing_method, version=version, supported_versions=supported_versions)
 
     def implemented_manifest_differ_from_this_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders())->bool:
+        if target_environment not in self.metadata['environments']:
+            return False
         current_exit_code = variable_cache.get_value(
             variable_name='{}:EXIT_CODE'.format(self.metadata['name']),
             value_if_expired=None,
@@ -100,6 +102,8 @@ variable name
         return work_file
 
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
+        if target_environment not in self.metadata['environments']:
+            return
         self.log(message='APPLY CALLED', level='info')
         if self.implemented_manifest_differ_from_this_manifest(manifest_lookup_function=manifest_lookup_function, variable_cache=variable_cache) is False:
             self.log(message='   Script already executed', level='info')

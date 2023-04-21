@@ -135,6 +135,8 @@ class CliInputPrompt(ManifestBase):
         variable_cache.store_variable(variable=Variable(name='{}:validated'.format(self._var_name()),logger=self.logger, initial_value=True), overwrite_existing=True)
 
     def implemented_manifest_differ_from_this_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders())->bool:
+        if target_environment not in self.metadata['environments']:
+            return False
         self._validate(variable_cache=variable_cache)        
         current_value = variable_cache.get_value(
             variable_name=self._var_name(),
@@ -150,6 +152,8 @@ class CliInputPrompt(ManifestBase):
         return False
 
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
+        if target_environment not in self.metadata['environments']:
+            return
         self._validate(variable_cache=variable_cache)
         value = None
         self.log(message='variable_cache={}'.format(str(variable_cache)), level='debug')
