@@ -124,10 +124,15 @@ variable name
             shabang = '#!/bin/sh'
             if 'shellInterpreter' in self.spec:
                 shabang = self.spec['shellInterpreter']
-            script_source = '#!/usr/bin/env {}\n\n{}'.format(
-                shabang,
-                self._load_source_from_spec()
-            )
+                script_source = '#!/usr/bin/env {}\n\n{}'.format(
+                    shabang,
+                    self._load_source_from_spec()
+                )
+            else:
+                script_source = '{}\n\n{}'.format(
+                    shabang,
+                    self._load_source_from_spec()
+                )
         else:
             script_source = self._load_source_from_file()
         self.log(message='script_source:\n--------------------\n{}\n--------------------'.format(script_source), level='debug')
