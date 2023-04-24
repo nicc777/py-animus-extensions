@@ -544,7 +544,7 @@ class AnimusExtensionTemplate(ManifestBase):
             self.log(message='Default {} output file used (1) - file_name="{}"'.format(component, file_name), level='info')
         return file_name
 
-    def implemented_manifest_differ_from_this_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache())->bool:
+    def implemented_manifest_differ_from_this_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders())->bool:
         self._validate(variable_cache=variable_cache)
         command = variable_cache.get_value(variable_name='{}:command'.format(self._var_name()))
         
@@ -994,7 +994,7 @@ __EXAMPLE_DESCRIPTION__
         self.log(message='      ACTION: Deleting Example "{}" File: {}'.format(example_name, file_name), level='info')
         os.unlink(file_name)
 
-    def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False):
+    def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
         variable_cache.store_variable(variable=Variable(name='{}:command'.format(self._var_name()),initial_value='apply',ttl=-1,logger=self.logger,mask_in_logs=False),overwrite_existing=False)
         self.log(message='APPLY CALLED', level='info')
         if self.implemented_manifest_differ_from_this_manifest(manifest_lookup_function=manifest_lookup_function, variable_cache=variable_cache) is False:
@@ -1065,7 +1065,7 @@ __EXAMPLE_DESCRIPTION__
         variable_cache.store_variable(variable=Variable(name='{}'.format(self._var_name()),initial_value=True,ttl=-1,logger=self.logger,mask_in_logs=False),overwrite_existing=False)
         return 
     
-    def delete_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False):
+    def delete_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
         variable_cache.store_variable(variable=Variable(name='{}:command'.format(self._var_name()),initial_value='delete',ttl=-1,logger=self.logger,mask_in_logs=False),overwrite_existing=False)
         self.log(message='DELETE CALLED', level='info')
         if self.implemented_manifest_differ_from_this_manifest(manifest_lookup_function=manifest_lookup_function, variable_cache=variable_cache) is False:
