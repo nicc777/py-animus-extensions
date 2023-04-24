@@ -43,7 +43,7 @@ spec:
     fieldDescription: |
       The region to set
     fieldType: str
-    fieldRequired: false
+    fieldRequired: true
     fieldDefaultValue: 'eu-central-1'
     fieldSetDefaultValueConditions:
     - fieldDefinitionNotPresentInManifest: true
@@ -53,7 +53,7 @@ spec:
       self.log(message='No custom validation for promptText', level='debug')
   - fieldName: profileName
     fieldDescription: |
-      If set, use the named profile for the session authentication.
+      If set, use the named profile for the session authentication.<br><br>
 
       See https://boto3.amazonaws.com/v1/documentation/api/latest/guide/session.html for more information.
     fieldType: str
@@ -67,7 +67,7 @@ spec:
       self.log(message='No custom validation for promptText', level='debug')
   - fieldName: awsAccessKeyId
     fieldDescription: |
-      If set together with `awsSecretAccessKey`, use the supplied credentials. The named profile, if set, will take preference for the session authentication.
+      If set together with `awsSecretAccessKey`, use the supplied credentials. The named profile, if set, will take preference for the session authentication.<br><br>
 
       See https://boto3.amazonaws.com/v1/documentation/api/latest/guide/session.html for more information.
     fieldType: str
@@ -81,14 +81,12 @@ spec:
       self.log(message='No custom validation for promptText', level='debug')
   - fieldName: awsSecretAccessKey.source
     fieldDescription: |
-      Used with awsAccessKeyId
+      Used with awsAccessKeyId<br><br>
 
-      > **Warning**
-      > Use of sensitive information like credentials in manifests is highly discouraged. However, when a secrets store is
-      > used to retrieve credentials, these settings can be used. Using profiles is preferred.
+      **Warning**: Use of sensitive information like credentials in manifests is highly discouraged. However, when a secrets store is used to retrieve credentials, these settings can be used. Using profiles is preferred.<br><br>
 
       In this implementation, the `source` points to a name of a variable that will contain the secret value. The variable is
-      typically set by another manifest which should be added as a dependency to this manifest when used in this way.
+      typically set by another manifest which should be added as a dependency to this manifest when used in this way.<br><br>
 
       See https://boto3.amazonaws.com/v1/documentation/api/latest/guide/session.html for more information.
     fieldType: str
