@@ -28,5 +28,5 @@ spec:
   awsAccessKeyId: ABCDEFGHIJKLMNOPQRSTUVWXYZ
   awsRegion: eu-central-1
   awsSecretAccessKey:
-    source: '{{ .Variables.ShellScript:cli-get-aws-secret-sandbox:sandbox:STDOUT }}'
+    value: '{{ .Variables.ShellScript:cli-get-aws-secret-sandbox:sandbox:STDOUT }}'
 

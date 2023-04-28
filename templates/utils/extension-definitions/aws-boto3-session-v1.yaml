@@ -98,6 +98,24 @@ spec:
     - fieldValueIsNull: true
     customValidation: |
       self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: awsSecretAccessKey.value
+    fieldDescription: |
+      Used with awsAccessKeyId<br><br>
+      
+      **Warning**: Use of sensitive information like credentials in manifests is highly discouraged. However, when a secrets store is used to retrieve credentials, these settings can be used. Using profiles is preferred.<br><br>
+      
+      In this implementation, the `value` is the actual literal value to be used.<br><br>
+      
+      See https://boto3.amazonaws.com/v1/documentation/api/latest/guide/session.html for more information.
+    fieldType: str
+    fieldRequired: false
+    fieldDefaultValue: null
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
   additionalExamples:
   - exampleName: minimal  # This will also be used to compile the the value of metadata.name
     manifest:
