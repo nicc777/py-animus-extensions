@@ -1,0 +1,32 @@
+---
+kind: ShellScript
+metadata:
+  name: cli-get-aws-secret-sandbox
+  skipDeleteAll: true
+  skipApplyAll: true  # Because this manifest is only used as a dependency for another manifest
+  environments:
+  - sandbox
+spec:
+  maskInput: true
+  source:
+    type: inline
+    value: echo "this-is-a-dummy-secret-key"
+version: v1
+---
+kind: AwsBoto3Session
+version: v1
+metadata:
+  name: aws-boto3-session-v1-aws-session-access-key-sandbox
+  dependencies:
+    apply: 
+    - cli-get-aws-secret-sandbox
+  environments:
+  - sandbox
+  executeOnlyOnceOnApply: true
+  executeOnlyOnceOnDelete: true
+spec:
+  awsAccessKeyId: ABCDEFGHIJKLMNOPQRSTUVWXYZ
+  awsRegion: eu-central-1
+  awsSecretAccessKey:
+    value: '{{ .Variables.ShellScript:cli-get-aws-secret-sandbox:sandbox:STDOUT }}'
+

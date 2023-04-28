@@ -38,6 +38,7 @@ docker run --rm -e "DEBUG=1" -it \
 
 # Extensions
 
-| Name                                           | Kind             | Description                                             |
-|------------------------------------------------|------------------|---------------------------------------------------------|
-| [cli-input-prompt-v1](cli-input-prompt-v1.md)  | CliInputPrompt   | Get input from a prompt on the command line from a user |
+| Name                                           | Kind             | Initial Issue                                                            | Description                                                                                                       |
+|------------------------------------------------|------------------|--------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
+| [cli-input-prompt-v1](cli-input-prompt-v1.md)  | CliInputPrompt   | n/a (already exists)                                                     | Get input from a prompt on the command line from a user                                                           |
+| [shell-script-v1](shell-script-v1.md)          | ShellScript      | [#000001](https://github.com/nicc777/py-animus-extensions/issues/1)      | Run a shell script and store the various STDOUT and STDERR values in Variable objects for use by other extensions |

@@ -1,0 +1,11 @@
+kind: ShellScript
+metadata:
+  name: shell-script-v1-docker-check
+  skipDeleteAll: true
+spec:
+  shellInterpreter: bash
+  source:
+    value: 'docker --version
+
+      '
+version: v1

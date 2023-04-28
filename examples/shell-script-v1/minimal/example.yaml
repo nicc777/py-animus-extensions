@@ -1,0 +1,9 @@
+kind: ShellScript
+metadata:
+  name: shell-script-v1-minimal
+  skipDeleteAll: true
+spec:
+  source:
+    type: inline
+    value: echo "not yet fully implemented"
+version: v1

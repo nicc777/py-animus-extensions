@@ -1,6 +1,7 @@
 {
     "cSpell.words": [
         "Boto",
+        "chardet",
         "Creds",
         "exmf",
         "getpass",
@@ -8,6 +9,8 @@
         "Kubeconfig",
         "pathlib",
         "shabang",
-        "traceback"
+        "tempfile",
+        "traceback",
+        "workdir"
     ]
 }
