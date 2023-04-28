@@ -77,6 +77,9 @@ If the caller identity can be established, the session will be exposed for other
             'sa-east-1',
         ):
             raise Exception('Invalid or unsupported AWS region.')
+        
+    def _profile_based_session(self, profile_name: str, aws_region: str):
+        return boto3.session.Session(profile_name=profile_name, region_name=aws_region)
 
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
         if target_environment not in self.metadata['environments']:
@@ -97,6 +100,24 @@ If the caller identity can be established, the session will be exposed for other
         
         if 'profileName' in self.spec:
             self.log(message='   Connecting to AWS in region "{}" using profile named "{}"'.format(aws_region, self.spec['profileName']), level='info')
+            profile_name = self.spec['profileName']
+            profile_name = profile_name.strip()
+            variable_cache.store_variable(
+                variable=Variable(
+                    name='{}:SESSION'.format(self._var_name(target_environment=target_environment)),
+                    initial_value=self._profile_based_session(profile_name=profile_name, aws_region=aws_region),
+                    logger=self.logger
+                ),
+                overwrite_existing=True
+            )
+            variable_cache.store_variable(
+                variable=Variable(
+                    name='{}:CONNECTED'.format(self._var_name(target_environment=target_environment)),
+                    initial_value=True,
+                    logger=self.logger
+                ),
+                overwrite_existing=True
+            )
         elif 'awsAccessKeyId' in self.spec:
             self.log(message='   Connecting to AWS in region "{}" using AWS Credentials'.format(aws_region), level='info')
         else:
