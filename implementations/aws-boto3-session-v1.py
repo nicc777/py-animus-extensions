@@ -96,9 +96,9 @@ If the caller identity can be established, the session will be exposed for other
             raise Exception('Cannot have both "profileName" and "awsAccessKeyId" in spec.')
         
         if 'profileName' in self.spec:
-            pass
+            self.log(message='   Connecting to AWS in region "{}" using profile named "{}"'.format(aws_region, self.spec['profileName']), level='info')
         elif 'awsAccessKeyId' in self.spec:
-            pass
+            self.log(message='   Connecting to AWS in region "{}" using AWS Credentials'.format(aws_region), level='info')
         else:
             raise Exception('Either "profileName" or "awsAccessKeyId" must be defined in spec')
         
