@@ -69,6 +69,25 @@
             "env": {
                 "DEBUG": "1"
             }
+        },
+
+        {
+            "name": "Python: TEST APPLY AwsBoto3Session - Example aws-session-access-key-sandbox",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/venv/bin/animus",
+            "args": [
+                "apply",
+                "-m", "${workspaceFolder}/examples/aws-boto3-session-v1/aws-session-access-key-sandbox/example.yaml",
+                "-s", "${workspaceFolder}/implementations",
+                "-e", "sandbox"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "DEBUG": "1"
+            }
         }
+
     ]
 }

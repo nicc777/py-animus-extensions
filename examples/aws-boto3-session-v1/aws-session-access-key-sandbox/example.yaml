@@ -3,6 +3,8 @@ kind: ShellScript
 metadata:
   name: cli-get-aws-secret-sandbox
   skipDeleteAll: true
+  environments:
+  - sandbox
 spec:
   source:
     type: inline
