@@ -78,8 +78,25 @@ If the caller identity can be established, the session will be exposed for other
         ):
             raise Exception('Invalid or unsupported AWS region.')
         
-    def _profile_based_session(self, profile_name: str, aws_region: str):
+    def _profile_based_session(self, profile_name: str, aws_region: str)->boto3.Session:
         return boto3.session.Session(profile_name=profile_name, region_name=aws_region)
+    
+    def _access_key_based_session(self, aws_region: str, variable_cache: VariableCache=VariableCache()):
+        if 'source' in self.spec['awsSecretAccessKey'] and 'value' in self.spec['awsSecretAccessKey']:
+            raise Exception('Cannot use both "source" and "value" when using access key credentials.')
+        secret_access_key_value = None
+        if 'source' in self.spec['awsSecretAccessKey']:
+            source_key = self.spec['awsSecretAccessKey']['source']
+            source_key.strip()
+            secret_access_key_value = variable_cache.get_value(variable_name=source_key)
+        if 'value' in self.spec['awsSecretAccessKey']:
+            secret_access_key_value = self.spec['awsSecretAccessKey']['value']
+        secret_access_key_value = self._decode_str_based_on_encoding(input_str=secret_access_key_value)
+        return boto3.session.Session(
+            aws_access_key_id=self._decode_str_based_on_encoding(input_str=copy.deepcopy(self.spec['awsAccessKeyId'])),
+            aws_secret_access_key=None,
+            region_name=aws_region
+        )
 
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
         if target_environment not in self.metadata['environments']:
@@ -120,6 +137,22 @@ If the caller identity can be established, the session will be exposed for other
             )
         elif 'awsAccessKeyId' in self.spec:
             self.log(message='   Connecting to AWS in region "{}" using AWS Credentials'.format(aws_region), level='info')
+            variable_cache.store_variable(
+                variable=Variable(
+                    name='{}:SESSION'.format(self._var_name(target_environment=target_environment)),
+                    initial_value=self._access_key_based_session(aws_region=aws_region, variable_cache=variable_cache),
+                    logger=self.logger
+                ),
+                overwrite_existing=True
+            )
+            variable_cache.store_variable(
+                variable=Variable(
+                    name='{}:CONNECTED'.format(self._var_name(target_environment=target_environment)),
+                    initial_value=True,
+                    logger=self.logger
+                ),
+                overwrite_existing=True
+            )
         else:
             raise Exception('Either "profileName" or "awsAccessKeyId" must be defined in spec')
         
