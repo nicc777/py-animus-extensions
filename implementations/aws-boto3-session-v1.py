@@ -98,6 +98,13 @@ If the caller identity can be established, the session will be exposed for other
             region_name=aws_region
         )
 
+    def _test_session(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
+        aws_session = variable_cache.get_value(variable_name='{}:SESSION'.format(self._var_name(target_environment=target_environment)))
+        client = aws_session.client('sts')
+        response = client.get_caller_identity()
+        self.log(message='      >> Effective IAM ARN : {}'.format(response['Arn']), level='info')
+        self.log(message='      >> AWS Account       : {}'.format(response['Account']), level='info')
+
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
         if target_environment not in self.metadata['environments']:
             self.log(message='Target environment "{}" not relevant for this manifest'.format(target_environment), level='warning')
@@ -156,6 +163,8 @@ If the caller identity can be established, the session will be exposed for other
         else:
             raise Exception('Either "profileName" or "awsAccessKeyId" must be defined in spec')
         
+        self._test_session(variable_cache=variable_cache, target_environment=target_environment)
+
         return 
     
     def delete_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
