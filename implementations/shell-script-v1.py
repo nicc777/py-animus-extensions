@@ -113,7 +113,7 @@ variable name
         if target_environment not in self.metadata['environments']:
             return
         self.log(message='APPLY CALLED', level='info')
-        if self.implemented_manifest_differ_from_this_manifest(manifest_lookup_function=manifest_lookup_function, variable_cache=variable_cache) is False:
+        if self.implemented_manifest_differ_from_this_manifest(manifest_lookup_function=manifest_lookup_function, variable_cache=variable_cache, target_environment=target_environment, value_placeholders=value_placeholders) is False:
             self.log(message='   Script already executed', level='info')
             return
         
