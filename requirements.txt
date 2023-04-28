@@ -1,3 +1,4 @@
 py-animus
 requests
 boto3
+chardet

@@ -5,6 +5,7 @@ import traceback
 from pathlib import Path
 import subprocess
 import tempfile
+import chardet
 
 
 class ShellScript(ManifestBase):
@@ -109,6 +110,14 @@ variable name
             self.log(message='   EXCEPTION in _create_work_file(): {}'.format(traceback.format_exc()), level='error')
         return work_file
 
+    def __detect_encoding(self, input_str: str)->str:
+        encoding = None
+        try:
+            encoding = chardet.detect(input_str)['encoding']
+        except:
+            pass
+        return encoding
+
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
         if target_environment not in self.metadata['environments']:
             return
@@ -188,6 +197,14 @@ variable name
             self.log(message='   Storing Variables', level='info')
             try:
                 self.log(message='      Storing Exit Code', level='info')
+                value_stdout_encoding = self.__detect_encoding(input_str=result.stdout)
+                value_stderr_encoding = self.__detect_encoding(input_str=result.stdout)
+                value_stdout_final = result.stdout
+                value_stderr_final = result.stderr
+                if value_stdout_encoding is not None:
+                    value_stdout_final = value_stdout_final.decode(value_stdout_encoding)
+                if value_stderr_encoding is not None:
+                    value_stderr_final = value_stderr_final.decode(value_stderr_encoding)
                 variable_cache.store_variable(
                     variable=Variable(
                         name='{}:EXIT_CODE'.format(self._var_name(target_environment=target_environment)),
@@ -200,7 +217,7 @@ variable name
                 variable_cache.store_variable(
                     variable=Variable(
                         name='{}:STDOUT'.format(self._var_name(target_environment=target_environment)),
-                        initial_value=result.stdout,
+                        initial_value=value_stdout_final,
                         logger=self.logger
                     ),
                     overwrite_existing=True
@@ -209,7 +226,7 @@ variable name
                 variable_cache.store_variable(
                     variable=Variable(
                         name='{}:STDERR'.format(self._var_name(target_environment=target_environment)),
-                        initial_value=result.stderr,
+                        initial_value=value_stderr_final,
                         logger=self.logger
                     ),
                     overwrite_existing=True
