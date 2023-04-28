@@ -16,13 +16,13 @@ version: v1
 kind: AwsBoto3Session
 version: v1
 metadata:
+  name: aws-boto3-session-v1-aws-session-access-key-sandbox
   dependencies:
     apply: 
     - cli-get-aws-secret-sandbox
   environments:
   - sandbox
   executeOnlyOnceOnApply: true
-  name: aws-boto3-session-v1-aws-session-access-key-sandbox
   skipDeleteAll: true
 spec:
   awsAccessKeyId: ABCDEFGHIJKLMNOPQRSTUVWXYZ
