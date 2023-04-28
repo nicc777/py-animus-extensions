@@ -1,9 +1,11 @@
 kind: AwsBoto3Session
 version: v1
 metadata:
-  executeOnlyOnceOnApply: true
   name: aws-boto3-session-v1-minimal
+  executeOnlyOnceOnApply: true
   skipDeleteAll: true
+  environments:
+  - sandbox
 spec:
   awsRegion: eu-central-1
   profileName: my-profile
