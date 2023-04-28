@@ -74,6 +74,7 @@ kind: ShellScript
 metadata:
   name: cli-get-aws-secret-sandbox
   skipDeleteAll: true
+  skipApplyAll: true  # Because this manifest is only used as a dependency for another manifest
   environments:
   - sandbox
 spec:

@@ -83,7 +83,7 @@
                 "-e", "sandbox"
             ],
             "console": "integratedTerminal",
-            "justMyCode": true,
+            "justMyCode": false,
             "env": {
                 "DEBUG": "1"
             }
