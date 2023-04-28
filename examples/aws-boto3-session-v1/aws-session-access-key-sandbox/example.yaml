@@ -23,7 +23,7 @@ metadata:
   environments:
   - sandbox
   executeOnlyOnceOnApply: true
-  skipDeleteAll: true
+  executeOnlyOnceOnDelete: true
 spec:
   awsAccessKeyId: ABCDEFGHIJKLMNOPQRSTUVWXYZ
   awsRegion: eu-central-1

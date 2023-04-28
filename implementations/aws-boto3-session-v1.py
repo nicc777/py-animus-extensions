@@ -86,12 +86,13 @@ If the caller identity can be established, the session will be exposed for other
             raise Exception('Cannot use both "source" and "value" when using access key credentials.')
         secret_access_key_value = None
         if 'source' in self.spec['awsSecretAccessKey']:
-            source_key = self.spec['awsSecretAccessKey']['source']
-            source_key.strip()
+            source_key = self._decode_str_based_on_encoding(input_str=self.spec['awsSecretAccessKey']['source']).strip()
             secret_access_key_value = variable_cache.get_value(variable_name=source_key)
         if 'value' in self.spec['awsSecretAccessKey']:
             secret_access_key_value = self.spec['awsSecretAccessKey']['value']
-        secret_access_key_value = self._decode_str_based_on_encoding(input_str=secret_access_key_value)
+
+        # self.log(message='*** aws_access_key_id     : "{}"'.format(self._decode_str_based_on_encoding(input_str=copy.deepcopy(self.spec['awsAccessKeyId'])).strip()), level='warning')
+        # self.log(message='*** aws_secret_access_key : "{}"'.format(self._decode_str_based_on_encoding(input_str=copy.deepcopy(secret_access_key_value)).strip()), level='warning')
 
         return boto3.session.Session(
             aws_access_key_id=self._decode_str_based_on_encoding(input_str=copy.deepcopy(self.spec['awsAccessKeyId'])).strip(),
@@ -172,6 +173,25 @@ If the caller identity can be established, the session will be exposed for other
         """
             This is just a session and it may be used in the delete sequence in other manifests to delete remote resources and 
             therefore the set values need to remain or created if not yet created previously.
+
+            Assuming that any dependencies is related to retrieve or calculate credential values, these dependencies will be called
+            as if they are applied (instead of being deleted)
         """
+        if 'dependencies' in self.metadata:
+            if 'apply' in self.metadata['dependencies']:
+                for dependency_name in self.metadata['dependencies']['apply']:
+                    self.log(message='   For this manifest DELETE action, APPLYING dependency manifest named "{}"'.format(dependency_name), level='info')
+                    instance = manifest_lookup_function(name=dependency_name)
+                    instance.process_dependencies(
+                        action='apply',
+                        process_dependency_if_already_applied=False,
+                        process_dependency_if_not_already_applied=True,
+                        manifest_lookup_function=manifest_lookup_function,
+                        variable_cache=variable_cache,
+                        process_self_post_dependency_processing=True,
+                        target_environment=target_environment,
+                        value_placeholders=value_placeholders
+                    )
+                    self.process_value_placeholders(value_placeholders=value_placeholders, environment_name=target_environment, variable_cache=variable_cache)
         self.apply_manifest(manifest_lookup_function=manifest_lookup_function, variable_cache=variable_cache, target_environment=target_environment, value_placeholders=value_placeholders)
         return 
