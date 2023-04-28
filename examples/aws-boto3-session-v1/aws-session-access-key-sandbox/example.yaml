@@ -6,6 +6,7 @@ metadata:
   environments:
   - sandbox
 spec:
+  maskInput: true
   source:
     type: inline
     value: echo "this-is-a-dummy-secret-key"

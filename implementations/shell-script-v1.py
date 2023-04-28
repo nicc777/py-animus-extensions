@@ -36,6 +36,7 @@ variable name
 
     def implemented_manifest_differ_from_this_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders())->bool:
         if target_environment not in self.metadata['environments']:
+            self.log(message='      Environment Mismatch: Requested environment "{}" but current environments are set to "{}"'.format(target_environment, self.target_environments), level='warning')
             return False
         current_exit_code = variable_cache.get_value(
             variable_name='{}:EXIT_CODE'.format(self._var_name(target_environment=target_environment)),
