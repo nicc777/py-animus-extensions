@@ -1,0 +1,28 @@
+---
+kind: ShellScript
+metadata:
+  name: cli-get-aws-secret-sandbox
+  skipDeleteAll: true
+spec:
+  source:
+    type: inline
+    value: echo "not yet fully implemented"
+version: v1
+---
+kind: AwsBoto3Session
+version: v1
+metadata:
+  dependencies:
+    apply: 
+    - cli-get-aws-secret-sandbox
+  environments:
+  - sandbox
+  executeOnlyOnceOnApply: true
+  name: aws-boto3-session-v1-aws-session-access-key-sandbox
+  skipDeleteAll: true
+spec:
+  awsAccessKeyId: ABCDEFGHIJKLMNOPQRSTUVWXYZ
+  awsRegion: eu-central-1
+  awsSecretAccessKey:
+    source: '{{ .Variables.ShellScript:cli-get-aws-secret-sandbox:default:STDOUT }}'
+
