@@ -26,10 +26,10 @@ spec:
   supportedVersions:
   - 'v1'
   baseClass: ManifestBase
-  outputPaths:              # If any of these are null/NoneType, the global defaults will be used (which is this repo)
-    doc: /tmp/dev-aws-boto3-session-v1/doc
-    examples: /tmp/dev-aws-boto3-session-v1/examples
-    implementations: /tmp/dev-aws-boto3-session-v1/impl
+  # outputPaths:              # If any of these are null/NoneType, the global defaults will be used (which is this repo)
+  #   doc: /tmp/dev-aws-boto3-session-v1/doc
+  #   examples: /tmp/dev-aws-boto3-session-v1/examples
+  #   implementations: /tmp/dev-aws-boto3-session-v1/impl
   pipRequirements:
   - 'py-animus'
   - 'boto3'
@@ -124,6 +124,6 @@ spec:
         awsRegion: eu-central-1
         awsAccessKeyId: ABCDEFGHIJKLMNOPQRSTUVWXYZ
         awsSecretAccessKey:
-          source: '{{ .Variables.ShellScript:cli-get-aws-secret-sandbox:default:STDOUT }}'
+          source: '\{\{ .Variables.ShellScript:cli-get-aws-secret-sandbox:default:STDOUT \}\}'
     explanatoryText: |
       This example uses AWS access and secret keys to authenticate, and the secret access key is derived from a dependant manifest. This example targets only one specific environment named `sandbox`
