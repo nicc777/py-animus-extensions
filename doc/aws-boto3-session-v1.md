@@ -69,10 +69,25 @@ export SCENARIO_NAME="aws-session-access-key-sandbox"
 Example manifest: [example.yaml](/media/nicc777/data/nicc777/git/Personal/GitHub/py-animus-extensions/examples/aws-boto3-session-v1/aws-session-access-key-sandbox/example.yaml)
 
 ```yaml
+---
+kind: ShellScript
+metadata:
+  name: cli-get-aws-secret-sandbox
+  skipDeleteAll: true
+  environments:
+  - sandbox
+spec:
+  source:
+    type: inline
+    value: echo "not yet fully implemented"
+version: v1
+---
 kind: AwsBoto3Session
+version: v1
 metadata:
   dependencies:
-    apply: cli-get-aws-secret-sandbox
+    apply: 
+    - cli-get-aws-secret-sandbox
   environments:
   - sandbox
   executeOnlyOnceOnApply: true
@@ -83,8 +98,6 @@ spec:
   awsRegion: eu-central-1
   awsSecretAccessKey:
     source: '{{ .Variables.ShellScript:cli-get-aws-secret-sandbox:default:STDOUT }}'
-version: v1
-
 ```
 
 This example uses AWS access and secret keys to authenticate, and the secret access key is derived from a dependant manifest. This example targets only one specific environment named `sandbox`
