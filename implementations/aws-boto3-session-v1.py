@@ -92,9 +92,10 @@ If the caller identity can be established, the session will be exposed for other
         if 'value' in self.spec['awsSecretAccessKey']:
             secret_access_key_value = self.spec['awsSecretAccessKey']['value']
         secret_access_key_value = self._decode_str_based_on_encoding(input_str=secret_access_key_value)
+
         return boto3.session.Session(
-            aws_access_key_id=self._decode_str_based_on_encoding(input_str=copy.deepcopy(self.spec['awsAccessKeyId'])),
-            aws_secret_access_key=None,
+            aws_access_key_id=self._decode_str_based_on_encoding(input_str=copy.deepcopy(self.spec['awsAccessKeyId'])).strip(),
+            aws_secret_access_key=self._decode_str_based_on_encoding(input_str=copy.deepcopy(secret_access_key_value)).strip(),
             region_name=aws_region
         )
 
