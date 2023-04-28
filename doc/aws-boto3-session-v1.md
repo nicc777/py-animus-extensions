@@ -79,7 +79,7 @@ metadata:
 spec:
   source:
     type: inline
-    value: echo "not yet fully implemented"
+    value: echo "this-is-a-dummy-secret-key"
 version: v1
 ---
 kind: AwsBoto3Session
