@@ -11,6 +11,11 @@ Using this manifest depends on `AwsBoto3Session` and will need a dependency for 
 
 Since the introduction of environments and variables, it will be possible to use one manifest for buckets in different accounts, assuming at least one AWS account per environment.
 
+The following variables will be set:
+
+* `:BUCKET_EXISTS`: boolean, with a value of `True` if the bucket exists
+* `:NAME`: string containing the bucket name
+
 
 ```shell
 export EXTENSION_NAME="aws-boto3-s3-bucket-v1"

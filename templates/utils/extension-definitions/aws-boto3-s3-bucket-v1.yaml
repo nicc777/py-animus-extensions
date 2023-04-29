@@ -18,6 +18,11 @@ spec:
     Using this manifest depends on `AwsBoto3Session` and will need a dependency for a session manifest.
 
     Since the introduction of environments and variables, it will be possible to use one manifest for buckets in different accounts, assuming at least one AWS account per environment.
+
+    The following variables will be set:
+
+    * `:BUCKET_EXISTS`: boolean, with a value of `True` if the bucket exists
+    * `:NAME`: string containing the bucket name
   kind: AwsBoto3S3Bucket
   version: v1
   versionChangelog: |
