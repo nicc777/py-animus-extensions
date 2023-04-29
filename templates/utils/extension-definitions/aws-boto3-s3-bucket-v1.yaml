@@ -163,6 +163,18 @@ spec:
     - fieldValueIsNull: true
     customValidation: |
       self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: deleteStrategy
+    fieldDescription: |
+      Defines the delete strategy which can be one of `IGNORE` (default) or `EMPTY_BUCKET_FIRST` or `ONLY_IF_ALREADY_EMPTY` or `IGNORE_WITH_WARNING_IF_NOT_EMPTY` or `EXCEPTION_IF_NOT_EMPTY`
+    fieldType: str
+    fieldRequired: false
+    fieldDefaultValue: 'IGNORE'
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
   additionalExamples:
   - exampleName: minimal  # This will also be used to compile the the value of metadata.name
     manifest:

@@ -35,7 +35,7 @@ export EXTENSION_NAME="aws-boto3-s3-bucket-v1"
 | `grantWriteACP`              | str     | No       | v1          | Corresponds to the Boto3 options `grantWriteACP` [boto3 documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/create_bucket.html) and [AWS API Documentation](https://docs.aws.amazon.com/AmazonS3/latest/API/API_CreateBucket.html)              |
 | `objectLockEnabledForBucket` | boolean | No       | v1          | Corresponds to the Boto3 options `objectLockEnabledForBucket` [boto3 documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/create_bucket.html) and [AWS API Documentation](https://docs.aws.amazon.com/AmazonS3/latest/API/API_CreateBucket.html) |
 | `objectOwnership`            | str     | No       | v1          | Corresponds to the Boto3 options `objectOwnership` [boto3 documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/create_bucket.html) and [AWS API Documentation](https://docs.aws.amazon.com/AmazonS3/latest/API/API_CreateBucket.html)            |
-
+| `deleteStrategy`             | str     | No       | v1          | Defines the delete strategy which can be one of `IGNORE` (default) or `EMPTY_BUCKET_FIRST` or `ONLY_IF_ALREADY_EMPTY` or `IGNORE_WITH_WARNING_IF_NOT_EMPTY` or `EXCEPTION_IF_NOT_EMPTY`                                                                                                         |
 
 # Example Usages
 
