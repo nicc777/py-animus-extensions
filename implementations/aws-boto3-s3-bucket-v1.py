@@ -62,7 +62,7 @@ Since the introduction of environments and variables, it will be possible to use
             response = client.head_bucket(
                 Bucket=self.spec['name']
             )
-            self.log(message='response={}'.format(json.dumps(response)), level='debug')
+            self.log(message='response={}'.format(json.dumps(response, default=str)), level='debug')
             return True
         except:
             self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
@@ -123,7 +123,7 @@ Since the introduction of environments and variables, it will be possible to use
         try:        
             client = self._get_boto3_se_client(variable_cache=variable_cache, target_environment=target_environment)
             response = client.create_bucket(**parameters)
-            self.log(message='response={}'.format(json.dumps(response)), level='debug')
+            self.log(message='response={}'.format(json.dumps(response, default=str)), level='debug')
             self._set_variables(exists=True, variable_cache=variable_cache, target_environment=target_environment)
         except:
             self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
@@ -135,7 +135,7 @@ Since the introduction of environments and variables, it will be possible to use
         try:        
             client = self._get_boto3_se_client(variable_cache=variable_cache, target_environment=target_environment)
             response = client.list_objects_v2(Bucket=self.spec['name'],MaxKeys=2)
-            self.log(message='response={}'.format(json.dumps(response)), level='debug')
+            self.log(message='response={}'.format(json.dumps(response, default=str)), level='debug')
             if 'KeyCount' in response:
                 if response['KeyCount'] is not None:
                     if isinstance(response['KeyCount'], int):
@@ -158,7 +158,7 @@ Since the introduction of environments and variables, it will be possible to use
         try:        
             client = self._get_boto3_se_client(variable_cache=variable_cache, target_environment=target_environment)
             response = client.delete_bucket(Bucket=self.spec['name'])
-            self.log(message='response={}'.format(json.dumps(response)), level='debug')
+            self.log(message='response={}'.format(json.dumps(response, default=str)), level='debug')
         except:
             self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
 
@@ -167,7 +167,7 @@ Since the introduction of environments and variables, it will be possible to use
         try:        
             client = self._get_boto3_se_client(variable_cache=variable_cache, target_environment=target_environment)
             response = client.list_objects_v2(Bucket=self.spec['name'],MaxKeys=100)
-            self.log(message='response={}'.format(json.dumps(response)), level='debug')
+            self.log(message='response={}'.format(json.dumps(response, default=str)), level='debug')
             if 'Contents' in response:
                 for content in response['Contents']:
                     if 'Key' in content:
@@ -179,7 +179,7 @@ Since the introduction of environments and variables, it will be possible to use
     def _delete_keys_batch(self, keys: list, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->list:
         client = self._get_boto3_se_client(variable_cache=variable_cache, target_environment=target_environment)
         response = client.delete_objects(Bucket=self.spec['name'],Delete={'Objects': keys})
-        self.log(message='response={}'.format(json.dumps(response)), level='debug')
+        self.log(message='response={}'.format(json.dumps(response, default=str)), level='debug')
         return self._get_s3_keys(variable_cache=variable_cache, target_environment=target_environment)
 
 
