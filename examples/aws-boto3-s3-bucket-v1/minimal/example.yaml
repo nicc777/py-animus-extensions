@@ -1,0 +1,13 @@
+kind: AwsBoto3S3Bucket
+metadata:
+  dependencies:
+    apply:
+    - some-boto3-session
+    delete:
+    - some-boto3-session
+  executeOnlyOnceOnApply: true
+  name: aws-boto3-s3-bucket-v1-minimal
+spec:
+  awsBoto3Session: some-boto3-session
+  name: my-very-unique-bucket-name
+version: v1
