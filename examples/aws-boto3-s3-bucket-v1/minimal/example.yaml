@@ -6,7 +6,7 @@ metadata:
   skipApplyAll: true 
   skipDeleteAll: true
 spec:
-  awsRegion: eu-central-1
+  awsRegion: us-east-1
   profileName: my-profile
 ---
 kind: AwsBoto3S3Bucket

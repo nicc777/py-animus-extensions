@@ -69,7 +69,7 @@ metadata:
   skipApplyAll: true 
   skipDeleteAll: true
 spec:
-  awsRegion: eu-central-1
+  awsRegion: us-east-1
   profileName: my-profile
 ---
 kind: AwsBoto3S3Bucket
@@ -89,6 +89,8 @@ spec:
 
 The most basic S3 bucket definition.
 
+> **Note**
+> For S3 buckets, the Boto3 session _**must**_ be `us-east-1`
 
 # Versions and Changelog
 
