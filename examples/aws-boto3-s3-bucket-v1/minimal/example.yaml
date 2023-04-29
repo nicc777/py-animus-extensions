@@ -1,0 +1,25 @@
+---
+kind: AwsBoto3Session
+version: v1
+metadata:
+  name: aws-boto3-session-v1-minimal
+  skipApplyAll: true 
+  skipDeleteAll: true
+spec:
+  awsRegion: us-east-1
+  profileName: my-profile
+---
+kind: AwsBoto3S3Bucket
+version: v1
+metadata:
+  name: aws-boto3-s3-bucket-v1-minimal
+  dependencies:
+    apply:
+    - aws-boto3-session-v1-minimal
+    delete:
+    - aws-boto3-session-v1-minimal
+  executeOnlyOnceOnApply: true
+spec:
+  awsBoto3Session: aws-boto3-session-v1-minimal
+  name: my-very-unique-bucket-name
+

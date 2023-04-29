@@ -1,0 +1,194 @@
+---
+kind: AnimusExtensionTemplate
+version: v1
+metadata:
+  name: aws-boto3-s3-bucket-v1
+  skipDeleteAll: false
+  executeOnlyOnceOnApply: true
+  executeOnlyOnceOnDelete: true
+spec:
+  description: |
+    Manages an S3 bucket. Version aims to support the following features:
+
+    * Create a new bucket with the `apply` action
+    * Delete an existing bucket with the `delete` action that was created earlier with the apply action
+        * If the bucket is not empty, the delete behavior will have three options: a) Ignore the delete and just carry on; b) Delete all content, and then delete the bucket; and c) Stop with an error/Exception
+    * A lot of the supported boto3 options can be set, but in v1 changes to these settings can not yet be handled (planned for a future version). This, for example, applies to changing the ACL or object ownership settings.
+
+    Using this manifest depends on `AwsBoto3Session` and will need a dependency for a session manifest.
+
+    Since the introduction of environments and variables, it will be possible to use one manifest for buckets in different accounts, assuming at least one AWS account per environment.
+
+    The following variables will be set:
+
+    * `:BUCKET_EXISTS`: boolean, with a value of `True` if the bucket exists
+    * `:NAME`: string containing the bucket name
+  kind: AwsBoto3S3Bucket
+  version: v1
+  versionChangelog: |
+    This is the initial version
+  supportedVersions:
+  - 'v1'
+  baseClass: ManifestBase
+  # outputPaths:              # If any of these are null/NoneType, the global defaults will be used (which is this repo)
+  #   doc: /tmp/aws-boto3-s3-bucket-v1/doc
+  #   examples: /tmp/aws-boto3-s3-bucket-v1/examples
+  #   implementations: /tmp/aws-boto3-s3-bucket-v1/impl
+  pipRequirements:
+  - 'py-animus'
+  - 'boto3'
+  importStatements:
+  - 'from py_animus.manifest_management import *'
+  - 'from py_animus import get_logger'
+  - 'import traceback'
+  - 'import boto3'
+  specFields:
+  - fieldName: awsBoto3Session
+    fieldDescription: |
+      The name of the `awsBoto3Session`. The appropriate variable name will be derived from this name.
+    fieldType: str
+    fieldRequired: true
+    fieldDefaultValue: 'set-me-please'
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: name
+    fieldDescription: |
+      The name of the AWS bucket. Keep in mind the S3 bucket naming restrictions: https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html
+    fieldType: str
+    fieldRequired: true
+    fieldDefaultValue: 'set-me-please'
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: acl
+    fieldDescription: |
+      Corresponds to the Boto3 options `acl` [boto3 documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/create_bucket.html) and [AWS API Documentation](https://docs.aws.amazon.com/AmazonS3/latest/API/API_CreateBucket.html)
+    fieldType: str
+    fieldRequired: false
+    fieldDefaultValue: null
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: grantFullControl
+    fieldDescription: |
+      Corresponds to the Boto3 options `grantFullControl` [boto3 documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/create_bucket.html) and [AWS API Documentation](https://docs.aws.amazon.com/AmazonS3/latest/API/API_CreateBucket.html)
+    fieldType: str
+    fieldRequired: false
+    fieldDefaultValue: null
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: grantRead
+    fieldDescription: |
+      Corresponds to the Boto3 options `grantRead` [boto3 documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/create_bucket.html) and [AWS API Documentation](https://docs.aws.amazon.com/AmazonS3/latest/API/API_CreateBucket.html)
+    fieldType: str
+    fieldRequired: false
+    fieldDefaultValue: null
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: grantReadACP
+    fieldDescription: |
+      Corresponds to the Boto3 options `grantReadACP` [boto3 documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/create_bucket.html) and [AWS API Documentation](https://docs.aws.amazon.com/AmazonS3/latest/API/API_CreateBucket.html)
+    fieldType: str
+    fieldRequired: false
+    fieldDefaultValue: null
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: grantWrite
+    fieldDescription: |
+      Corresponds to the Boto3 options `grantWrite` [boto3 documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/create_bucket.html) and [AWS API Documentation](https://docs.aws.amazon.com/AmazonS3/latest/API/API_CreateBucket.html)
+    fieldType: str
+    fieldRequired: false
+    fieldDefaultValue: null
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: grantWriteACP
+    fieldDescription: |
+      Corresponds to the Boto3 options `grantWriteACP` [boto3 documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/create_bucket.html) and [AWS API Documentation](https://docs.aws.amazon.com/AmazonS3/latest/API/API_CreateBucket.html)
+    fieldType: str
+    fieldRequired: false
+    fieldDefaultValue: null
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: objectLockEnabledForBucket
+    fieldDescription: |
+      Corresponds to the Boto3 options `objectLockEnabledForBucket` [boto3 documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/create_bucket.html) and [AWS API Documentation](https://docs.aws.amazon.com/AmazonS3/latest/API/API_CreateBucket.html)
+    fieldType: boolean
+    fieldRequired: false
+    fieldDefaultValue: false
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: objectOwnership
+    fieldDescription: |
+      Corresponds to the Boto3 options `objectOwnership` [boto3 documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/create_bucket.html) and [AWS API Documentation](https://docs.aws.amazon.com/AmazonS3/latest/API/API_CreateBucket.html)
+    fieldType: str
+    fieldRequired: false
+    fieldDefaultValue: null
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: deleteStrategy
+    fieldDescription: |
+      Defines the delete strategy which can be one of `IGNORE` (default) or `EMPTY_BUCKET_FIRST` or `ONLY_IF_ALREADY_EMPTY` or `IGNORE_WITH_WARNING_IF_NOT_EMPTY` or `EXCEPTION_IF_NOT_EMPTY`
+    fieldType: str
+    fieldRequired: false
+    fieldDefaultValue: 'IGNORE'
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  additionalExamples:
+  - exampleName: minimal  # This will also be used to compile the the value of metadata.name
+    manifest:
+      generated: false # This will automatically generate an example spec data with the minimum required fields and default values
+      additionalMetadata: |
+        executeOnlyOnceOnApply: true
+        dependencies:
+          apply:
+          - some-boto3-session
+          delete:
+          - some-boto3-session
+      specData: |
+        awsBoto3Session: some-boto3-session
+        name: my-very-unique-bucket-name
+    explanatoryText: |
+      The most basic S3 bucket definition.
+  
