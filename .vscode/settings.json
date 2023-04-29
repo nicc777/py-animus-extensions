@@ -11,6 +11,7 @@
         "shabang",
         "tempfile",
         "traceback",
+        "venv",
         "workdir"
     ]
 }
