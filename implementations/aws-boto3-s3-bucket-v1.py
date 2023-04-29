@@ -31,10 +31,7 @@ Since the introduction of environments and variables, it will be possible to use
             target_environment
         )
 
-    def implemented_manifest_differ_from_this_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders())->bool:
-        if target_environment not in self.metadata['environments']:
-            return False
-        
+    def _get_boto3_se_client(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
         boto3_session_base_name = 'AwsBoto3Session:{}:{}'.format(
             self.spec['awsBoto3Session'],
             target_environment
@@ -55,19 +52,26 @@ Since the introduction of environments and variables, it will be possible to use
             raise_exception_on_expired=False,
             raise_exception_on_not_found=False
         )
+        if boto3_session:
+            return boto3_session.client('s3')
+        raise Exception('Unable to create S3 client')
 
+    def _bucket_exists(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->bool:
         try:        
-            client = boto3_session.client('s3')
+            client = self._get_boto3_se_client(variable_cache=variable_cache, target_environment=target_environment)
             response = client.head_bucket(
-                Bucket='string',
-                ExpectedBucketOwner='string'
+                Bucket=self.spec['name']
             )
             self.log(message='response={}'.format(json.dumps(response)), level='debug')
+            return True
         except:
             self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
-            return True
-
         return False
+
+    def implemented_manifest_differ_from_this_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders())->bool:
+        if target_environment not in self.metadata['environments']:
+            return False        
+        return not self._bucket_exists(variable_cache=variable_cache, target_environment=target_environment)
 
     def _set_variables(self, exists: bool=True, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
         variable_cache.store_variable(
@@ -116,20 +120,8 @@ Since the introduction of environments and variables, it will be possible to use
         parameters = self._add_parameter(spec_param_name='objectLockEnabledForBucket', boto3_param_name='ObjectLockEnabledForBucket', current_parameters=copy.deepcopy(parameters), type_def=bool)
         parameters = self._add_parameter(spec_param_name='objectOwnership', boto3_param_name='ObjectOwnership', current_parameters=copy.deepcopy(parameters), type_def=str)
 
-        boto3_session_base_name = 'AwsBoto3Session:{}:{}'.format(
-            self.spec['awsBoto3Session'],
-            target_environment
-        )
-        boto3_session = variable_cache.get_value(
-            variable_name='{}:SESSION'.format(boto3_session_base_name),
-            value_if_expired=False,
-            default_value_if_not_found=False,
-            raise_exception_on_expired=False,
-            raise_exception_on_not_found=False
-        )
-
         try:        
-            client = boto3_session.client('s3')
+            client = self._get_boto3_se_client(variable_cache=variable_cache, target_environment=target_environment)
             response = client.create_bucket(**parameters)
             self.log(message='response={}'.format(json.dumps(response)), level='debug')
             self._set_variables(exists=True, variable_cache=variable_cache, target_environment=target_environment)
@@ -144,4 +136,13 @@ Since the introduction of environments and variables, it will be possible to use
             self.log(message='Target environment "{}" not relevant for this manifest'.format(target_environment), level='warning')
             return
         self.log(message='DELETE CALLED', level='info')
+        if self._bucket_exists(variable_cache=variable_cache, target_environment=target_environment) is False:
+            self.log(message='    Bucket "{}" not found in environment "{}" - already deleted?'.format(self.spec['name'], target_environment), level='warning')
+            self._set_variables(exists=False, variable_cache=variable_cache, target_environment=target_environment)
+            return
+        else:
+            self.log(message='    FOUND bucket "{}" in environment "{}"'.format(self.spec['name'], target_environment), level='warning')
+
+        
+
         return 
