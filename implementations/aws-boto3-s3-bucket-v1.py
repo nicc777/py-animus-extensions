@@ -131,6 +131,58 @@ Since the introduction of environments and variables, it will be possible to use
 
         return 
     
+    def _is_bucket_empty(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->bool:
+        try:        
+            client = self._get_boto3_se_client(variable_cache=variable_cache, target_environment=target_environment)
+            response = client.list_objects_v2(Bucket=self.spec['name'],MaxKeys=2)
+            self.log(message='response={}'.format(json.dumps(response)), level='debug')
+            if 'KeyCount' in response:
+                if response['KeyCount'] is not None:
+                    if isinstance(response['KeyCount'], int):
+                        if response['KeyCount'] > 0:
+                            self.log(message='Some files found. Bucket is NOT empty', level='info')
+                            return False
+                        else:
+                            self.log(message='No files found. Bucket is empty', level='info')
+                    else:
+                        self.log(message='KeyCount field in response is not a number. Assuming bucket is empty', level='warning')
+                else:
+                    self.log(message='KeyCount field in response was NoneType. Assuming bucket is empty', level='warning')
+            else:
+                self.log(message='No KeyCount field in response. Assuming bucket is empty', level='warning')
+        except:
+            self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
+        return True
+
+    def _delete_bucket(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
+        try:        
+            client = self._get_boto3_se_client(variable_cache=variable_cache, target_environment=target_environment)
+            response = client.delete_bucket(Bucket=self.spec['name'])
+            self.log(message='response={}'.format(json.dumps(response)), level='debug')
+        except:
+            self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
+
+    def _get_s3_keys(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->list:
+        keys = list()
+        try:        
+            client = self._get_boto3_se_client(variable_cache=variable_cache, target_environment=target_environment)
+            response = client.list_objects_v2(Bucket=self.spec['name'],MaxKeys=100)
+            self.log(message='response={}'.format(json.dumps(response)), level='debug')
+            if 'Contents' in response:
+                for content in response['Contents']:
+                    if 'Key' in content:
+                        keys.append({'Key': content['Key']})
+        except:
+            self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
+        return keys
+    
+    def _delete_keys_batch(self, keys: list, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->list:
+        client = self._get_boto3_se_client(variable_cache=variable_cache, target_environment=target_environment)
+        response = client.delete_objects(Bucket=self.spec['name'],Delete={'Objects': keys})
+        self.log(message='response={}'.format(json.dumps(response)), level='debug')
+        return self._get_s3_keys(variable_cache=variable_cache, target_environment=target_environment)
+
+
     def delete_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
         if target_environment not in self.metadata['environments']:
             self.log(message='Target environment "{}" not relevant for this manifest'.format(target_environment), level='warning')
@@ -143,6 +195,55 @@ Since the introduction of environments and variables, it will be possible to use
         else:
             self.log(message='    FOUND bucket "{}" in environment "{}"'.format(self.spec['name'], target_environment), level='warning')
 
-        
+        delete_strategy = 'IGNORE'
+        if 'deleteStrategy' in self.spec:
+            if self.spec['deleteStrategy'].upper() in ('EMPTY_BUCKET_FIRST', 'ONLY_IF_ALREADY_EMPTY', 'IGNORE_WITH_WARNING_IF_NOT_EMPTY', 'EXCEPTION_IF_NOT_EMPTY'):
+                delete_strategy = self.spec['deleteStrategy'].upper()
+        if self._is_bucket_empty(variable_cache=variable_cache, target_environment=target_environment) is True:
+            self._delete_bucket(variable_cache=variable_cache, target_environment=target_environment)
+            self._set_variables(exists=False, variable_cache=variable_cache, target_environment=target_environment)
+            self.log(message='    Bucket "{}" in environment "{}" was deleted (strategy ignored - bucket was empty)'.format(self.spec['name'], target_environment), level='info')
+        else:
+            if delete_strategy == 'IGNORE':
+                self.log(message='    Bucket "{}" in environment "{}" was NOT deleted (bucket NOT empty, deleteStrategy={})'.format(self.spec['name'], target_environment, delete_strategy), level='info')
+            elif delete_strategy == 'EMPTY_BUCKET_FIRST':
+                keys = self._get_s3_keys(variable_cache=variable_cache, target_environment=target_environment)
+                loop_count = 0
+                while len(keys) > 0:
+                    loop_count += 1
+                    self.log(message='        Deleting {} keys from bucket "{}" in environment "{}")'.format(len(keys), self.spec['name'], target_environment), level='info')
+                    if loop_count % 10 == 0:
+                        self.log(message='            Number of Loops now {} - still carrying on. The process will give up after 1000 loops (100,000 keys)'.format(loop_count), level='info')
+                    keys = self._delete_keys_batch(keys=copy.deepcopy(keys), variable_cache=variable_cache, target_environment=target_environment)
+                    if loop_count > 999 and len(keys) > 0:
+                        self.log(message='            MAX LOOP COUNT REACHED - QUITTING', level='error')
+                        raise Exception('Maximum loop count reached while deleting objects in S3 bucket "{}" in environment "{}"'.format(self.spec['name'], target_environment))
+                self._delete_bucket(variable_cache=variable_cache, target_environment=target_environment)
+                self._set_variables(exists=False, variable_cache=variable_cache, target_environment=target_environment)
+                self.log(message='    Bucket "{}" in environment "{}" was deleted (uSING "{}" STRATEGY)'.format(self.spec['name'], target_environment, delete_strategy), level='info')
+            elif delete_strategy == 'ONLY_IF_ALREADY_EMPTY':
+                keys = self._get_s3_keys(variable_cache=variable_cache, target_environment=target_environment)
+                if len(keys) == 0:
+                    self._delete_bucket(variable_cache=variable_cache, target_environment=target_environment)
+                    self._set_variables(exists=False, variable_cache=variable_cache, target_environment=target_environment)
+                    self.log(message='    Bucket "{}" in environment "{}" was deleted (uSING "{}" STRATEGY)'.format(self.spec['name'], target_environment, delete_strategy), level='info')
+            elif delete_strategy == 'IGNORE_WITH_WARNING_IF_NOT_EMPTY':
+                keys = self._get_s3_keys(variable_cache=variable_cache, target_environment=target_environment)
+                if len(keys) == 0:
+                    self._delete_bucket(variable_cache=variable_cache, target_environment=target_environment)
+                    self._set_variables(exists=False, variable_cache=variable_cache, target_environment=target_environment)
+                    self.log(message='    Bucket "{}" in environment "{}" was deleted (uSING "{}" STRATEGY)'.format(self.spec['name'], target_environment, delete_strategy), level='info')
+                else:
+                    self.log(message='    Bucket "{}" in environment "{}" was NOT deleted (bucket NOT empty, deleteStrategy={})'.format(self.spec['name'], target_environment, delete_strategy), level='warning')
+            elif delete_strategy == 'EXCEPTION_IF_NOT_EMPTY':
+                keys = self._get_s3_keys(variable_cache=variable_cache, target_environment=target_environment)
+                if len(keys) == 0:
+                    self._delete_bucket(variable_cache=variable_cache, target_environment=target_environment)
+                    self._set_variables(exists=False, variable_cache=variable_cache, target_environment=target_environment)
+                    self.log(message='    Bucket "{}" in environment "{}" was deleted (uSING "{}" STRATEGY)'.format(self.spec['name'], target_environment, delete_strategy), level='info')
+                else:
+                    raise Exception('Bucket "{}" in environment "{}" was NOT deleted (bucket NOT empty, deleteStrategy={})'.format(self.spec['name'], target_environment, delete_strategy))
+            else:
+                self.log(message='    Bucket "{}" in environment "{}" was NOT deleted (bucket NOT empty, deleteStrategy=IGNORE (assumed due to unrecognized delete strategy))'.format(self.spec['name'], target_environment), level='warning')
 
         return 
