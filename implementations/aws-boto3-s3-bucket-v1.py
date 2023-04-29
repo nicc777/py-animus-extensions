@@ -5,8 +5,6 @@ import traceback
 import boto3
 
 
-
-
 class AwsBoto3S3Bucket(ManifestBase):
     """Manages an S3 bucket. Version aims to support the following features:
 
