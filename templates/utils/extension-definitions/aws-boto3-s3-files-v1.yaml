@@ -68,7 +68,7 @@ spec:
       self.log(message='No custom validation for promptText', level='debug')
   - fieldName: s3Bucket
     fieldDescription: |
-      The name of the `AwsBoto3S3Bucket` used to manage the S3 bucket. The bucket name will be obtained from this manifest
+      The name of the `AwsBoto3S3Bucket` used to manage the S3 bucket. The bucket name will be obtained from this manifest. The bucket name will be in the variable `AwsBoto3S3Bucket:manifest-name:target-environment:NAME` from the `AwsBoto3S3Bucket` manifest
     fieldType: str
     fieldRequired: true
     fieldDefaultValue: 'set-me-please'
