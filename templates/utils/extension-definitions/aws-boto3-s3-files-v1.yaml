@@ -1,0 +1,81 @@
+---
+kind: AnimusExtensionTemplate
+version: v1
+metadata:
+  name: aws-boto3-s3-files-v1
+  skipDeleteAll: false
+  executeOnlyOnceOnApply: true
+  executeOnlyOnceOnDelete: true
+spec:
+  description: |
+    Synchronizes files to an S3 bucket (apply action) or deletes the files in an S3 bucket (delete action).
+
+    It is important that the bucket remain under control of Animus (both through `AwsBoto3S3Bucket` amd `AwsBoto3S3Files`)
+    to avoid inconsistencies or loss of dat or data corruption.
+
+    The intent of this facility is to keep file synchronized that are required for IaC activities. Ir was not really meant
+    for uploading or synchronizing a large amount of files. Consider using the AWS CLI tool 
+    [aws s3 sync](https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html) for bulk file uploads (1000+ files)
+
+    When the apply action is complete the following variable will be set:
+
+    * `:SYNC_RESULT` - Set to the string `ALL_OK`` when done.
+    * `:CHECKSUM_DIFFERENCES_DETECTED` - Boolean value which will only be present if some files or directories had the `verifyChecksums` parameter set to `true`. If this variable is `true`, it means some of the files evaluated did have a mismatch in checksum and was re-uploaded. If the `verifyChecksums` parameter was never used, this variable may be absent or have a value of `False`
+
+    Both individual files, or entire directory contents can be uploaded.
+
+    There are several strategies that can be followed: 
+
+    * Ignore the current files in the bucket, and just overwrite all of them
+    * A longer process can first get the checksum of each remote file and compare it with the local file and only upload the differences.
+  kind: AwsBoto3S3Files
+  version: v1
+  versionChangelog: |
+    This is the initial version
+  supportedVersions:
+  - 'v1'
+  baseClass: ManifestBase
+  outputPaths:              # If any of these are null/NoneType, the global defaults will be used (which is this repo)
+    doc: /tmp/aws-boto3-s3-files-v1/doc
+    examples: /tmp/aws-boto3-s3-files-v1/examples
+    implementations: /tmp/aws-boto3-s3-files-v1/impl
+  pipRequirements:
+  - 'py-animus'
+  - 'boto3'
+  importStatements:
+  - 'from py_animus.manifest_management import *'
+  - 'from py_animus import get_logger'
+  - 'import traceback'
+  - 'import boto3'
+  - 'import os'
+  - 'import shutil'
+  - 'import tempfile'
+  - 'from pathlib import Path'
+  - 'import re'
+  - 'import hashlib'
+  specFields:
+  - fieldName: awsBoto3Session
+    fieldDescription: |
+      The name of the `awsBoto3Session`. The appropriate variable name will be derived from this name.
+    fieldType: str
+    fieldRequired: true
+    fieldDefaultValue: 'set-me-please'
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: s3Bucket
+    fieldDescription: |
+      The name of the `AwsBoto3S3Bucket` used to manage the S3 bucket. The bucket name will be obtained from this manifest
+    fieldType: str
+    fieldRequired: true
+    fieldDefaultValue: 'set-me-please'
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  
