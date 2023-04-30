@@ -137,10 +137,40 @@ spec:
       self.log(message='No custom validation for promptText', level='debug')
   - fieldName: ifFileExists.overWrite
     fieldDescription: |
-      If set to `False` (default), any existing files will just be skipped, _**unless**_ the `verifyChecksums` parameter is also used, which will overwrite the file if the checksum mismatches. If set to `True`, the file will be uploaded regardless if it already exists or not and regardless of the `verifyChecksums` parameter.  Therefore, when using the `verifyChecksums` parameter, it is best to keep this value `False`.
+      If set to `False` (default), any existing files will just be skipped, _**unless**_ the `verifyChecksums` parameter is
+      also used, which will overwrite the file if the checksum mismatches. If set to `True`, the file will be uploaded
+      regardless if it already exists or not and regardless of the `verifyChecksums` parameter.  Therefore, when using the
+      `verifyChecksums` parameter, it is best to keep this value `False`.
     fieldType: bool
     fieldRequired: true
     fieldDefaultValue: false
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: onError
+    fieldDescription: |
+      The only excepted values is `warn` (just create a warning log entry and carry on) and `exception` which will halt the
+      apply action with an exception. 
+    fieldType: str
+    fieldRequired: true
+    fieldDefaultValue: 'warn'
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: actionExtraFilesOnS3
+    fieldDescription: |
+      The only excepted values is `keep` (basically ignoring existing files on S3) and `delete` which will remove all files on
+      the S3 bucket not found in the local file map. For consistency, the default is `delete` and it is also the recommended
+      setting for a managed bucket.
+    fieldType: str
+    fieldRequired: true
+    fieldDefaultValue: 'delete'
     fieldSetDefaultValueConditions:
     - fieldDefinitionNotPresentInManifest: true
     - fieldValueTypeMismatch: true
