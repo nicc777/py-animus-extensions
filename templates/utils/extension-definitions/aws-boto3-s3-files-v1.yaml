@@ -108,4 +108,44 @@ spec:
     - fieldValueIsNull: true
     customValidation: |
       self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: localStagingDirectory
+    fieldDescription: |
+      Only required if `verifyChecksums` parameter is used. If the `verifyChecksums` parameter is used and this temporary
+      location is not specified, one will be determined programmatically at run time. If the target directory does not exist,
+      an attempt will be made to create it. Post processing, the directory content will be deleted, but the directory will
+      remain.
+    fieldType: str
+    fieldRequired: false
+    fieldDefaultValue: ''
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: sources
+    fieldDescription: |
+      A collection (list) of files and/or directories to upload to S3
+    fieldType: list
+    fieldRequired: true
+    fieldDefaultValue: []
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: ifFileExists.overWrite
+    fieldDescription: |
+      If set to `False` (default), any existing files will just be skipped, _**unless**_ the `verifyChecksums` parameter is also used, which will overwrite the file if the checksum mismatches. If set to `True`, the file will be uploaded regardless if it already exists or not and regardless of the `verifyChecksums` parameter.  Therefore, when using the `verifyChecksums` parameter, it is best to keep this value `False`.
+    fieldType: bool
+    fieldRequired: true
+    fieldDefaultValue: false
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  
   
