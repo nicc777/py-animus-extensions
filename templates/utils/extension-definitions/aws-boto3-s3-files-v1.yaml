@@ -78,4 +78,16 @@ spec:
     - fieldValueIsNull: true
     customValidation: |
       self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: globalOverwrite
+    fieldDescription: |
+      If this parameter is present and is set to `True`, all selected files and directories will be uploaded regarded if they already exists or not. This is by far the fastest operation, and resembled the `aws s3 sync` functionality.
+    fieldType: bool
+    fieldRequired: true
+    fieldDefaultValue: false
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
   
