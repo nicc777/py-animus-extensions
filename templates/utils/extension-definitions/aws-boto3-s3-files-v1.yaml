@@ -41,10 +41,10 @@ spec:
   supportedVersions:
   - 'v1'
   baseClass: ManifestBase
-  outputPaths:              # If any of these are null/NoneType, the global defaults will be used (which is this repo)
-    doc: /tmp/aws-boto3-s3-files-v1/doc
-    examples: /tmp/aws-boto3-s3-files-v1/examples
-    implementations: /tmp/aws-boto3-s3-files-v1/impl
+  # outputPaths:              # If any of these are null/NoneType, the global defaults will be used (which is this repo)
+  #   doc: /tmp/aws-boto3-s3-files-v1/doc
+  #   examples: /tmp/aws-boto3-s3-files-v1/examples
+  #   implementations: /tmp/aws-boto3-s3-files-v1/impl
   pipRequirements:
   - 'py-animus'
   - 'boto3'

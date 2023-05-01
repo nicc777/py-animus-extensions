@@ -1,0 +1,12 @@
+kind: AwsBoto3S3Files
+metadata:
+  name: aws-boto3-s3-files-v1-minimal
+spec:
+  actionExtraFilesOnS3: delete
+  awsBoto3Session: set-me-please
+  ifFileExists:
+    overWrite: false
+  onError: warn
+  s3Bucket: set-me-please
+  sources: []
+version: v1
