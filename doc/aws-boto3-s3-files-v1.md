@@ -146,7 +146,7 @@ metadata:
     - aws-boto3-session-v1-minimal
     - aws-boto3-s3-bucket-v1-minimal # Because we need to ensure the S3 bucket exists first
     delete:
-    - aws-boto3-session-v1-minimal # Just delete all the files if the exist on S3
+    - aws-boto3-session-v1-minimal # Just delete all the files if the exist on S3 - but we need a session for that...
 spec:
   awsBoto3Session: aws-boto3-session-v1-minimal
   s3Bucket: aws-boto3-s3-bucket-v1-minimal # Name of the AwsBoto3S3Bucket manifest to use as reference bucket for the files
