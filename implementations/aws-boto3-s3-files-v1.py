@@ -212,8 +212,27 @@ Restrictions:
                         else:
                             self.log(message='No actual files found. Ignoring this section: Problematic source_definition={}'.format(json.dumps(source_definition)), level='warning')
                     elif source_definition['sourceType'].lower() == 'localdirectories':
-                        # TODO Walk the directory and get all the file data
-                        pass
+                        recurse = False
+                        if 'recurse' in source_definition:
+                            recurse = source_definition['recurse']
+                        if 'verifyChecksums' in source_definition:
+                            verify_checksums = source_definition['verifyChecksums']
+                        directory_list = list()
+                        if 'directories' in source_definition:
+                            for dir in source_definition['directories']:
+                                directory_list.append('{}{}{}'.format(base_directory, os.sep, dir))
+                        else:
+                            directory_list.append(base_directory)
+                        for dir in directory_list:
+                            file_list_data = list_files(directory=dir, recurse=recurse)
+                            for file_full_path in list(file_list_data.keys()):
+                                full_base_dir = '{}{}'.format(base_directory, os.sep)
+                                file_name = copy.deepcopy(file_full_path).replace(full_base_dir, '')
+                                self.log(message='Attempting to add file "{}"'.format(file_full_path), level='info')
+                                target_key_checksum = hashlib.sha256(file_name.encode('utf-8')).hexdigest()
+                                local_file_metadata = self._retrieve_local_file_meta_data(base_directory=base_directory, file_name_portion=file_name, verify_checksums=verify_checksums)
+                                if local_file_metadata is not None:                                    
+                                    files[target_key_checksum] = local_file_metadata
                     else:
                         self.log(message='Unsupported source type "{}" SKIPPED'.format(source_definition['sourceType']), level='warning')
                 else:
