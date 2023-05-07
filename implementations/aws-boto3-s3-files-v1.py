@@ -51,7 +51,7 @@ Restrictions:
             target_environment
         )
 
-    def _get_boto3_se_client(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
+    def _get_boto3_s3_client(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
         boto3_session_base_name = 'AwsBoto3Session:{}:{}'.format(
             self.spec['awsBoto3Session'],
             target_environment
@@ -113,7 +113,7 @@ Restrictions:
     
     def _bucket_exists(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->bool:
         try:        
-            client = self._get_boto3_se_client(variable_cache=variable_cache, target_environment=target_environment)
+            client = self._get_boto3_s3_client(variable_cache=variable_cache, target_environment=target_environment)
             response = client.head_bucket(
                 Bucket=self._get_bucket_name(variable_cache=variable_cache, target_environment=target_environment)
             )
@@ -123,14 +123,52 @@ Restrictions:
             self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
         return False
 
-    def _get_all_s3_keys(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->list:
-        keys = list()
-        # TODO implement
+    def _get_all_s3_keys(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default', continuation_token: str=None, start_after: str=None)->dict:
+        keys = dict()
+        try:
+            client = self._get_boto3_s3_client(variable_cache=variable_cache, target_environment=target_environment)
+            response = None
+            if continuation_token is not None:
+                if start_after is not None:
+                    response = client.list_objects_v2(
+                        Bucket=self._get_bucket_name(variable_cache=variable_cache, target_environment=target_environment),
+                        MaxKeys=100,
+                        ContinuationToken=continuation_token,
+                        StartAfter=start_after
+                    )
+                else:
+                    response = client.list_objects_v2(
+                        Bucket=self._get_bucket_name(variable_cache=variable_cache, target_environment=target_environment),
+                        MaxKeys=100,
+                        ContinuationToken=continuation_token
+                    )
+            else:
+                response = client.list_objects_v2(
+                    Bucket=self._get_bucket_name(variable_cache=variable_cache, target_environment=target_environment),
+                    MaxKeys=100
+                )
+            if 'ContinuationToken' in response:
+                new_continuation_token = response['ContinuationToken']
+                new_start_after = None
+                if 'StartAfter' in response:
+                    new_start_after = response['StartAfter']
+                keys = {**keys, **self._get_all_s3_keys(variable_cache=variable_cache, target_environment=target_environment, continuation_token=new_continuation_token, start_after=new_start_after)}
+            if 'Contents' in response:
+                for key_data in response['Contents']:
+                    key_checksum = hashlib.sha256(key_data['Key'].encode('utf-8')).hexdigest()
+                    keys[key_checksum] = dict()
+                    keys[key_checksum]['Key'] = key_data['Key']
+                    keys[key_checksum]['Size'] = key_data['Size']
+        except:
+            self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
         return keys
 
     def implemented_manifest_differ_from_this_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders())->bool:
         if target_environment not in self.metadata['environments']:
             return False
+        
+        s3_keys = self._get_all_s3_keys(variable_cache=variable_cache, target_environment=target_environment)
+
         return False
 
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
@@ -155,5 +193,9 @@ Restrictions:
             return
         if self._bucket_exists(variable_cache=variable_cache, target_environment=target_environment) is False:
             self.log(message='Bucket already deleted', level='warning')
+        s3_keys = self._get_all_s3_keys(variable_cache=variable_cache, target_environment=target_environment)
+        for key_hash, key_data in s3_keys.items():
+            # TODO delete key in key_data['Key]
+            pass
         self.log(message='DELETE CALLED', level='info')
         return 

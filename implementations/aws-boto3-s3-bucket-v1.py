@@ -29,7 +29,7 @@ Since the introduction of environments and variables, it will be possible to use
             target_environment
         )
 
-    def _get_boto3_se_client(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
+    def _get_boto3_s3_client(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
         boto3_session_base_name = 'AwsBoto3Session:{}:{}'.format(
             self.spec['awsBoto3Session'],
             target_environment
@@ -56,7 +56,7 @@ Since the introduction of environments and variables, it will be possible to use
 
     def _bucket_exists(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->bool:
         try:        
-            client = self._get_boto3_se_client(variable_cache=variable_cache, target_environment=target_environment)
+            client = self._get_boto3_s3_client(variable_cache=variable_cache, target_environment=target_environment)
             response = client.head_bucket(
                 Bucket=self.spec['name']
             )
@@ -119,7 +119,7 @@ Since the introduction of environments and variables, it will be possible to use
         parameters = self._add_parameter(spec_param_name='objectOwnership', boto3_param_name='ObjectOwnership', current_parameters=copy.deepcopy(parameters), type_def=str)
 
         try:        
-            client = self._get_boto3_se_client(variable_cache=variable_cache, target_environment=target_environment)
+            client = self._get_boto3_s3_client(variable_cache=variable_cache, target_environment=target_environment)
             response = client.create_bucket(**parameters)
             self.log(message='response={}'.format(json.dumps(response, default=str)), level='debug')
             self._set_variables(exists=True, variable_cache=variable_cache, target_environment=target_environment)
@@ -131,7 +131,7 @@ Since the introduction of environments and variables, it will be possible to use
     
     def _is_bucket_empty(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->bool:
         try:        
-            client = self._get_boto3_se_client(variable_cache=variable_cache, target_environment=target_environment)
+            client = self._get_boto3_s3_client(variable_cache=variable_cache, target_environment=target_environment)
             response = client.list_objects_v2(Bucket=self.spec['name'],MaxKeys=2)
             self.log(message='response={}'.format(json.dumps(response, default=str)), level='debug')
             if 'KeyCount' in response:
@@ -154,7 +154,7 @@ Since the introduction of environments and variables, it will be possible to use
 
     def _delete_bucket(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
         try:        
-            client = self._get_boto3_se_client(variable_cache=variable_cache, target_environment=target_environment)
+            client = self._get_boto3_s3_client(variable_cache=variable_cache, target_environment=target_environment)
             response = client.delete_bucket(Bucket=self.spec['name'])
             self.log(message='response={}'.format(json.dumps(response, default=str)), level='debug')
         except:
@@ -163,7 +163,7 @@ Since the introduction of environments and variables, it will be possible to use
     def _get_s3_keys(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->list:
         keys = list()
         try:        
-            client = self._get_boto3_se_client(variable_cache=variable_cache, target_environment=target_environment)
+            client = self._get_boto3_s3_client(variable_cache=variable_cache, target_environment=target_environment)
             response = client.list_objects_v2(Bucket=self.spec['name'],MaxKeys=100)
             self.log(message='response={}'.format(json.dumps(response, default=str)), level='debug')
             if 'Contents' in response:
@@ -175,7 +175,7 @@ Since the introduction of environments and variables, it will be possible to use
         return keys
     
     def _delete_keys_batch(self, keys: list, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->list:
-        client = self._get_boto3_se_client(variable_cache=variable_cache, target_environment=target_environment)
+        client = self._get_boto3_s3_client(variable_cache=variable_cache, target_environment=target_environment)
         response = client.delete_objects(Bucket=self.spec['name'],Delete={'Objects': keys})
         self.log(message='response={}'.format(json.dumps(response, default=str)), level='debug')
         return self._get_s3_keys(variable_cache=variable_cache, target_environment=target_environment)
