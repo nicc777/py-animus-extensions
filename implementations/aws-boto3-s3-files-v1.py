@@ -163,6 +163,16 @@ Restrictions:
             self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
         return keys
 
+    def _delete_s3_key(self, key: str, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
+        try:
+            client = self._get_boto3_s3_client(variable_cache=variable_cache, target_environment=target_environment)
+            client.delete_object(
+                Bucket=self._get_bucket_name(variable_cache=variable_cache, target_environment=target_environment),
+                Key=key
+            )
+        except:
+            self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
+
     def implemented_manifest_differ_from_this_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders())->bool:
         if target_environment not in self.metadata['environments']:
             return False
@@ -195,7 +205,9 @@ Restrictions:
             self.log(message='Bucket already deleted', level='warning')
         s3_keys = self._get_all_s3_keys(variable_cache=variable_cache, target_environment=target_environment)
         for key_hash, key_data in s3_keys.items():
-            # TODO delete key in key_data['Key]
-            pass
+            self._delete_s3_key(key=key_data['Key'], variable_cache=variable_cache, target_environment=target_environment)
+            self.log(message='   Deleted known S3 key "{}"'.format(key_data['Key']), level='info')   
+        # TODO Delete temporary files
+        # TODO Delete temporary work directories 
         self.log(message='DELETE CALLED', level='info')
         return 
