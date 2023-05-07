@@ -97,6 +97,37 @@ Restrictions:
             overwrite_existing=True
         )
 
+    def _get_bucket_name(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->str:
+        bucket_name = variable_cache.get_value(
+            variable_name='AwsBoto3S3Bucket:{}:{}:NAME'.format(self.spec['s3Bucket'], target_environment),
+            value_if_expired=None,
+            default_value_if_not_found=None,
+            raise_exception_on_expired=False,
+            raise_exception_on_not_found=False
+        )
+        if bucket_name is not None:
+            if isinstance(bucket_name, str):
+                if len(bucket_name) > 0:
+                    return bucket_name
+        raise Exception('Bucket name not found')
+    
+    def _bucket_exists(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->bool:
+        try:        
+            client = self._get_boto3_se_client(variable_cache=variable_cache, target_environment=target_environment)
+            response = client.head_bucket(
+                Bucket=self._get_bucket_name(variable_cache=variable_cache, target_environment=target_environment)
+            )
+            self.log(message='response={}'.format(json.dumps(response, default=str)), level='debug')
+            return True
+        except:
+            self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
+        return False
+
+    def _get_all_s3_keys(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->list:
+        keys = list()
+        # TODO implement
+        return keys
+
     def implemented_manifest_differ_from_this_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders())->bool:
         if target_environment not in self.metadata['environments']:
             return False
@@ -107,6 +138,9 @@ Restrictions:
             self.log(message='Target environment "{}" not relevant for this manifest'.format(target_environment), level='warning')
             return
         self.log(message='APPLY CALLED', level='info')
+
+        if self._bucket_exists(variable_cache=variable_cache, target_environment=target_environment) is False:
+            raise Exception('Bucket does not exist - cannot continue')
 
         if self.implemented_manifest_differ_from_this_manifest(manifest_lookup_function=manifest_lookup_function, variable_cache=variable_cache, target_environment=target_environment, value_placeholders=value_placeholders) is False:
             self.log(message='    Bucket "{}" in environment "{}" already appears to be synchronized'.format(self.spec['name'], target_environment), level='info')
@@ -119,5 +153,7 @@ Restrictions:
         if target_environment not in self.metadata['environments']:
             self.log(message='Target environment "{}" not relevant for this manifest'.format(target_environment), level='warning')
             return
+        if self._bucket_exists(variable_cache=variable_cache, target_environment=target_environment) is False:
+            self.log(message='Bucket already deleted', level='warning')
         self.log(message='DELETE CALLED', level='info')
         return 
