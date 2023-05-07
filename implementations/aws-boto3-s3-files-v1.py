@@ -174,6 +174,23 @@ Restrictions:
         except:
             self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
 
+    def _retrieve_local_file_meta_data(self, base_directory: str, file_name_portion: str, verify_checksums: bool=False)->dict:
+        result = dict()
+        file_full_path = '{}{}{}'.format(base_directory, os.sep, file_name_portion)
+        self.log(message='Attempting to add file "{}"'.format(file_full_path), level='info')
+        file_size = get_file_size(file_path=file_full_path)
+        if file_size is not None:
+            result['Key'] = file_name_portion
+            result['LocalFullPath'] = file_full_path
+            result['BaseDirectory'] = base_directory
+            result['Size'] = file_size
+            result['ContentChecksumSha256'] = calculate_file_checksum(file_path=file_full_path, checksum_algorithm='sha256', _known_size=file_size)
+            result['VerifyS3Checksum'] = verify_checksums
+        else:
+            self.log(message='Failed to get filesize for file "{}" - skipping file. Please ensure it exists.'.format(file_full_path), level='warning')
+            return None
+        return result
+
     def _get_all_local_files(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->dict:
         files = dict()
         if 'sources' in self.spec:
@@ -188,18 +205,10 @@ Restrictions:
                             for file_name in source_definition['files']:
                                 file_full_path = '{}{}{}'.format(base_directory, os.sep, file_name)
                                 self.log(message='Attempting to add file "{}"'.format(file_full_path), level='info')
-                                file_size = get_file_size(file_path=file_full_path)
-                                if file_size is not None:
-                                    target_key_checksum = hashlib.sha256(file_name.encode('utf-8')).hexdigest()
-                                    files[target_key_checksum] = dict()
-                                    files[target_key_checksum]['Key'] = file_name
-                                    files[target_key_checksum]['LocalFullPath'] = file_full_path
-                                    files[target_key_checksum]['BaseDirectory'] = base_directory
-                                    files[target_key_checksum]['Size'] = file_size
-                                    files[target_key_checksum]['ContentChecksumSha256'] = calculate_file_checksum(file_path=file_full_path, checksum_algorithm='sha256', _known_size=file_size)
-                                    files[target_key_checksum]['VerifyS3Checksum'] = verify_checksums
-                                else:
-                                    self.log(message='Failed to get filesize for file "{}" - skipping file. Please ensure it exists.'.format(file_full_path), level='warning')
+                                target_key_checksum = hashlib.sha256(file_name.encode('utf-8')).hexdigest()
+                                local_file_metadata = self._retrieve_local_file_meta_data(base_directory=base_directory, file_name_portion=file_name, verify_checksums=verify_checksums)
+                                if local_file_metadata is not None:                                    
+                                    files[target_key_checksum] = local_file_metadata
                         else:
                             self.log(message='No actual files found. Ignoring this section: Problematic source_definition={}'.format(json.dumps(source_definition)), level='warning')
                     elif source_definition['sourceType'].lower() == 'localdirectories':
