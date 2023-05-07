@@ -204,7 +204,6 @@ Restrictions:
                         if 'files' in source_definition:
                             for file_name in source_definition['files']:
                                 file_full_path = '{}{}{}'.format(base_directory, os.sep, file_name)
-                                self.log(message='Attempting to add file "{}"'.format(file_full_path), level='info')
                                 target_key_checksum = hashlib.sha256(file_name.encode('utf-8')).hexdigest()
                                 local_file_metadata = self._retrieve_local_file_meta_data(base_directory=base_directory, file_name_portion=file_name, verify_checksums=verify_checksums)
                                 if local_file_metadata is not None:                                    
@@ -228,7 +227,6 @@ Restrictions:
                             for file_full_path in list(file_list_data.keys()):
                                 full_base_dir = '{}{}'.format(base_directory, os.sep)
                                 file_name = copy.deepcopy(file_full_path).replace(full_base_dir, '')
-                                self.log(message='Attempting to add file "{}"'.format(file_full_path), level='info')
                                 target_key_checksum = hashlib.sha256(file_name.encode('utf-8')).hexdigest()
                                 local_file_metadata = self._retrieve_local_file_meta_data(base_directory=base_directory, file_name_portion=file_name, verify_checksums=verify_checksums)
                                 if local_file_metadata is not None:                                    
