@@ -159,6 +159,7 @@ Restrictions:
                     keys[key_checksum] = dict()
                     keys[key_checksum]['Key'] = key_data['Key']
                     keys[key_checksum]['Size'] = key_data['Size']
+                    keys[key_checksum]['ContentChecksumSha256'] = None
         except:
             self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
         return keys
@@ -173,11 +174,52 @@ Restrictions:
         except:
             self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
 
+    def _get_all_local_files(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->dict:
+        files = dict()
+        if 'sources' in self.spec:
+            for source_definition in self.spec['sources']:
+                if 'sourceType' in source_definition and 'baseDirectory' in source_definition:
+                    verify_checksums = False
+                    base_directory = source_definition['baseDirectory']
+                    if 'verifyChecksums' in source_definition:
+                        verify_checksums = source_definition['verifyChecksums']
+                    if source_definition['sourceType'].lower() == 'localfiles':
+                        if 'files' in source_definition:
+                            for file_name in source_definition['files']:
+                                file_full_path = '{}{}{}'.format(base_directory, os.sep, file_name)
+                                self.log(message='Attempting to add file "{}"'.format(file_full_path), level='info')
+                                file_size = get_file_size(file_path=file_full_path)
+                                if file_size is not None:
+                                    target_key_checksum = hashlib.sha256(file_name.encode('utf-8')).hexdigest()
+                                    files[target_key_checksum] = dict()
+                                    files[target_key_checksum]['Key'] = file_name
+                                    files[target_key_checksum]['LocalFullPath'] = file_full_path
+                                    files[target_key_checksum]['BaseDirectory'] = base_directory
+                                    files[target_key_checksum]['Size'] = file_size
+                                    files[target_key_checksum]['ContentChecksumSha256'] = calculate_file_checksum(file_path=file_full_path, checksum_algorithm='sha256', _known_size=file_size)
+                                    files[target_key_checksum]['VerifyS3Checksum'] = verify_checksums
+                                else:
+                                    self.log(message='Failed to get filesize for file "{}" - skipping file. Please ensure it exists.'.format(file_full_path), level='warning')
+                        else:
+                            self.log(message='No actual files found. Ignoring this section: Problematic source_definition={}'.format(json.dumps(source_definition)), level='warning')
+                    elif source_definition['sourceType'].lower() == 'localdirectories':
+                        # TODO Walk the directory and get all the file data
+                        pass
+                    else:
+                        self.log(message='Unsupported source type "{}" SKIPPED'.format(source_definition['sourceType']), level='warning')
+                else:
+                    self.log(message='Not all required fields present. Problematic source_definition={}'.format(json.dumps(source_definition)), level='warning')
+        else:
+            self.log(message='NO SOURCES found in Spec - Nothing to do', level='warning')
+        self.log(message='files={}'.format(json.dumps(files)), level='debug')
+        return files
+
     def implemented_manifest_differ_from_this_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders())->bool:
         if target_environment not in self.metadata['environments']:
             return False
         
         s3_keys = self._get_all_s3_keys(variable_cache=variable_cache, target_environment=target_environment)
+        local_files = self._get_all_local_files(variable_cache=variable_cache, target_environment=target_environment)
 
         return False
 
