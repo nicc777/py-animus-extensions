@@ -192,6 +192,7 @@ Since the introduction of environments and variables, it will be possible to use
             return
         else:
             self.log(message='    FOUND bucket "{}" in environment "{}"'.format(self.spec['name'], target_environment), level='warning')
+            self._set_variables(exists=True, variable_cache=variable_cache, target_environment=target_environment)
 
         delete_strategy = 'IGNORE'
         if 'deleteStrategy' in self.spec:
