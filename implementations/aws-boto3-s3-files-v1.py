@@ -191,8 +191,8 @@ Restrictions:
             raise Exception('Bucket does not exist - cannot continue')
 
         if self.implemented_manifest_differ_from_this_manifest(manifest_lookup_function=manifest_lookup_function, variable_cache=variable_cache, target_environment=target_environment, value_placeholders=value_placeholders) is False:
-            self.log(message='    Bucket "{}" in environment "{}" already appears to be synchronized'.format(self.spec['name'], target_environment), level='info')
-            self._set_variables(oll_ok=True, checksum_differences_detected=False, variable_cache=variable_cache, target_environment=target_environment)
+            self.log(message='    Bucket "{}" in environment "{}" already appears to be synchronized'.format(self._get_bucket_name(variable_cache=variable_cache, target_environment=target_environment), target_environment), level='info')
+            self._set_variables(all_ok=True, checksum_differences_detected=False, variable_cache=variable_cache, target_environment=target_environment)
             return
 
         return 
