@@ -267,9 +267,23 @@ Restrictions:
                             files_to_transfer[local_key] = copy.deepcopy(key_data)
                             self.log(message='Local file "{}" found in S3 and checksums mismatch - marked for UPLOAD'.format(key_data['LocalFullPath']), level='info')
                         else:
-                            self.log(message='Local file "{}" found in S3 and checksums match - ignoring file'.format(key_data['LocalFullPath']), level='info')
+                            if 'ifFileExists' in self.spec:
+                                if self.spec['ifFileExists']['overWrite'] is True:
+                                    files_to_transfer[local_key] = copy.deepcopy(key_data)
+                                    self.log(message='Local file "{}" marked for UPLOAD ("ifFileExists" is set to "{}")'.format(key_data['LocalFullPath'], self.spec['ifFileExists']['overWrite']), level='info')
+                                else:
+                                    self.log(message='Local file "{}" found in S3 and checksums match - ignoring file ("ifFileExists" is set to "{}")'.format(key_data['LocalFullPath'], self.spec['ifFileExists']['overWrite']), level='info')
+                            else:
+                                self.log(message='Local file "{}" found in S3 and checksums match - ignoring file'.format(key_data['LocalFullPath']), level='info')
                     else:
-                        self.log(message='Local file "{}" found in S3 - ignoring file'.format(key_data['LocalFullPath']), level='info')
+                        if 'ifFileExists' in self.spec:
+                            if self.spec['ifFileExists']['overWrite'] is True:
+                                files_to_transfer[local_key] = copy.deepcopy(key_data)
+                                self.log(message='Local file "{}" marked for UPLOAD ("ifFileExists" is set to "{}")'.format(key_data['LocalFullPath'], self.spec['ifFileExists']['overWrite']), level='info')
+                            else:
+                                self.log(message='Local file "{}" found in S3 and checksums match - ignoring file ("ifFileExists" is set to "{}")'.format(key_data['LocalFullPath'], self.spec['ifFileExists']['overWrite']), level='info')
+                        else:
+                            self.log(message='Local file "{}" found in S3 - ignoring file'.format(key_data['LocalFullPath']), level='info')
         return files_to_transfer
     
     def _remote_files_to_delete(self, current_s3_keys: dict, local_files: dict, work_dir: str, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->dict:
