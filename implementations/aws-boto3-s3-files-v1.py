@@ -274,7 +274,10 @@ Restrictions:
     
     def _remote_files_to_delete(self, current_s3_keys: dict, local_files: dict, work_dir: str, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->dict:
         files_to_delete = dict()
-        # TODO implement
+        for remote_key, remote_key_data in current_s3_keys.items():
+            if remote_key not in local_files:
+                files_to_delete[remote_key] = copy.deepcopy(remote_key_data)
+                self.log(message='Remote key "{}" will be deleted (not found in local files collection)'.format(remote_key_data['Key']), level='info')
         return files_to_delete
 
     def _create_temporary_working_directory(self)->str:
