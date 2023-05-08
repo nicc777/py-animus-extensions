@@ -188,6 +188,11 @@ Restrictions:
             result['VerifyS3Checksum'] = verify_checksums
         else:
             self.log(message='Failed to get filesize for file "{}" - skipping file. Please ensure it exists.'.format(file_full_path), level='warning')
+            if 'onError' in self.spec:
+                if self.spec['onError'].lower() == 'exception':
+                    raise Exception('The "onError" parameter was set to "{}" - Further operations halted'.format(self.spec['onError'].lower()))
+                else:
+                    self.log(message='FILE WARNING: Failed to locate local file "{}" while the "onError" parameter was set to "{}"'.format(file_full_path, self.spec['onError'].lower()), level='warning')
             return None
         return result
 
@@ -352,6 +357,8 @@ Restrictions:
         return False
     
     def _upload_local_file(self, local_file_path: str, target_key: str, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
+        exception_on_fail = False
+        echo_warning = False
         try:
             client = self._get_boto3_s3_client(variable_cache=variable_cache, target_environment=target_environment)
             with open(local_file_path, 'rb') as f:
@@ -366,6 +373,15 @@ Restrictions:
             )
         except:
             self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
+            if 'onError' in self.spec:
+                if self.spec['onError'].lower() == 'exception':
+                    exception_on_fail = True
+                else:
+                    echo_warning = True
+        if exception_on_fail is True:
+            raise Exception('Failed to upload local file "{}" and "onError" was set to "{}"' .format(local_file_path, self.spec['onError'].lower()))
+        elif echo_warning is True:
+            self.log(message='UPLOAD WARNING: Failed to upload local file "{}"'.format(local_file_path), level='warning')
 
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
         if target_environment not in self.metadata['environments']:
