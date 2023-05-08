@@ -254,7 +254,22 @@ Restrictions:
 
     def _files_to_transfer(self, current_s3_keys: dict, local_files: dict, work_dir: str, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->dict:
         files_to_transfer = dict()
-        # TODO implement
+        for local_key, key_data in local_files.items():
+            if local_key not in current_s3_keys:
+                files_to_transfer[local_key] = copy.deepcopy(key_data)
+                self.log(message='Local file "{}" not found in S3 - marked for UPLOAD'.format(key_data['LocalFullPath']), level='info')
+            else:
+                if 'VerifyS3Checksum' in key_data and 'ContentChecksumSha256' in key_data:
+                    if key_data['VerifyS3Checksum'] is True:
+                        downloaded_file_path = self._download_s3_key(key=current_s3_keys[local_key]['Key'], work_dir=work_dir, variable_cache=variable_cache, target_environment=target_environment)
+                        downloaded_file_checksum = calculate_file_checksum(file_path=downloaded_file_path, checksum_algorithm='sha256')
+                        if key_data['ContentChecksumSha256'] != downloaded_file_checksum:
+                            files_to_transfer[local_key] = copy.deepcopy(key_data)
+                            self.log(message='Local file "{}" found in S3 and checksums mismatch - marked for UPLOAD'.format(key_data['LocalFullPath']), level='info')
+                        else:
+                            self.log(message='Local file "{}" found in S3 and checksums match - ignoring file'.format(key_data['LocalFullPath']), level='info')
+                    else:
+                        self.log(message='Local file "{}" found in S3 - ignoring file'.format(key_data['LocalFullPath']), level='info')
         return files_to_transfer
     
     def _remote_files_to_delete(self, current_s3_keys: dict, local_files: dict, work_dir: str, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->dict:
