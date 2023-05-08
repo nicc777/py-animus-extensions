@@ -328,7 +328,7 @@ Restrictions:
             overwrite_existing=True
         )
 
-        if len(files_to_transfer) > 0 or files_to_delete > 0:
+        if len(files_to_transfer) > 0 or len(files_to_delete) > 0:
             return True
 
         return False
