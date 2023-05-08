@@ -288,6 +288,10 @@ Restrictions:
     
     def _remote_files_to_delete(self, current_s3_keys: dict, local_files: dict, work_dir: str, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->dict:
         files_to_delete = dict()
+        if 'actionExtraFilesOnS3' in self.spec:
+            if self.spec['actionExtraFilesOnS3'].lower() == 'keep':
+                self.log(message='All remote keys will be kept as "actionExtraFilesOnS3" is set to "{}"'.format(self.spec['actionExtraFilesOnS3'].lower()), level='info')
+                return files_to_delete
         for remote_key, remote_key_data in current_s3_keys.items():
             if remote_key not in local_files:
                 files_to_delete[remote_key] = copy.deepcopy(remote_key_data)
