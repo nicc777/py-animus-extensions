@@ -239,14 +239,28 @@ Restrictions:
             self.log(message='NO SOURCES found in Spec - Nothing to do', level='warning')
         return files
 
-    def _download_s3_key(self, key: str, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
-        # TODO implement
-        pass
+    def _download_s3_key(self, key: str, work_dir: str, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->str:
+        local_file_name = hashlib.sha256(key.encode('utf-8')).hexdigest()
+        saved_file_path = '{}{}{}'.format(work_dir, os.sep, local_file_name)
+        try:
+            client = self._get_boto3_s3_client(variable_cache=variable_cache, target_environment=target_environment)
+            with open(saved_file_path, 'wb') as f:
+                client.download_fileobj(self._get_bucket_name(variable_cache=variable_cache, target_environment=target_environment), key, f)
+            self.log(message='Downloaded S3 key "{}" to local file "{}"'.format(key, saved_file_path), level='info')
+        except:
+            self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
+            return None
+        return saved_file_path
 
     def _files_to_transfer(self, current_s3_keys: dict, local_files: dict, work_dir: str, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->dict:
         files_to_transfer = dict()
         # TODO implement
         return files_to_transfer
+    
+    def _remote_files_to_delete(self, current_s3_keys: dict, local_files: dict, work_dir: str, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->dict:
+        files_to_delete = dict()
+        # TODO implement
+        return files_to_delete
 
     def _create_temporary_working_directory(self)->str:
         work_dir = ''
@@ -266,6 +280,7 @@ Restrictions:
         s3_keys = self._get_all_s3_keys(variable_cache=variable_cache, target_environment=target_environment)
         local_files = self._get_all_local_files(variable_cache=variable_cache, target_environment=target_environment)
         files_to_transfer = self._files_to_transfer(current_s3_keys=s3_keys, local_files=local_files, work_dir=work_dir, variable_cache=variable_cache, target_environment=target_environment)
+        files_to_delete = self._remote_files_to_delete(current_s3_keys=s3_keys, local_files=local_files, work_dir=work_dir, variable_cache=variable_cache, target_environment=target_environment)
 
         self.log(message='{}'.format('*'*80), level='debug')
         self.log(message='s3_keys            = {}'.format(json.dumps(s3_keys)), level='debug')
@@ -274,11 +289,47 @@ Restrictions:
         self.log(message='{}'.format('*'*80), level='debug')
         self.log(message='files_to_transfer  = {}'.format(json.dumps(files_to_transfer)), level='debug')
         self.log(message='{}'.format('*'*80), level='debug')
+        self.log(message='files_to_delete  = {}'.format(json.dumps(files_to_delete)), level='debug')
+        self.log(message='{}'.format('*'*80), level='debug')
 
         if work_dir != tempfile.gettempdir():   # Do not delete the system default temp directory if that was the directory set as the work dir
             delete_directory(dir=work_dir)
 
+        variable_cache.store_variable(
+            variable=Variable(
+                name='{}:FILES_TO_TRANSFER'.format(self._var_name),
+                initial_value=files_to_transfer
+            ),
+            overwrite_existing=True
+        )
+        variable_cache.store_variable(
+            variable=Variable(
+                name='{}:FILES_TO_DELETE'.format(self._var_name),
+                initial_value=files_to_delete
+            ),
+            overwrite_existing=True
+        )
+
+        if len(files_to_transfer) > 0 or files_to_delete > 0:
+            return True
+
         return False
+    
+    def _upload_local_file(self, local_file_path: str, target_key: str, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
+        try:
+            client = self._get_boto3_s3_client(variable_cache=variable_cache, target_environment=target_environment)
+            with open(local_file_path, 'rb') as f:
+                client.upload_fileobj(f, self._get_bucket_name(variable_cache=variable_cache, target_environment=target_environment), target_key)
+            self.log(
+                message='Uploaded local file "{}" to S3 key "s3://{}/{}"'.format(
+                    local_file_path,
+                    self._get_bucket_name(variable_cache=variable_cache, target_environment=target_environment),
+                    target_key
+                ),
+                level='info'
+            )
+        except:
+            self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
 
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
         if target_environment not in self.metadata['environments']:
@@ -293,6 +344,21 @@ Restrictions:
             self.log(message='    Bucket "{}" in environment "{}" already appears to be synchronized'.format(self._get_bucket_name(variable_cache=variable_cache, target_environment=target_environment), target_environment), level='info')
             self._set_variables(all_ok=True, checksum_differences_detected=False, variable_cache=variable_cache, target_environment=target_environment)
             return
+
+        files_to_transfer = variable_cache.get_value(
+            variable_name='{}:FILES_TO_TRANSFER'.format(self._var_name),
+            value_if_expired=dict(),
+            default_value_if_not_found=dict(),
+            raise_exception_on_expired=False,
+            raise_exception_on_not_found=False
+        )
+        files_to_delete = variable_cache.get_value(
+            variable_name='{}:FILES_TO_DELETE'.format(self._var_name),
+            value_if_expired=dict(),
+            default_value_if_not_found=dict(),
+            raise_exception_on_expired=False,
+            raise_exception_on_not_found=False
+        )
 
         return 
     
