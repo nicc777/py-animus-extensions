@@ -189,8 +189,16 @@ Restrictions:
         file_full_path = '{}{}{}'.format(base_directory, os.sep, file_name_portion)
         self.log(message='Attempting to add file "{}"'.format(file_full_path), level='info')
         file_size = get_file_size(file_path=file_full_path)
+
+        final_file_name_portion = file_name_portion
+        if 'destinationDirectory' in self.spec:
+            final_file_name_portion = '/{}/{}'.format(self.spec['destinationDirectory'], file_name_portion)
+            final_file_name_portion = final_file_name_portion.replace('//', '/')
+            if final_file_name_portion.startswith('/'):
+                final_file_name_portion = final_file_name_portion[1:]
+
         if file_size is not None:
-            result['Key'] = file_name_portion
+            result['Key'] = final_file_name_portion
             result['LocalFullPath'] = file_full_path
             result['BaseDirectory'] = base_directory
             result['Size'] = file_size
@@ -274,7 +282,10 @@ Restrictions:
                 files_to_transfer[local_key] = copy.deepcopy(key_data)
                 self.log(message='Local file "{}" not found in S3 - marked for UPLOAD'.format(key_data['LocalFullPath']), level='info')
             else:
-                if 'VerifyS3Checksum' in key_data and 'ContentChecksumSha256' in key_data:
+                if key_data['Key'] != current_s3_keys[local_key]['Key']:
+                    files_to_transfer[local_key] = copy.deepcopy(key_data)
+                    self.log(message='Local file "{}" not found in S3 - marked for UPLOAD ("Key" attribute mismatched)'.format(key_data['LocalFullPath']), level='info')
+                elif 'VerifyS3Checksum' in key_data and 'ContentChecksumSha256' in key_data:
                     if key_data['VerifyS3Checksum'] is True:
                         downloaded_file_path = self._download_s3_key(key=current_s3_keys[local_key]['Key'], work_dir=work_dir, variable_cache=variable_cache, target_environment=target_environment)
                         downloaded_file_checksum = calculate_file_checksum(file_path=downloaded_file_path, checksum_algorithm='sha256')
@@ -311,6 +322,10 @@ Restrictions:
             if remote_key not in local_files:
                 files_to_delete[remote_key] = copy.deepcopy(remote_key_data)
                 self.log(message='Remote key "{}" will be deleted (not found in local files collection)'.format(remote_key_data['Key']), level='info')
+            else:
+                if remote_key_data['Key'] != local_files[remote_key]['Key']:
+                    files_to_delete[remote_key] = copy.deepcopy(remote_key_data)
+                    self.log(message='Remote key "{}" will be deleted (found in local files collection, but remote location mismatch on "Key" attributes)'.format(remote_key_data['Key']), level='info')
         return files_to_delete
 
     def _create_temporary_working_directory(self)->str:
