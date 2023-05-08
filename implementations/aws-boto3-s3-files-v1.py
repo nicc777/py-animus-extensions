@@ -7,7 +7,7 @@ from pathlib import Path
 import re
 import hashlib
 from py_animus.manifest_management import *
-from py_animus import get_logger
+from py_animus import get_logger, get_utc_timestamp
 from py_animus.file_io import *
 
 
@@ -171,8 +171,18 @@ Restrictions:
                 Bucket=self._get_bucket_name(variable_cache=variable_cache, target_environment=target_environment),
                 Key=key
             )
+            self._write_transaction_log(message='SUCCESSFULLY Deleted S3 key "s3://{}/{}"'.format(
+                    self._get_bucket_name(variable_cache=variable_cache, target_environment=target_environment),
+                    key
+                )
+            )
         except:
             self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
+            self._write_transaction_log(message='FAILED Deleting S3 key "s3://{}/{}"'.format(
+                    self._get_bucket_name(variable_cache=variable_cache, target_environment=target_environment),
+                    key
+                )
+            )
 
     def _retrieve_local_file_meta_data(self, base_directory: str, file_name_portion: str, verify_checksums: bool=False)->dict:
         result = dict()
@@ -356,6 +366,15 @@ Restrictions:
 
         return False
     
+    def _write_transaction_log(self, message: str):
+        if 'transferLogFile' in self.spec:
+            try:
+                final_message = '{}   {}'.format(get_utc_timestamp(with_decimal=True), message)
+                with open(self.spec['transferLogFile'], 'a') as f:
+                    f.write('{}\n'.format(final_message))
+            except:
+                self.log(message='Failed to write transaction log to log file "{}"'.format(self.spec['transferLogFile']), level='warning')
+
     def _upload_local_file(self, local_file_path: str, target_key: str, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
         exception_on_fail = False
         echo_warning = False
@@ -371,8 +390,20 @@ Restrictions:
                 ),
                 level='info'
             )
+            self._write_transaction_log(message='SUCCESSFULLY Uploaded local file "{}" to S3 key "s3://{}/{}"'.format(
+                    local_file_path,
+                    self._get_bucket_name(variable_cache=variable_cache, target_environment=target_environment),
+                    target_key
+                )
+            )
         except:
             self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
+            self._write_transaction_log(message='FAILED to Uploaded local file "{}" to S3 key "s3://{}/{}"'.format(
+                    local_file_path,
+                    self._get_bucket_name(variable_cache=variable_cache, target_environment=target_environment),
+                    target_key
+                )
+            )
             if 'onError' in self.spec:
                 if self.spec['onError'].lower() == 'exception':
                     exception_on_fail = True

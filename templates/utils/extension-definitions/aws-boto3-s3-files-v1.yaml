@@ -50,7 +50,7 @@ spec:
   - 'boto3'
   importStatements:
   - 'from py_animus.manifest_management import *'
-  - 'from py_animus import get_logger'
+  - 'from py_animus import get_logger, get_utc_timestamp'
   - 'import traceback'
   - 'import boto3'
   - 'import os'
