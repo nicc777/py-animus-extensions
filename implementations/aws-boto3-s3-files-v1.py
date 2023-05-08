@@ -378,6 +378,20 @@ Restrictions:
             raise_exception_on_not_found=False
         )
 
+        for local_key, local_key_data in files_to_transfer.items():
+            self._upload_local_file(
+                local_file_path=local_key_data['LocalFullPath'],
+                target_key=local_key_data['Key'],
+                variable_cache=variable_cache,
+                target_environment=target_environment
+            )
+        for remote_key, remote_key_data in files_to_delete.items():
+            self._delete_s3_key(
+                key=remote_key_data['Key'],
+                variable_cache=variable_cache,
+                target_environment=target_environment
+            )
+
         return 
     
     def delete_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
