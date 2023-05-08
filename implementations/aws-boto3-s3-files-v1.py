@@ -239,15 +239,44 @@ Restrictions:
             self.log(message='NO SOURCES found in Spec - Nothing to do', level='warning')
         return files
 
+    def _download_s3_key(self, key: str, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
+        # TODO implement
+        pass
+
+    def _files_to_transfer(self, current_s3_keys: dict, local_files: dict, work_dir: str, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->dict:
+        files_to_transfer = dict()
+        # TODO implement
+        return files_to_transfer
+
+    def _create_temporary_working_directory(self)->str:
+        work_dir = ''
+        if 'localStagingDirectory' in self.spec:
+            work_dir = self.spec['localStagingDirectory']
+            create_directory(path=work_dir)
+        else:
+            work_dir = create_temp_directory()
+        return work_dir
+
     def implemented_manifest_differ_from_this_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders())->bool:
         if target_environment not in self.metadata['environments']:
             return False
         
+        work_dir = self._create_temporary_working_directory()
+
         s3_keys = self._get_all_s3_keys(variable_cache=variable_cache, target_environment=target_environment)
         local_files = self._get_all_local_files(variable_cache=variable_cache, target_environment=target_environment)
+        files_to_transfer = self._files_to_transfer(current_s3_keys=s3_keys, local_files=local_files, work_dir=work_dir, variable_cache=variable_cache, target_environment=target_environment)
 
-        self.log(message='s3_keys={}'.format(json.dumps(s3_keys)), level='debug')
-        self.log(message='local_files={}'.format(json.dumps(local_files)), level='debug')
+        self.log(message='{}'.format('*'*80), level='debug')
+        self.log(message='s3_keys            = {}'.format(json.dumps(s3_keys)), level='debug')
+        self.log(message='{}'.format('*'*80), level='debug')
+        self.log(message='local_files        = {}'.format(json.dumps(local_files)), level='debug')
+        self.log(message='{}'.format('*'*80), level='debug')
+        self.log(message='files_to_transfer  = {}'.format(json.dumps(files_to_transfer)), level='debug')
+        self.log(message='{}'.format('*'*80), level='debug')
+
+        if work_dir != tempfile.gettempdir():   # Do not delete the system default temp directory if that was the directory set as the work dir
+            delete_directory(dir=work_dir)
 
         return False
 
