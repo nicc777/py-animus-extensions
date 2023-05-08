@@ -1,0 +1,60 @@
+---
+kind: AwsBoto3Session
+version: v1
+metadata:
+  name: aws-boto3-session-v1-minimal
+  skipApplyAll: true
+  skipDeleteAll: true
+spec:
+  awsRegion: us-east-1
+  profileName: my-profile
+---
+kind: AwsBoto3S3Bucket
+version: v1
+metadata:
+  name: aws-boto3-s3-bucket-v1-minimal
+  dependencies:
+    apply:
+    - aws-boto3-session-v1-minimal
+    delete:
+    - aws-boto3-session-v1-minimal
+  executeOnlyOnceOnApply: true
+spec:
+  awsBoto3Session: aws-boto3-session-v1-minimal
+  name: my-very-unique-bucket-name
+---
+kind: AwsBoto3S3Files
+version: v1
+metadata:
+  name: aws-s3-files
+  dependencies:
+    apply:
+    - aws-boto3-session-v1-minimal
+    - aws-boto3-s3-bucket-v1-minimal # Because we need to ensure the S3 bucket exists first
+    delete:
+    - aws-boto3-session-v1-minimal # Just delete all the files if the exist on S3 - but we need a session for that...
+spec:
+  awsBoto3Session: aws-boto3-session-v1-minimal
+  s3Bucket: aws-boto3-s3-bucket-v1-minimal # Name of the AwsBoto3S3Bucket manifest to use as reference bucket for the files
+  globalOverwrite: false # Optional. If true, no checks will be performed - all files will just be uploaded, regardless of other settings like "ifFileExists" or "verifyChecksums"
+  destinationDirectory: /example
+  localStagingDirectory: /tmp/staging # If not set, a tmp directory will be calculated and created. Used only when checksums must be verified (this is where the downloaded files go)
+  transferLogFile: /tmp/log/file_transfer.log # Optional. Apart from the normal logging, log specific file transfer transactions to this file. If not set, no additional transfer log will be created. If the file exist, new transfers will be appended.
+  sources:
+  - sourceType: localFiles
+    baseDirectory: /tmp/some-dir-1
+    verifyChecksums: true # If set to true, very expensive! Downloads each file first to calculate the checksum
+    files:
+    - file1.txt
+    - file2.txt
+  - sourceType: localDirectories
+    recurse: true
+    baseDirectory: /tmp/some-dir-2
+    verifyChecksums: false
+    directories:
+    - sub-dir1/dir1
+    - sub-dir2/dir2
+  ifFileExists:
+    overWrite: true # Overwrite the current version
+  onError: warn # Or "exception" to stop further processing
+  actionExtraFilesOnS3: keep # or "delete" (default="keep") - what to do with files on S3 not present locally (by matching file path and remote key)

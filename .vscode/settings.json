@@ -9,6 +9,7 @@
         "Kubeconfig",
         "pathlib",
         "shabang",
+        "shutil",
         "tempfile",
         "traceback",
         "venv",
