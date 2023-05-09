@@ -70,7 +70,18 @@ spec:
     fieldDescription: 'If you need to pass through a proxy, set the proxy host here. Include the protocol and port, for example `http://` or `https://`. An example: `http://myproxy:3128`'
     fieldType: string
     fieldRequired: false
-    fieldDefaultValue: false
+    fieldDefaultValue: null
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: proxy.basicAuthentication.username
+    fieldDescription: 'If the proxy requires authentication and supports basic authentication, set the username here'
+    fieldType: string
+    fieldRequired: false
+    fieldDefaultValue: null
     fieldSetDefaultValueConditions:
     - fieldDefinitionNotPresentInManifest: true
     - fieldValueTypeMismatch: true
