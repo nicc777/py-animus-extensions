@@ -125,4 +125,15 @@ spec:
     - fieldValueIsNull: true
     customValidation: |
       self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: method
+    fieldDescription: 'The HTTP method to use (default=GET)'
+    fieldType: string
+    fieldRequired: false
+    fieldDefaultValue: 'GET'
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
   
