@@ -1,0 +1,7 @@
+kind: WebDownloadFile
+metadata:
+  name: web-download-file-v1-minimal
+spec:
+  sourceUrl: a-value-of-type-str
+  targetOutputFile: /tmp/output.html
+version: v1
