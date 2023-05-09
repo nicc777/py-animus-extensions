@@ -10,6 +10,10 @@ variable name. The following values can be expected:
 
 The destination file with ful path will be stored in the `Variable` named `:FILE_PATH`
 
+The remote file will be downloaded under the following conditions:
+
+* The local output file does not exist
+* If the local file exist, a HEAD request will be made to the URL and the file sizes will be compared. if the size of the local file is different, the remote file will be downloaded.
 
 ```shell
 export EXTENSION_NAME="web-download-file-v1"
