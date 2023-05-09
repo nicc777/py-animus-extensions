@@ -24,6 +24,10 @@ spec:
   supportedVersions:
   - 'v1'
   baseClass: ManifestBase
+  outputPaths:              # If any of these are null/NoneType, the global defaults will be used (which is this repo)
+    doc: /tmp/web-download-file-v1/doc
+    examples: /tmp/web-download-file-v1/examples
+    implementations: /tmp/web-download-file-v1/impl
   pipRequirements:
   - 'py-animus'
   - 'requests'
