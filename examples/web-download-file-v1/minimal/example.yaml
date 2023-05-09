@@ -1,7 +1,7 @@
 kind: WebDownloadFile
+version: v1
 metadata:
   name: web-download-file-v1-minimal
 spec:
-  sourceUrl: a-value-of-type-str
+  sourceUrl: https://github.com/nicc777/py-animus-extensions/blob/308ef58e295b619901be464d7c44ee33344ed37e/requirements.txt
   targetOutputFile: /tmp/output.html
-version: v1
