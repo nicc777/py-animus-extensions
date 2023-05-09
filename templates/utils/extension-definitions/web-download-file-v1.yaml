@@ -52,7 +52,7 @@ spec:
     fieldDescription: 'The destination file. NOTE: The directory MUST exist. To create the directory first (if needed) consider using a ShellScript as a dependency.'
     fieldType: str
     fieldRequired: true
-    fieldDefaultValue: '/tmp'
+    fieldDefaultValue: '/tmp/output.html'
     fieldSetDefaultValueConditions:
     - fieldDefinitionNotPresentInManifest: true
     - fieldValueTypeMismatch: true
@@ -62,7 +62,7 @@ spec:
   - fieldName: skipSslVerification
     fieldDescription: 'If set to true, skips SSL verification. WARNING: use with caution as this may pose a serious security risk'
     fieldType: bool
-    fieldRequired: true
+    fieldRequired: false
     fieldDefaultValue: false
     fieldSetDefaultValueConditions:
     - fieldDefinitionNotPresentInManifest: true
