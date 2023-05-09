@@ -17,21 +17,21 @@ export EXTENSION_NAME="web-download-file-v1"
 
 # Spec fields
 
-| Field | Type    | Required | In Versions | Description  |
-|-------|:-------:|:--------:|:-----------:|--------------|
-| `sourceUrl` | str | Yes | v1 | The URL from where to download the file |
-| `targetOutputFile` | str | Yes | v1 | The destination file. NOTE: The directory MUST exist. To create the directory first (if needed) consider using a ShellScript as a dependency. |
-| `skipSslVerification` | bool | No | v1 | If set to true, skips SSL verification. WARNING: use with caution as this may pose a serious security risk |
-| `proxy.host` | string | No | v1 | If you need to pass through a proxy, set the proxy host here. Include the protocol and port, for example `http://` or `https://`. An example: `http://myproxy:3128` |
-| `proxy.basicAuthentication.username` | string | No | v1 | If the proxy requires authentication and supports basic authentication, set the username here |
-| `proxy.basicAuthentication.passwordSrc` | string | No | v1 | Contains the name of the manifest that will provide the password, for example when using "AwsBoto3GetSecret" |
-| `proxy.basicAuthentication.passwordVariableName` | string | No | v1 | Contains the `Variable`` name, depending on source manifest implementation, that will contain the password |
-| `extraHeaders` | string | No | v1 | A list of name and value items with additional headers to set for the request. Things like a Authorization header might need to be set. |
-| `method` | string | No | v1 | The HTTP method to use (default=GET) |
-| `body` | string | No | v1 | Some request types, like POST, requires a body with the data to send. Also remember to set additional headers like "Content Type" as required |
-| `httpBasicAuthentication.username` | string | No | v1 | If the remote site requires basic authentication, set the username using this field |
-| `httpBasicAuthentication.passwordSrc` | string | No | v1 | Contains the name of the manifest that will provide the password, for example when using "AwsBoto3GetSecret" |
-| `httpBasicAuthentication.passwordVariableName` | string | No | v1 | Contains the `Variable`` name, depending on source manifest implementation, that will contain the password |
+| Field                                            | Type    | Required | In Versions | Description                                                                                                                                                         |
+|--------------------------------------------------|:-------:|:--------:|:-----------:|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `sourceUrl`                                      | string  | Yes      | v1          | The URL from where to download the file                                                                                                                             |
+| `targetOutputFile`                               | string  | Yes      | v1          | The destination file. NOTE: The directory MUST exist. To create the directory first (if needed) consider using a ShellScript as a dependency.                       |
+| `skipSslVerification`                            | bool    | No       | v1          | If set to true, skips SSL verification. WARNING: use with caution as this may pose a serious security risk                                                          |
+| `proxy.host`                                     | string  | No       | v1          | If you need to pass through a proxy, set the proxy host here. Include the protocol and port, for example `http://` or `https://`. An example: `http://myproxy:3128` |
+| `proxy.basicAuthentication.username`             | string  | No       | v1          | If the proxy requires authentication and supports basic authentication, set the username here                                                                       |
+| `proxy.basicAuthentication.passwordSrc`          | string  | No       | v1          | Contains the name of the manifest that will provide the password, for example when using "AwsBoto3GetSecret"                                                        |
+| `proxy.basicAuthentication.passwordVariableName` | string  | No       | v1          | Contains the `Variable`` name, depending on source manifest implementation, that will contain the password                                                          |
+| `extraHeaders`                                   | string  | No       | v1          | A list of name and value items with additional headers to set for the request. Things like a Authorization header might need to be set.                             |
+| `method`                                         | string  | No       | v1          | The HTTP method to use (default=GET)                                                                                                                                |
+| `body`                                           | string  | No       | v1          | Some request types, like POST, requires a body with the data to send. Also remember to set additional headers like "Content Type" as required                       |
+| `httpBasicAuthentication.username`               | string  | No       | v1          | If the remote site requires basic authentication, set the username using this field                                                                                 |
+| `httpBasicAuthentication.passwordSrc`            | string  | No       | v1          | Contains the name of the manifest that will provide the password, for example when using "AwsBoto3GetSecret"                                                        |
+| `httpBasicAuthentication.passwordVariableName`   | string  | No       | v1          | Contains the `Variable`` name, depending on source manifest implementation, that will contain the password                                                          |
 
 
 # Example Usages
