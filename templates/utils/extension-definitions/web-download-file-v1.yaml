@@ -55,3 +55,15 @@ spec:
     - fieldValueIsNull: true
     customValidation: |
       self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: skipSslVerification
+    fieldDescription: 'If set to true, skips SSL verification. WARNING: use with caution as this may pose a serious security risk'
+    fieldType: bool
+    fieldRequired: true
+    fieldDefaultValue: false
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  
