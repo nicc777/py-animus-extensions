@@ -26,6 +26,7 @@ spec:
   baseClass: ManifestBase
   pipRequirements:
   - 'py-animus'
+  - 'requests'
   importStatements:
   - 'from py_animus.manifest_management import *'
   - 'from py_animus import get_logger'
