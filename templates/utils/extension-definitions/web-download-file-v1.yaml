@@ -114,4 +114,15 @@ spec:
     - fieldValueIsNull: true
     customValidation: |
       self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: extraHeaders
+    fieldDescription: 'A list of name and value items with additional headers to set for the request. Things like a Authorization header might need to be set.'
+    fieldType: string
+    fieldRequired: false
+    fieldDefaultValue: null
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
   
