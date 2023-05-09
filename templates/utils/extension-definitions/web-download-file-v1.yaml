@@ -158,4 +158,26 @@ spec:
     - fieldValueIsNull: true
     customValidation: |
       self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: httpBasicAuthentication.passwordSrc
+    fieldDescription: 'Contains the name of the manifest that will provide the password, for example when using "AwsBoto3GetSecret"'
+    fieldType: string
+    fieldRequired: false
+    fieldDefaultValue: null
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: httpBasicAuthentication.passwordVariableName
+    fieldDescription: 'Contains the `Variable`` name, depending on source manifest implementation, that will contain the password'
+    fieldType: string
+    fieldRequired: false
+    fieldDefaultValue: null
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
   
