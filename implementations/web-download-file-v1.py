@@ -64,6 +64,9 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
             self.log(message='Target environment "{}" not relevant for this manifest'.format(target_environment), level='warning')
             return
         self.log(message='APPLY CALLED', level='info')
+        if self.implemented_manifest_differ_from_this_manifest(manifest_lookup_function=manifest_lookup_function, variable_cache=variable_cache, target_environment=target_environment, value_placeholders=value_placeholders) is False:
+            self.log(message='   URL "{}" appears to be already downloaded to target file "{}"'.format(self.spec['sourceUrl'], self.spec['targetOutputFile']), level='info')
+            return
         return 
     
     def delete_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
