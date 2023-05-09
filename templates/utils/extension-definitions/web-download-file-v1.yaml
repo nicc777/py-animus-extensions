@@ -147,4 +147,15 @@ spec:
     - fieldValueIsNull: true
     customValidation: |
       self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: httpBasicAuthentication.username
+    fieldDescription: 'If the remote site requires basic authentication, set the username using this field'
+    fieldType: string
+    fieldRequired: false
+    fieldDefaultValue: null
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
   
