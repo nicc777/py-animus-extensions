@@ -49,8 +49,6 @@ export SCENARIO_NAME="minimal"
 venv/bin/animus apply -m $EXAMPLE_DIR/$EXTENSION_NAME/$SCENARIO_NAME/example.yaml -s $PWD/implementations
 ```
 
-
-
 ## Example: minimal
 
 ```shell
@@ -61,13 +59,12 @@ Example manifest: [example.yaml](/media/nicc777/data/nicc777/git/Personal/GitHub
 
 ```yaml
 kind: WebDownloadFile
+version: v1
 metadata:
   name: web-download-file-v1-minimal
 spec:
-  sourceUrl: a-value-of-type-str
+  sourceUrl: https://github.com/nicc777/py-animus-extensions/blob/308ef58e295b619901be464d7c44ee33344ed37e/requirements.txt
   targetOutputFile: /tmp/output.html
-version: v1
-
 ```
 
 This is the absolute minimal example based on required values. Dummy random data was generated where required.
