@@ -1,0 +1,45 @@
+---
+kind: AnimusExtensionTemplate
+version: v1
+metadata:
+  name: web-download-file-v1
+  skipDeleteAll: false # TODO remove when ready
+  executeOnlyOnceOnApply: true
+  executeOnlyOnceOnDelete: true
+spec:
+  description: |
+    Download a file from an Internet URL and save it locally on the filesystem.
+
+    The final status will be stored in a `Variable` with `:STATUS` appended to the
+    variable name. The following values can be expected:
+
+    * SUCCESS - Successfully downloaded the file
+    * FAIL - Some error occurred and the file could not be downloaded
+
+    The destination file with ful path will be stored in the `Variable` named `:FILE_PATH`
+  kind: WebDownloadFile
+  version: v1
+  versionChangelog: |
+    This is the initial version
+  supportedVersions:
+  - 'v1'
+  baseClass: ManifestBase
+  pipRequirements:
+  - 'py-animus'
+  importStatements:
+  - 'from py_animus.manifest_management import *'
+  - 'from py_animus import get_logger'
+  - 'import traceback'
+  - 'from pathlib import Path'
+  specFields:
+  - fieldName: sourceUrl
+    fieldDescription: The URL from where to download the file
+    fieldType: str
+    fieldRequired: true
+    fieldDefaultValue: null
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
