@@ -88,4 +88,15 @@ spec:
     - fieldValueIsNull: true
     customValidation: |
       self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: proxy.basicAuthentication.passwordSrc
+    fieldDescription: 'Contains the name of the manifest that will provide the password, for example when using "AwsBoto3GetSecret"'
+    fieldType: string
+    fieldRequired: false
+    fieldDefaultValue: null
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
   
