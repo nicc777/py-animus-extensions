@@ -114,6 +114,8 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         http_basic_authentication_username = None
         http_basic_authentication_password = None
         extra_headers = dict()
+        http_method = 'GET'
+        http_body = None
 
         if url.lower().startswith('https'):
             use_ssl = True
@@ -158,6 +160,15 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
                 else:
                     self.log(message='      Ignoring extra header item as it does not contain the keys "name" and/or "value"', level='warning')
 
+        if 'method' in self.spec:
+            http_method = self.spec['method'].upper()
+            if http_method not in ('GET','HEAD','POST','PUT','DELETE','PATCH',):
+                self.log(message='      HTTP method "{}" not recognized. Defaulting to GET'.format(http_method), level='warning')
+                http_method = 'GET'
+
+        if http_method != 'GET' and 'body' in self.spec:
+            http_body = self.spec['body']
+
         self.log(message='   * Using SSL                       : {}'.format(use_ssl), level='info')
         if use_ssl:
             self.log(message='   * Skip SSL Verification SSL       : {}'.format(not verify_ssl), level='info')
@@ -169,6 +180,11 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
             self.log(message='   * Extra Header Keys               : {}'.format(list(extra_headers.keys())), level='info')
         else:
             self.log(message='   * Extra Header Keys               : None - Using Default Headers', level='info')
+        self.log(message='   * HTTP Method                     : {}'.format(http_method), level='info')
+        if http_body is not None:
+            self.log(message='   * HTTP Body Bytes                 : {}'.format(len(http_body)), level='info')
+        else:
+            self.log(message='   * HTTP Body Bytes                 : None', level='info')
 
         return 
     
