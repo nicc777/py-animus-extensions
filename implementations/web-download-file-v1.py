@@ -153,8 +153,10 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
 
         if 'extraHeaders' in self.spec:
             for header_data in self.spec['extraHeaders']:
-                for header_name, header_value in header_data.items():
-                    extra_headers[header_name] = header_value
+                if 'name' in header_data and 'value' in header_data:
+                    extra_headers[header_data['name']] = header_data['value']
+                else:
+                    self.log(message='      Ignoring extra header item as it does not contain the keys "name" and/or "value"', level='warning')
 
         self.log(message='   * Using SSL                       : {}'.format(use_ssl), level='info')
         if use_ssl:
