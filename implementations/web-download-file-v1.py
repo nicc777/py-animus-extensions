@@ -104,6 +104,34 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
             return
         self.log(message='   Downloading URL "{}" to target file "{}"'.format(url, target_file), level='info')
 
+        use_ssl = False
+        use_proxy = False
+        use_proxy_authentication = False
+        verify_ssl = True
+        proxy_username = None
+        proxy_password = None
+
+        if url.lower().startswith('https'):
+            use_ssl = True
+        if use_ssl is True and 'skipSslVerification' in self.spec:
+            verify_ssl = self.spec['skipSslVerification']
+        
+        if 'proxy' in self.spec:
+            if 'host' in self.spec['proxy']:
+                use_proxy = True
+                if 'basicAuthentication' in self.spec['proxy']:
+                    use_proxy_authentication = True
+                    proxy_username = self.spec['proxy']['basicAuthentication']['username']
+                    proxy_password = variable_cache.get_value(
+                        variable_name=self.spec['proxy']['basicAuthentication']['passwordVariableName'],
+                        value_if_expired=None,
+                        default_value_if_not_found=None,
+                        raise_exception_on_expired=False,
+                        raise_exception_on_not_found=False
+                    )
+                    if proxy_password is None:
+                        self.log(message='      Proxy Password not Set - Ignoring Proxy AuthenticationConfiguration', level='warning')
+                        use_proxy_authentication = False
 
         return 
     
@@ -123,5 +151,5 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
                 self.log(message='   Target file "{}" not deleted as it is not a file'.format(self.spec['targetOutputFile']), level='info')
         else:
             self.log(message='   Target file "{}" already deleted'.format(self.spec['targetOutputFile']), level='info')
-        self._set_variables(all_ok=False, variable_cache=variable_cache, target_environment=target_environment)
+        self._set_variables(all_ok=False, deleted=True, variable_cache=variable_cache, target_environment=target_environment)
         return 
