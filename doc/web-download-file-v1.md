@@ -171,7 +171,9 @@ APPLY CALLED
    * Skip SSL Verification           : True
    * Using Proxy                     : True
    * Using Proxy Authentication      : True
+   * Proxy Password Length           : 24
    * Using HTTP Basic Authentication : True
+   * HTTP Password Length            : 24
    * Extra Header Keys               : ['content-type']
    * HTTP Method                     : POST
    * HTTP Body Bytes                 : 17
