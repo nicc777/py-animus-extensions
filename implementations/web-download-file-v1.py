@@ -120,7 +120,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         if url.lower().startswith('https'):
             use_ssl = True
         if use_ssl is True and 'skipSslVerification' in self.spec:
-            verify_ssl = self.spec['skipSslVerification']
+            verify_ssl = not self.spec['skipSslVerification']
         
         if 'proxy' in self.spec:
             if 'host' in self.spec['proxy']:
@@ -171,7 +171,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
 
         self.log(message='   * Using SSL                       : {}'.format(use_ssl), level='info')
         if use_ssl:
-            self.log(message='   * Skip SSL Verification SSL       : {}'.format(not verify_ssl), level='info')
+            self.log(message='   * Skip SSL Verification           : {}'.format(not verify_ssl), level='info')
         self.log(message='   * Using Proxy                     : {}'.format(use_proxy), level='info')
         if use_proxy:
             self.log(message='   * Using Proxy Authentication      : {}'.format(use_proxy_authentication), level='info')
