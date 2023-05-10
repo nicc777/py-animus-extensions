@@ -40,7 +40,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
             self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
         raise Exception('Failed to get content length of URL "{}"'.format(url))
 
-    def _set_variables(self, all_ok: bool=True, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
+    def _set_variables(self, all_ok: bool=True, deleted: bool=False, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
         result_txt = 'SUCCESS'
         if all_ok is False:
             result_txt = 'FAIL'
@@ -56,6 +56,15 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
             variable=Variable(
                 name='{}:FILE_PATH'.format(self._var_name(target_environment=target_environment)),
                 initial_value=self.spec['targetOutputFile'],
+                logger=self.logger
+            ),
+            overwrite_existing=True
+        )
+        if deleted is True:
+            variable_cache.store_variable(
+            variable=Variable(
+                name='{}:DELETED'.format(self._var_name(target_environment=target_environment)),
+                initial_value=True,
                 logger=self.logger
             ),
             overwrite_existing=True
