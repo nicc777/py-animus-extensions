@@ -113,6 +113,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         use_http_basic_authentication = False
         http_basic_authentication_username = None
         http_basic_authentication_password = None
+        extra_headers = dict()
 
         if url.lower().startswith('https'):
             use_ssl = True
@@ -150,6 +151,11 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
                 self.log(message='      Basic Authentication Password not Set - Ignoring HTTP Basic Authentication Configuration', level='warning')
                 use_http_basic_authentication = False
 
+        if 'extraHeaders' in self.spec:
+            for header_data in self.spec['extraHeaders']:
+                for header_name, header_value in header_data.items():
+                    extra_headers[header_name] = header_value
+
         self.log(message='   * Using SSL                       : {}'.format(use_ssl), level='info')
         if use_ssl:
             self.log(message='   * Skip SSL Verification SSL       : {}'.format(not verify_ssl), level='info')
@@ -157,6 +163,10 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         if use_proxy:
             self.log(message='   * Using Proxy Authentication      : {}'.format(use_proxy_authentication), level='info')
         self.log(message='   * Using HTTP Basic Authentication : {}'.format(use_http_basic_authentication), level='info')
+        if len(extra_headers) > 0:
+            self.log(message='   * Extra Header Keys               : {}'.format(list(extra_headers.keys())), level='info')
+        else:
+            self.log(message='   * Extra Header Keys               : None - Using Default Headers', level='info')
 
         return 
     
