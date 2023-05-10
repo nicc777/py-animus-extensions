@@ -107,7 +107,12 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
             if Path(self.spec['targetOutputFile']).is_file() is True:
                 try:
                     os.unlink(self.spec['targetOutputFile'])
+                    self.log(message='   Deleted target file "{}"'.format(self.spec['targetOutputFile']), level='info')
                 except:
                     self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
+            else:
+                self.log(message='   Target file "{}" not deleted as it is not a file'.format(self.spec['targetOutputFile']), level='info')
+        else:
+            self.log(message='   Target file "{}" already deleted'.format(self.spec['targetOutputFile']), level='info')
         self._set_variables(all_ok=False, variable_cache=variable_cache, target_environment=target_environment)
         return 
