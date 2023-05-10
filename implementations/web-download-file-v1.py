@@ -103,5 +103,11 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
             self.log(message='Target environment "{}" not relevant for this manifest'.format(target_environment), level='warning')
             return
         self.log(message='DELETE CALLED', level='info')
-        
+        if os.path.exists(self.spec['targetOutputFile']) is True:
+            if Path(self.spec['targetOutputFile']).is_file() is True:
+                try:
+                    os.unlink(self.spec['targetOutputFile'])
+                except:
+                    self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
+        self._set_variables(all_ok=False, variable_cache=variable_cache, target_environment=target_environment)
         return 
