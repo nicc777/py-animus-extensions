@@ -134,7 +134,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
                         default_value_if_not_found=None,
                         raise_exception_on_expired=False,
                         raise_exception_on_not_found=False
-                    )
+                    ).strip()
                     if proxy_password is None:
                         self.log(message='      Proxy Password not Set - Ignoring Proxy AuthenticationConfiguration', level='warning')
                         use_proxy_authentication = False
@@ -148,7 +148,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
                 default_value_if_not_found=None,
                 raise_exception_on_expired=False,
                 raise_exception_on_not_found=False
-            )
+            ).strip()
             if http_basic_authentication_password is None:
                 self.log(message='      Basic Authentication Password not Set - Ignoring HTTP Basic Authentication Configuration', level='warning')
                 use_http_basic_authentication = False
@@ -175,7 +175,10 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         self.log(message='   * Using Proxy                     : {}'.format(use_proxy), level='info')
         if use_proxy:
             self.log(message='   * Using Proxy Authentication      : {}'.format(use_proxy_authentication), level='info')
+            self.log(message='   * Proxy Password Length           : {}'.format(len(proxy_password)), level='info')
         self.log(message='   * Using HTTP Basic Authentication : {}'.format(use_http_basic_authentication), level='info')
+        if use_http_basic_authentication:
+            self.log(message='   * HTTP Password Length            : {}'.format(len(http_basic_authentication_password)), level='info')
         if len(extra_headers) > 0:
             self.log(message='   * Extra Header Keys               : {}'.format(list(extra_headers.keys())), level='info')
         else:

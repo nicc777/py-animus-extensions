@@ -70,7 +70,116 @@ spec:
 ```
 
 This is the absolute minimal example based on required values. Dummy random data was generated where required.
-        
+
+When the command is run, the following output can be expected (some entries omitted, and data adopted for easier display):
+
+```text
+APPLY CALLED
+   Downloading URL "https://raw.githubusercontent.com/nicc777/py-animus-extensions/main/requirements.txt" to target file "/tmp/output.html"
+   * Using SSL                       : True
+   * Skip SSL Verification           : False
+   * Using Proxy                     : False
+   * Using HTTP Basic Authentication : False
+   * Extra Header Keys               : None - Using Default Headers
+   * HTTP Method                     : GET
+   * HTTP Body Bytes                 : None
+```
+
+## A much more complex (and full) Example
+
+When authentication is required, or more complex scenarios is encountered, the approach may have to include additional manifests. Consider the following example:
+
+```yaml
+# FILE: /tmp/file_download_large_example.yaml
+---
+kind: ShellScript
+version: v1
+metadata:
+  name: cli-get-password
+  skipDeleteAll: true
+  skipApplyAll: true  # Because this manifest is only used as a dependency for another manifest
+  environments:
+  - sandbox
+  - test
+  - prod
+spec:
+  maskInput: true
+  source:
+    type: inline
+    value: echo "this-is-a-dummy-password"
+---
+kind: WebDownloadFile
+version: v1
+metadata:
+  name: web-download-file-v1-minimal
+  dependencies:
+    apply: 
+    - cli-get-password
+  environments:
+  - sandbox
+  - test
+  - prod
+spec:
+  sourceUrl: https://raw.githubusercontent.com/nicc777/py-animus-extensions/main/requirements.txt
+  targetOutputFile: /tmp/output.html
+  proxy:
+    host: 'http://localhost:3128/'
+    basicAuthentication:
+      username: some-user
+      passwordVariableName: '{{ .Values.general-password }}'
+  httpBasicAuthentication:
+    username: some-other-username
+    passwordVariableName: '{{ .Values.general-password }}'
+  skipSslVerification: True
+  extraHeaders:
+  - name: content-type
+    value: 'text/plain'
+  method: POST
+  body: 'some-body-content'
+```
+
+The following values file could be used:
+
+```yaml
+# FILE: /tmp/file_download_large_example_values.yaml
+---
+values:
+- name: general-password
+  environments:
+  - environmentName: sandbox
+    value: 'ShellScript:cli-get-password:sandbox:STDOUT'
+  - environmentName: test
+    value: 'ShellScript:cli-get-password:test:STDOUT'
+  - environmentName: prod
+    value: 'ShellScript:cli-get-password:prod:STDOUT'
+  - environmentName: default
+    value: 'ShellScript:cli-get-password:sandbox:STDOUT'
+```
+
+Using the above files are in `/tmp`, the following command could be used to apply the manifest (in this example, the `test` environment is targeted):
+
+```shell
+animus apply -m /tmp/file_download_large_example.yaml -s $PWD/implementations -f /tmp/file_download_large_example_values.yaml -e test
+```
+
+In the logs, the following can be observed (some entries omitted, and data adopted for easier display):
+
+```text
+APPLY CALLED
+   Downloading URL "https://raw.githubusercontent.com/nicc777/py-animus-extensions/main/requirements.txt" to target file "/tmp/output.html"
+   * Using SSL                       : True
+   * Skip SSL Verification           : True
+   * Using Proxy                     : True
+   * Using Proxy Authentication      : True
+   * Using HTTP Basic Authentication : True
+   * Extra Header Keys               : ['content-type']
+   * HTTP Method                     : POST
+   * HTTP Body Bytes                 : 17
+```
+
+This is perhaps not the most practical example and even if the proxy server existed, the example would probably not
+work because of the HTTP method, body content etc. However, it uses all the available setting to show a hypothetical
+complex example.
 
 # Versions and Changelog
 
