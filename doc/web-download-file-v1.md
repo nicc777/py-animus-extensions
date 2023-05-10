@@ -33,7 +33,6 @@ export EXTENSION_NAME="web-download-file-v1"
 | `method`                                         | string  | No       | v1          | The HTTP method to use (default=GET)                                                                                                                                |
 | `body`                                           | string  | No       | v1          | Some request types, like POST, requires a body with the data to send. Also remember to set additional headers like "Content Type" as required                       |
 | `httpBasicAuthentication.username`               | string  | No       | v1          | If the remote site requires basic authentication, set the username using this field                                                                                 |
-| `httpBasicAuthentication.passwordSrc`            | string  | No       | v1          | Contains the name of the manifest that will provide the password, for example when using "AwsBoto3GetSecret"                                                        |
 | `httpBasicAuthentication.passwordVariableName`   | string  | No       | v1          | Contains the `Variable`` name, depending on source manifest implementation, that will contain the password                                                          |
 
 

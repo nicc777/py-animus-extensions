@@ -105,11 +105,14 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         self.log(message='   Downloading URL "{}" to target file "{}"'.format(url, target_file), level='info')
 
         use_ssl = False
+        verify_ssl = True
         use_proxy = False
         use_proxy_authentication = False
-        verify_ssl = True
         proxy_username = None
         proxy_password = None
+        use_http_basic_authentication = False
+        http_basic_authentication_username = None
+        http_basic_authentication_password = None
 
         if url.lower().startswith('https'):
             use_ssl = True
@@ -132,6 +135,28 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
                     if proxy_password is None:
                         self.log(message='      Proxy Password not Set - Ignoring Proxy AuthenticationConfiguration', level='warning')
                         use_proxy_authentication = False
+
+        if 'httpBasicAuthentication' in self.spec:
+            use_http_basic_authentication = True
+            http_basic_authentication_username = self.spec['httpBasicAuthentication']['username']
+            http_basic_authentication_password = variable_cache.get_value(
+                variable_name=self.spec['httpBasicAuthentication']['passwordVariableName'],
+                value_if_expired=None,
+                default_value_if_not_found=None,
+                raise_exception_on_expired=False,
+                raise_exception_on_not_found=False
+            )
+            if http_basic_authentication_password is None:
+                self.log(message='      Basic Authentication Password not Set - Ignoring HTTP Basic Authentication Configuration', level='warning')
+                use_http_basic_authentication = False
+
+        self.log(message='   * Using SSL                       : {}'.format(use_ssl), level='info')
+        if use_ssl:
+            self.log(message='   * Skip SSL Verification SSL       : {}'.format(not verify_ssl), level='info')
+        self.log(message='   * Using Proxy                     : {}'.format(use_proxy), level='info')
+        if use_proxy:
+            self.log(message='   * Using Proxy Authentication      : {}'.format(use_proxy_authentication), level='info')
+        self.log(message='   * Using HTTP Basic Authentication : {}'.format(use_http_basic_authentication), level='info')
 
         return 
     
