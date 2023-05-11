@@ -32,9 +32,11 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
 
     def _get_url_content_length(self, url: str)->dict:
         try:
-            response = requests.head(url)
+            response = requests.head(url, allow_redirects=True)
+            self.log(message='Headers: {}'.format(response.headers), level='debug')
             for header_name, header_value in response.headers.items():
                 if header_name.lower() == 'content-length':
+                    self.log(message='Content-Length: {}'.format(int(header_value)), level='info')
                     return int(header_value)
         except:
             self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
@@ -78,7 +80,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         variable_cache.store_variable(
             variable=Variable(
                 name='{}:CONTENT_LENGTH'.format(self._var_name(target_environment=target_environment)),
-                initial_value=True,
+                initial_value=remote_file_size,
                 logger=self.logger
             ),
             overwrite_existing=True
@@ -111,8 +113,9 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         method: str,
         body: str
     )->bool:
+        self.log(message='Running Method "_get_data_basic_request"', level='debug')
         try:
-            r = requests.get(url=url)
+            r = requests.get(url=url, allow_redirects=True)
             with open(target_file, 'wb') as f:
                 f.write(r.content)
         except:
@@ -134,8 +137,9 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         body: str
     )->bool:
         # Refer to https://stackoverflow.com/questions/16694907/download-large-file-in-python-with-requests
+        self.log(message='Running Method "_get_data_basic_request_stream"', level='debug')
         try:
-            with requests.get(url, stream=True) as r:
+            with requests.get(url, stream=True, allow_redirects=True) as r:
                 r.raise_for_status()
                 with open(target_file, 'wb') as f:
                     for chunk in r.iter_content(chunk_size=8192): 
@@ -162,6 +166,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
 
         remote_file_size = variable_cache.get_value(variable_name='{}:CONTENT_LENGTH'.format(self._var_name(target_environment=target_environment)), raise_exception_on_expired=True, raise_exception_on_not_found=True)
         large_file = False
+        self.log(message='Checking if {} > 104857600...'.format(remote_file_size), level='info')
         if remote_file_size > 104857600:   # Anything larger than 100MiB is considered large and will be downloaded in chunks
             large_file = True 
 
@@ -237,6 +242,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
             if len(http_body) > 0:
                 use_body = True
 
+        self.log(message='   * Large File                      : {}'.format(large_file), level='info')
         self.log(message='   * Using SSL                       : {}'.format(use_ssl), level='info')
         if use_ssl:
             self.log(message='   * Skip SSL Verification           : {}'.format(not verify_ssl), level='info')
@@ -305,7 +311,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
                     'use_custom_headers': False,
                     'use_body': False,
                 },
-                'method': self._get_data_basic_request
+                'method': self._get_data_basic_request_stream
             },
         ]
 
