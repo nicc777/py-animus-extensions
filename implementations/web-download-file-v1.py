@@ -74,11 +74,20 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         if target_environment not in self.metadata['environments']:
             return False
         
+        remote_file_size = self._get_url_content_length(url=self.spec['sourceUrl'])
+        variable_cache.store_variable(
+            variable=Variable(
+                name='{}:CONTENT_LENGTH'.format(self._var_name(target_environment=target_environment)),
+                initial_value=True,
+                logger=self.logger
+            ),
+            overwrite_existing=True
+        )
+
         # Check if the local file exists:
         if os.path.exists(self.spec['targetOutputFile']) is True:
             if Path(self.spec['targetOutputFile']).is_file() is True:
                 local_file_size = int(get_file_size(file_path=self.spec['targetOutputFile']))
-                remote_file_size = self._get_url_content_length(url=self.spec['sourceUrl'])
                 self.log(message='local_file_size={}   remote_file_size={}'.format(local_file_size, remote_file_size), level='info')
                 if local_file_size != remote_file_size:
                     return True
@@ -88,6 +97,53 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
             return True
 
         return False
+
+    def _get_data_basic_request(
+        self, 
+        url: str,
+        target_file: str,
+        verify_ssl: bool,
+        proxy_username: str,
+        proxy_password: str,
+        username: str,
+        password: str,
+        headers: dict,
+        method: str,
+        body: str
+    )->bool:
+        try:
+            r = requests.get(url=url)
+            with open(target_file, 'wb') as f:
+                f.write(r.content)
+        except:
+            self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
+            return False
+        return True
+
+    def _get_data_basic_request_stream(
+        self, 
+        url: str,
+        target_file: str,
+        verify_ssl: bool,
+        proxy_username: str,
+        proxy_password: str,
+        username: str,
+        password: str,
+        headers: dict,
+        method: str,
+        body: str
+    )->bool:
+        # Refer to https://stackoverflow.com/questions/16694907/download-large-file-in-python-with-requests
+        try:
+            with requests.get(url, stream=True) as r:
+                r.raise_for_status()
+                with open(target_file, 'wb') as f:
+                    for chunk in r.iter_content(chunk_size=8192): 
+                        f.write(chunk)
+        except:
+            self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
+            return False
+        return True
 
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
         if target_environment not in self.metadata['environments']:
@@ -104,6 +160,11 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
             return
         self.log(message='   Downloading URL "{}" to target file "{}"'.format(url, target_file), level='info')
 
+        remote_file_size = variable_cache.get_value(variable_name='{}:CONTENT_LENGTH'.format(self._var_name(target_environment=target_environment)), raise_exception_on_expired=True, raise_exception_on_not_found=True)
+        large_file = False
+        if remote_file_size > 104857600:   # Anything larger than 100MiB is considered large and will be downloaded in chunks
+            large_file = True 
+
         use_ssl = False
         verify_ssl = True
         use_proxy = False
@@ -114,8 +175,10 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         http_basic_authentication_username = None
         http_basic_authentication_password = None
         extra_headers = dict()
+        use_custom_headers = False
         http_method = 'GET'
         http_body = None
+        use_body = False
 
         if url.lower().startswith('https'):
             use_ssl = True
@@ -159,6 +222,8 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
                     extra_headers[header_data['name']] = header_data['value']
                 else:
                     self.log(message='      Ignoring extra header item as it does not contain the keys "name" and/or "value"', level='warning')
+        if len(extra_headers) > 0:
+            use_custom_headers = True
 
         if 'method' in self.spec:
             http_method = self.spec['method'].upper()
@@ -168,6 +233,9 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
 
         if http_method != 'GET' and 'body' in self.spec:
             http_body = self.spec['body']
+        if http_body is not None:
+            if len(http_body) > 0:
+                use_body = True
 
         self.log(message='   * Using SSL                       : {}'.format(use_ssl), level='info')
         if use_ssl:
@@ -189,6 +257,81 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         else:
             self.log(message='   * HTTP Body Bytes                 : None', level='info')
 
+        work_values = {
+            'large_file': large_file,
+            'verify_ssl': verify_ssl,
+            'use_proxy': use_proxy,
+            'use_proxy_authentication': use_proxy_authentication,
+            'use_http_basic_authentication': use_http_basic_authentication,
+            'http_method': http_method,
+            'use_custom_headers': use_custom_headers,
+            'use_body': use_body,
+        }
+
+        parameters = {
+            'url': url,
+            'target_file': target_file,
+            'verify_ssl': verify_ssl,
+            'proxy_username': proxy_username,
+            'proxy_password': proxy_password,
+            'username': http_basic_authentication_username,
+            'password': http_basic_authentication_password,
+            'headers': extra_headers,
+            'method': http_method,
+            'body': http_body
+        }
+        download_scenarios = [
+            {
+                'values': {
+                    'large_file': False,
+                    'verify_ssl': True,
+                    'use_proxy': False,
+                    'use_proxy_authentication': False,
+                    'use_http_basic_authentication': False,
+                    'http_method': ('GET', ),
+                    'use_custom_headers': False,
+                    'use_body': False,
+                },
+                'method': self._get_data_basic_request
+            },
+            {
+                'values': {
+                    'large_file': True,
+                    'verify_ssl': True,
+                    'use_proxy': False,
+                    'use_proxy_authentication': False,
+                    'use_http_basic_authentication': False,
+                    'http_method': ('GET', ),
+                    'use_custom_headers': False,
+                    'use_body': False,
+                },
+                'method': self._get_data_basic_request
+            },
+        ]
+
+        effective_method = None
+        for scenario in download_scenarios:
+            values = scenario['values']
+            criterion_match = True
+            for criterion, condition in values.items():
+                if criterion != 'http_method':
+                    if condition != work_values[criterion]:
+                        criterion_match = False
+                else:
+                    if work_values['http_method'] not in condition:
+                        criterion_match = False
+            if criterion_match is True:
+                effective_method = scenario['method']
+
+        if effective_method is not None:
+            result = effective_method(**parameters)
+            if result is True:
+                self._set_variables(all_ok=True, deleted=False, variable_cache=variable_cache, target_environment=target_environment)
+            else:
+                raise Exception('Failed to download "{}" to file "{}"'.format(url, target_file))
+        else:
+            raise Exception('No suitable method could be found to handle the download.')
+            
         return 
     
     def delete_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
