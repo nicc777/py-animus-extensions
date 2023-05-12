@@ -40,7 +40,8 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
                     return int(header_value)
         except:
             self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
-        raise Exception('Failed to get content length of URL "{}"'.format(url))
+        # It may be impossible to get the initial length as we did not take into account proxy or authentication. In these cases assume a LARGE file
+        return 999999999999
 
     def _set_variables(self, all_ok: bool=True, deleted: bool=False, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
         result_txt = 'SUCCESS'
@@ -100,11 +101,27 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
 
         return False
 
+    def _build_proxy_dict(self, proxy_host: str, proxy_username: str, proxy_password: str)->dict:
+        proxies = dict()
+        proxy_str = ''
+        if proxy_host is not None:
+            if isinstance(proxy_host, str):
+                if proxy_host.startswith('http'):
+                    proxy_str = proxy_host
+                    if proxy_username is not None and proxy_password is not None:
+                        if isinstance(proxy_username, str) and isinstance(proxy_password, str):
+                            creds = '//{}:{}@'.format(proxy_username, proxy_password)
+                            final_proxy_str = '{}{}{}'.format(proxy_str.split('/')[0], creds, '/'.join(proxy_str.split('/')[2:]))
+                            proxies['http'] = final_proxy_str
+                            proxies['https'] = final_proxy_str
+        return proxies
+
     def _get_data_basic_request(
         self, 
         url: str,
         target_file: str,
         verify_ssl: bool,
+        proxy_host: str,
         proxy_username: str,
         proxy_password: str,
         username: str,
@@ -115,7 +132,8 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
     )->bool:
         self.log(message='Running Method "_get_data_basic_request"', level='debug')
         try:
-            r = requests.get(url=url, allow_redirects=True, verify=verify_ssl)
+            proxies=self._build_proxy_dict(proxy_host=proxy_host, proxy_username=proxy_username, proxy_password=proxy_password)
+            r = requests.get(url=url, allow_redirects=True, verify=verify_ssl, proxies=proxies)
             with open(target_file, 'wb') as f:
                 f.write(r.content)
         except:
@@ -128,6 +146,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         url: str,
         target_file: str,
         verify_ssl: bool,
+        proxy_host: str,
         proxy_username: str,
         proxy_password: str,
         username: str,
@@ -139,7 +158,8 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         # Refer to https://stackoverflow.com/questions/16694907/download-large-file-in-python-with-requests
         self.log(message='Running Method "_get_data_basic_request_stream"', level='debug')
         try:
-            with requests.get(url, stream=True, allow_redirects=True, verify=verify_ssl) as r:
+            proxies=dict()
+            with requests.get(url, stream=True, allow_redirects=True, verify=verify_ssl, proxies=proxies) as r:
                 r.raise_for_status()
                 with open(target_file, 'wb') as f:
                     for chunk in r.iter_content(chunk_size=8192): 
@@ -174,6 +194,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         verify_ssl = True
         use_proxy = False
         use_proxy_authentication = False
+        proxy_host = None
         proxy_username = None
         proxy_password = None
         use_http_basic_authentication = False
@@ -193,6 +214,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         if 'proxy' in self.spec:
             if 'host' in self.spec['proxy']:
                 use_proxy = True
+                proxy_host = self.spec['proxy']['host']
                 if 'basicAuthentication' in self.spec['proxy']:
                     use_proxy_authentication = True
                     proxy_username = self.spec['proxy']['basicAuthentication']['username']
@@ -248,6 +270,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
             self.log(message='   * Skip SSL Verification           : {}'.format(not verify_ssl), level='info')
         self.log(message='   * Using Proxy                     : {}'.format(use_proxy), level='info')
         if use_proxy:
+            self.log(message='   * Proxy Host                      : {}'.format(proxy_host), level='info')
             self.log(message='   * Using Proxy Authentication      : {}'.format(use_proxy_authentication), level='info')
             self.log(message='   * Proxy Password Length           : {}'.format(len(proxy_password)), level='info')
         self.log(message='   * Using HTTP Basic Authentication : {}'.format(use_http_basic_authentication), level='info')
@@ -278,6 +301,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
             'url': url,
             'target_file': target_file,
             'verify_ssl': verify_ssl,
+            'proxy_host': proxy_host,
             'proxy_username': proxy_username,
             'proxy_password': proxy_password,
             'username': http_basic_authentication_username,
