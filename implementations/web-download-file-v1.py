@@ -313,6 +313,32 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
                 },
                 'method': self._get_data_basic_request_stream
             },
+            {
+                'values': {
+                    'large_file': False,
+                    'verify_ssl': False,
+                    'use_proxy': False,
+                    'use_proxy_authentication': False,
+                    'use_http_basic_authentication': False,
+                    'http_method': ('GET', ),
+                    'use_custom_headers': False,
+                    'use_body': False,
+                },
+                'method': self._get_data_basic_request
+            },
+            {
+                'values': {
+                    'large_file': True,
+                    'verify_ssl': False,
+                    'use_proxy': False,
+                    'use_proxy_authentication': False,
+                    'use_http_basic_authentication': False,
+                    'http_method': ('GET', ),
+                    'use_custom_headers': False,
+                    'use_body': False,
+                },
+                'method': self._get_data_basic_request_stream
+            },
         ]
 
         effective_method = None
