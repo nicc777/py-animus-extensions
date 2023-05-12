@@ -272,7 +272,8 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         if use_proxy:
             self.log(message='   * Proxy Host                      : {}'.format(proxy_host), level='info')
             self.log(message='   * Using Proxy Authentication      : {}'.format(use_proxy_authentication), level='info')
-            self.log(message='   * Proxy Password Length           : {}'.format(len(proxy_password)), level='info')
+            if use_proxy_authentication is True:
+                self.log(message='   * Proxy Password Length           : {}'.format(len(proxy_password)), level='info')
         self.log(message='   * Using HTTP Basic Authentication : {}'.format(use_http_basic_authentication), level='info')
         if use_http_basic_authentication:
             self.log(message='   * HTTP Password Length            : {}'.format(len(http_basic_authentication_password)), level='info')
@@ -314,8 +315,6 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
             {
                 'values': {
                     'large_file': False,
-                    'use_proxy': False,
-                    'use_proxy_authentication': False,
                     'use_http_basic_authentication': False,
                     'http_method': ('GET', ),
                     'use_custom_headers': False,
@@ -326,8 +325,6 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
             {
                 'values': {
                     'large_file': True,
-                    'use_proxy': False,
-                    'use_proxy_authentication': False,
                     'use_http_basic_authentication': False,
                     'http_method': ('GET', ),
                     'use_custom_headers': False,
