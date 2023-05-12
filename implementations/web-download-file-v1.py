@@ -115,7 +115,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
     )->bool:
         self.log(message='Running Method "_get_data_basic_request"', level='debug')
         try:
-            r = requests.get(url=url, allow_redirects=True)
+            r = requests.get(url=url, allow_redirects=True, verify=verify_ssl)
             with open(target_file, 'wb') as f:
                 f.write(r.content)
         except:
@@ -139,7 +139,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         # Refer to https://stackoverflow.com/questions/16694907/download-large-file-in-python-with-requests
         self.log(message='Running Method "_get_data_basic_request_stream"', level='debug')
         try:
-            with requests.get(url, stream=True, allow_redirects=True) as r:
+            with requests.get(url, stream=True, allow_redirects=True, verify=verify_ssl) as r:
                 r.raise_for_status()
                 with open(target_file, 'wb') as f:
                     for chunk in r.iter_content(chunk_size=8192): 
