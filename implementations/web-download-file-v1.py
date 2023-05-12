@@ -111,7 +111,10 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
                     if proxy_username is not None and proxy_password is not None:
                         if isinstance(proxy_username, str) and isinstance(proxy_password, str):
                             creds = '//{}:{}@'.format(proxy_username, proxy_password)
+                            creds_logging = '//{}:{}@'.format(proxy_username, '*' * len(proxy_password))
                             final_proxy_str = '{}{}{}'.format(proxy_str.split('/')[0], creds, '/'.join(proxy_str.split('/')[2:]))
+                            final_proxy_str_logging = '{}{}{}'.format(proxy_str.split('/')[0], creds_logging, '/'.join(proxy_str.split('/')[2:]))
+                            self.log(message='Using proxy "{}"'.format(final_proxy_str_logging), level='info')
                             proxies['http'] = final_proxy_str
                             proxies['https'] = final_proxy_str
         return proxies
