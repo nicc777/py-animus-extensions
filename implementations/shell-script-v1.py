@@ -201,10 +201,6 @@ variable name
                 value_stderr_encoding = self.__detect_encoding(input_str=result.stdout)
                 value_stdout_final = result.stdout
                 value_stderr_final = result.stderr
-                if value_stdout_encoding is not None:
-                    value_stdout_final = value_stdout_final.decode(value_stdout_encoding)
-                if value_stderr_encoding is not None:
-                    value_stderr_final = value_stderr_final.decode(value_stderr_encoding)
                 variable_cache.store_variable(
                     variable=Variable(
                         name='{}:EXIT_CODE'.format(self._var_name(target_environment=target_environment)),
@@ -214,6 +210,49 @@ variable name
                     overwrite_existing=True
                 )
                 self.log(message='      Storing STDOUT', level='info')
+
+                if 'convertOutputToText' in self.spec:
+                    if self.spec['convertOutputToText'] is True:
+                        if value_stdout_encoding is not None:
+                            value_stdout_final = value_stdout_final.decode(value_stdout_encoding)
+                        if value_stderr_encoding is not None:
+                            value_stderr_final = value_stderr_final.decode(value_stderr_encoding)
+                
+                if 'StripNewline' in self.spec:
+                    if self.spec['StripNewline'] is True:
+                        try:
+                            if value_stdout_final is not None:
+                                value_stdout_final = value_stdout_final.replace('\n', '')
+                                value_stdout_final = value_stdout_final.replace('\r', '')
+                            if value_stderr_final is not None:
+                                value_stderr_final = value_stdout_final.replace('\n', '')
+                                value_stderr_final = value_stdout_final.replace('\r', '')
+                        except:
+                            traceback.print_exc()
+                            self.log(message='Could not remove newline characters after "StripNewline" setting was set to True', level='warning')
+
+                if 'ConvertRepeatingSpaces' in self.spec:
+                    if self.spec['ConvertRepeatingSpaces'] is True:
+                        try:
+                            if value_stdout_final is not None:
+                                value_stdout_final = ' '.join(value_stdout_final.split())
+                            if value_stderr_final is not None:
+                                value_stdout_final = ' '.join(value_stderr_final.split())
+                        except:
+                            traceback.print_exc()
+                            self.log(message='Could not remove repeating whitespace characters after "ConvertRepeatingSpaces" setting was set to True', level='warning')
+
+                if 'StripLeadingTrailingSpaces' in self.spec:
+                    if self.spec['StripLeadingTrailingSpaces'] is True:
+                        try:
+                            if value_stdout_final is not None:
+                                value_stdout_final = value_stdout_final.strip()
+                            if value_stderr_final is not None:
+                                value_stdout_final = value_stdout_final.strip()
+                        except:
+                            traceback.print_exc()
+                            self.log(message='Could not remove repeating whitespace characters after "ConvertRepeatingSpaces" setting was set to True', level='warning')
+
                 variable_cache.store_variable(
                     variable=Variable(
                         name='{}:STDOUT'.format(self._var_name(target_environment=target_environment)),
