@@ -218,8 +218,8 @@ variable name
                         if value_stderr_encoding is not None:
                             value_stderr_final = value_stderr_final.decode(value_stderr_encoding)
                 
-                if 'StripNewline' in self.spec:
-                    if self.spec['StripNewline'] is True:
+                if 'stripNewline' in self.spec:
+                    if self.spec['stripNewline'] is True:
                         try:
                             if value_stdout_final is not None:
                                 value_stdout_final = value_stdout_final.replace('\n', '')
@@ -231,8 +231,8 @@ variable name
                             traceback.print_exc()
                             self.log(message='Could not remove newline characters after "StripNewline" setting was set to True', level='warning')
 
-                if 'ConvertRepeatingSpaces' in self.spec:
-                    if self.spec['ConvertRepeatingSpaces'] is True:
+                if 'convertRepeatingSpaces' in self.spec:
+                    if self.spec['convertRepeatingSpaces'] is True:
                         try:
                             if value_stdout_final is not None:
                                 value_stdout_final = ' '.join(value_stdout_final.split())
@@ -242,8 +242,8 @@ variable name
                             traceback.print_exc()
                             self.log(message='Could not remove repeating whitespace characters after "ConvertRepeatingSpaces" setting was set to True', level='warning')
 
-                if 'StripLeadingTrailingSpaces' in self.spec:
-                    if self.spec['StripLeadingTrailingSpaces'] is True:
+                if 'stripLeadingTrailingSpaces' in self.spec:
+                    if self.spec['stripLeadingTrailingSpaces'] is True:
                         try:
                             if value_stdout_final is not None:
                                 value_stdout_final = value_stdout_final.strip()
