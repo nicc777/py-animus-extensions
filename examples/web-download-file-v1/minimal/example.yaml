@@ -1,0 +1,7 @@
+kind: WebDownloadFile
+version: v1
+metadata:
+  name: web-download-file-v1-minimal
+spec:
+  sourceUrl: https://raw.githubusercontent.com/nicc777/py-animus-extensions/main/requirements.txt
+  targetOutputFile: /tmp/output.html

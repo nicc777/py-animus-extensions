@@ -70,7 +70,6 @@
                 "DEBUG": "1"
             }
         },
-
         {
             "name": "Python: TEST APPLY AwsBoto3Session - Example aws-session-access-key-sandbox",
             "type": "python",
@@ -81,6 +80,22 @@
                 "-m", "${workspaceFolder}/examples/aws-boto3-session-v1/aws-session-access-key-sandbox/example.yaml",
                 "-s", "${workspaceFolder}/implementations",
                 "-e", "sandbox"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "env": {
+                "DEBUG": "1"
+            }
+        },
+        {
+            "name": "Python: TEST APPLY WebDownloadFile - Complex Example 1x",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/venv/bin/animus",
+            "args": [
+                "apply",
+                "-m", "${userHome}/tmp/pyanimus_tests/variable_newline_bug/example.yaml",
+                "-s", "${workspaceFolder}/implementations"
             ],
             "console": "integratedTerminal",
             "justMyCode": false,
