@@ -161,7 +161,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         # Refer to https://stackoverflow.com/questions/16694907/download-large-file-in-python-with-requests
         self.log(message='Running Method "_get_data_basic_request_stream"', level='debug')
         try:
-            proxies=dict()
+            proxies=self._build_proxy_dict(proxy_host=proxy_host, proxy_username=proxy_username, proxy_password=proxy_password)
             with requests.get(url, stream=True, allow_redirects=True, verify=verify_ssl, proxies=proxies) as r:
                 r.raise_for_status()
                 with open(target_file, 'wb') as f:
