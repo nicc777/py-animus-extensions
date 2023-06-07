@@ -3,7 +3,7 @@ kind: AnimusExtensionTemplate
 version: v1
 metadata:
   name: aws-boto3-s3-files-v1
-  skipDeleteAll: false
+  skipDeleteAll: true
   executeOnlyOnceOnApply: true
   executeOnlyOnceOnDelete: true
 spec:

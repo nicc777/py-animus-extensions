@@ -1,0 +1,168 @@
+---
+kind: AnimusExtensionTemplate
+version: v1
+metadata:
+  name: web-download-file-v1
+  skipDeleteAll: true
+  executeOnlyOnceOnApply: true
+  executeOnlyOnceOnDelete: true
+spec:
+  description: |
+    Download a file from an Internet URL and save it locally on the filesystem.
+
+    The final status will be stored in a `Variable` with `:STATUS` appended to the
+    variable name. The following values can be expected:
+
+    * SUCCESS - Successfully downloaded the file
+    * FAIL - Some error occurred and the file could not be downloaded
+
+    The destination file with ful path will be stored in the `Variable` named `:FILE_PATH`
+
+    The remote file will be downloaded under the following conditions:
+
+    * The local output file does not exist
+    * If the local file exist, a HEAD request will be made to the URL and the file sizes will be compared. if the size of the local file is different, the remote file will be downloaded.
+  kind: WebDownloadFile
+  version: v1
+  versionChangelog: |
+    This is the initial version
+  supportedVersions:
+  - 'v1'
+  baseClass: ManifestBase
+  # outputPaths:              # If any of these are null/NoneType, the global defaults will be used (which is this repo)
+  #   doc: /tmp/web-download-file-v1/doc
+  #   examples: /tmp/web-download-file-v1/examples
+  #   implementations: /tmp/web-download-file-v1/impl
+  pipRequirements:
+  - 'py-animus'
+  - 'requests'
+  importStatements:
+  - 'from py_animus.manifest_management import *'
+  - 'from py_animus import get_logger'
+  - 'from py_animus.file_io import get_file_size'
+  - 'import traceback'
+  - 'from pathlib import Path'
+  - 'import requests'
+  specFields:
+  - fieldName: sourceUrl
+    fieldDescription: The URL from where to download the file
+    fieldType: str
+    fieldRequired: true
+    fieldDefaultValue: null
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: targetOutputFile
+    fieldDescription: 'The destination file. NOTE: The directory MUST exist. To create the directory first (if needed) consider using a ShellScript as a dependency.'
+    fieldType: str
+    fieldRequired: true
+    fieldDefaultValue: '/tmp/output.html'
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: skipSslVerification
+    fieldDescription: 'If set to true, skips SSL verification. WARNING: use with caution as this may pose a serious security risk'
+    fieldType: bool
+    fieldRequired: false
+    fieldDefaultValue: false
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: proxy.host
+    fieldDescription: 'If you need to pass through a proxy, set the proxy host here. Include the protocol and port, for example `http://` or `https://`. An example: `http://myproxy:3128`'
+    fieldType: string
+    fieldRequired: false
+    fieldDefaultValue: null
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: proxy.basicAuthentication.username
+    fieldDescription: 'If the proxy requires authentication and supports basic authentication, set the username here'
+    fieldType: string
+    fieldRequired: false
+    fieldDefaultValue: null
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: proxy.basicAuthentication.passwordVariableName
+    fieldDescription: 'Contains the `Variable`` name, depending on source manifest implementation, that will contain the password'
+    fieldType: string
+    fieldRequired: false
+    fieldDefaultValue: null
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: extraHeaders
+    fieldDescription: 'A list of name and value items with additional headers to set for the request. Things like a Authorization header might need to be set.'
+    fieldType: list
+    fieldRequired: false
+    fieldDefaultValue: []
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: method
+    fieldDescription: 'The HTTP method to use (default=GET)'
+    fieldType: string
+    fieldRequired: false
+    fieldDefaultValue: 'GET'
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: body
+    fieldDescription: 'Some request types, like POST, requires a body with the data to send. Also remember to set additional headers like "Content Type" as required'
+    fieldType: string
+    fieldRequired: false
+    fieldDefaultValue: null
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: httpBasicAuthentication.username
+    fieldDescription: 'If the remote site requires basic authentication, set the username using this field'
+    fieldType: string
+    fieldRequired: false
+    fieldDefaultValue: null
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: httpBasicAuthentication.passwordVariableName
+    fieldDescription: 'Contains the `Variable`` name, depending on source manifest implementation, that will contain the password'
+    fieldType: string
+    fieldRequired: false
+    fieldDefaultValue: null
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  

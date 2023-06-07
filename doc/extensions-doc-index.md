@@ -21,16 +21,16 @@ Therefore, when running an example, the following strategy could be used:
 
 ```shell
 # Use an environment variable to store the extension to test:
-export EXTENSION_NAME="cli-input-prompt-v1"
+export EXTENSION_NAME="....."
 
 # Use an environment variable to store the scenario to test:
 export SCENARIO_NAME="minimal"
 
-# Run the example:
-docker run --rm -e "DEBUG=1" -it \
-  -v $PWD/implementations:/tmp/src \
-  -v $PWD/examples/$EXTENSION_NAME/$SCENARIO_NAME:/tmp/data \
-  ghcr.io/nicc777/py-animus:latest apply -m /tmp/data/example.yaml -s /tmp/src
+# Set the examples directory (adjust to suit your needs):
+export EXAMPLE_DIR="$PWD/examples"
+
+# Run the animus command from a local virtual environment
+venv/bin/animus apply -m $EXAMPLE_DIR/$EXTENSION_NAME/$SCENARIO_NAME/example.yaml -s $PWD/implementations
 ```
 
 > **Note**
@@ -45,3 +45,4 @@ docker run --rm -e "DEBUG=1" -it \
 | [aws-boto3-session-v1.md](aws-boto3-session-v1.md)       | AwsBoto3Session   | [#000003](https://github.com/nicc777/py-animus-extensions/issues/3)      | Connect to AWS using the boto3 library. This manifest will create a session variable that can be shared with all other manifests dependant on it. |
 | [aws-boto3-s3-bucket-v1.md](aws-boto3-s3-bucket-v1.md)   | AwsBoto3S3Bucket  | [#000015](https://github.com/nicc777/py-animus-extensions/issues/15)     | Manges an AWS S3 bucket resource using the AWS API's via a Boto3 Implementation.                                                                  |
 | [aws-boto3-s3-files-v1.md](aws-boto3-s3-files-v1.md)     | AwsBoto3S3Files   | [#000022](https://github.com/nicc777/py-animus-extensions/issues/22)     | Synchronizes local files and/or directories to an AWS S3 bucket.                                                                                  |
+| [web-download-file-v1.md](web-download-file-v1.md)       | WebDownloadFile   | [#000008](https://github.com/nicc777/py-animus-extensions/issues/08)     | Download a file from the Internet using HTTP(S) and save the content to a local file.                                                             |
