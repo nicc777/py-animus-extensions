@@ -145,7 +145,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         try:
             proxies=self._build_proxy_dict(proxy_host=proxy_host, proxy_username=proxy_username, proxy_password=proxy_password)
             auth = self._build_http_basic_auth_dict(username=username, password=password)
-            r = requests.get(url=url, allow_redirects=True, verify=verify_ssl, proxies=proxies, auth=auth)
+            r = requests.get(url=url, allow_redirects=True, verify=verify_ssl, proxies=proxies, auth=auth, headers=headers)
             with open(target_file, 'wb') as f:
                 f.write(r.content)
         except:
@@ -172,7 +172,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         try:
             proxies=self._build_proxy_dict(proxy_host=proxy_host, proxy_username=proxy_username, proxy_password=proxy_password)
             auth = self._build_http_basic_auth_dict(username=username, password=password)
-            with requests.get(url, stream=True, allow_redirects=True, verify=verify_ssl, proxies=proxies, auth=auth) as r:
+            with requests.get(url, stream=True, allow_redirects=True, verify=verify_ssl, proxies=proxies, auth=auth, headers=headers) as r:
                 r.raise_for_status()
                 with open(target_file, 'wb') as f:
                     for chunk in r.iter_content(chunk_size=8192): 
@@ -213,7 +213,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         use_http_basic_authentication = False
         http_basic_authentication_username = None
         http_basic_authentication_password = None
-        extra_headers = dict()
+        extra_headers = None
         use_custom_headers = False
         http_method = 'GET'
         http_body = None
@@ -257,13 +257,17 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
                 use_http_basic_authentication = False
 
         if 'extraHeaders' in self.spec:
+            extra_headers = dict()
             for header_data in self.spec['extraHeaders']:
                 if 'name' in header_data and 'value' in header_data:
                     extra_headers[header_data['name']] = header_data['value']
                 else:
                     self.log(message='      Ignoring extra header item as it does not contain the keys "name" and/or "value"', level='warning')
-        if len(extra_headers) > 0:
-            use_custom_headers = True
+        try:
+            if len(extra_headers) > 0:
+                use_custom_headers = True
+        except:
+            self.log(message='extra_headers length is zero - not using custom headers', level='info')
 
         if 'method' in self.spec:
             http_method = self.spec['method'].upper()
@@ -290,8 +294,11 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         self.log(message='   * Using HTTP Basic Authentication : {}'.format(use_http_basic_authentication), level='info')
         if use_http_basic_authentication:
             self.log(message='   * HTTP Password Length            : {}'.format(len(http_basic_authentication_password)), level='info')
-        if len(extra_headers) > 0:
-            self.log(message='   * Extra Header Keys               : {}'.format(list(extra_headers.keys())), level='info')
+        if extra_headers is not None:
+            if len(extra_headers) > 0:
+                self.log(message='   * Extra Header Keys               : {}'.format(list(extra_headers.keys())), level='info')
+            else:
+                self.log(message='   * Extra Header Keys               : None - Using Default Headers', level='info')
         else:
             self.log(message='   * Extra Header Keys               : None - Using Default Headers', level='info')
         self.log(message='   * HTTP Method                     : {}'.format(http_method), level='info')
@@ -328,9 +335,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
             {
                 'values': {
                     'large_file': False,
-                    'use_http_basic_authentication': False,
                     'http_method': ('GET', ),
-                    'use_custom_headers': False,
                     'use_body': False,
                 },
                 'method': self._get_data_basic_request
@@ -338,9 +343,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
             {
                 'values': {
                     'large_file': True,
-                    'use_http_basic_authentication': False,
                     'http_method': ('GET', ),
-                    'use_custom_headers': False,
                     'use_body': False,
                 },
                 'method': self._get_data_basic_request_stream
