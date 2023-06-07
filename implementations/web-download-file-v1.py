@@ -277,6 +277,8 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
 
         if http_method != 'GET' and 'body' in self.spec:
             http_body = self.spec['body']
+        elif http_method == 'GET' and 'body' in self.spec:
+            self.log(message='Body cannot be set with GET requests - ignoring body content', level='warning')
         if http_body is not None:
             if len(http_body) > 0:
                 use_body = True
