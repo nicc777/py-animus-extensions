@@ -145,7 +145,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         try:
             proxies=self._build_proxy_dict(proxy_host=proxy_host, proxy_username=proxy_username, proxy_password=proxy_password)
             auth = self._build_http_basic_auth_dict(username=username, password=password)
-            r = requests.get(url=url, allow_redirects=True, verify=verify_ssl, proxies=proxies, auth=auth, headers=headers)
+            r = requests.request(method=method, url=url, allow_redirects=True, verify=verify_ssl, proxies=proxies, auth=auth, headers=headers, data=body)
             with open(target_file, 'wb') as f:
                 f.write(r.content)
         except:
@@ -172,7 +172,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         try:
             proxies=self._build_proxy_dict(proxy_host=proxy_host, proxy_username=proxy_username, proxy_password=proxy_password)
             auth = self._build_http_basic_auth_dict(username=username, password=password)
-            with requests.get(url, stream=True, allow_redirects=True, verify=verify_ssl, proxies=proxies, auth=auth, headers=headers) as r:
+            with requests.request(method=method, url=url, allow_redirects=True, verify=verify_ssl, proxies=proxies, auth=auth, headers=headers, stream=True, data=body) as r:
                 r.raise_for_status()
                 with open(target_file, 'wb') as f:
                     for chunk in r.iter_content(chunk_size=8192): 
@@ -337,16 +337,12 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
             {
                 'values': {
                     'large_file': False,
-                    'http_method': ('GET', ),
-                    'use_body': False,
                 },
                 'method': self._get_data_basic_request
             },
             {
                 'values': {
                     'large_file': True,
-                    'http_method': ('GET', ),
-                    'use_body': False,
                 },
                 'method': self._get_data_basic_request_stream
             },
