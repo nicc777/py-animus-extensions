@@ -5,6 +5,7 @@ from py_animus.file_io import get_file_size
 import traceback
 from pathlib import Path
 import requests
+from requests.auth import HTTPBasicAuth
 
 
 class WebDownloadFile(ManifestBase):
@@ -118,6 +119,13 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
                             proxies['http'] = final_proxy_str
                             proxies['https'] = final_proxy_str
         return proxies
+    
+    def _build_http_basic_auth_dict(self, username: str, password: str)->HTTPBasicAuth:
+        auth = None
+        if username is not None and password is not None:
+            if len(username) > 0 and len(password) > 0:
+                auth = HTTPBasicAuth(username, password)
+        return auth
 
     def _get_data_basic_request(
         self, 
@@ -136,7 +144,8 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         self.log(message='Running Method "_get_data_basic_request"', level='debug')
         try:
             proxies=self._build_proxy_dict(proxy_host=proxy_host, proxy_username=proxy_username, proxy_password=proxy_password)
-            r = requests.get(url=url, allow_redirects=True, verify=verify_ssl, proxies=proxies)
+            auth = self._build_http_basic_auth_dict(username=username, password=password)
+            r = requests.get(url=url, allow_redirects=True, verify=verify_ssl, proxies=proxies, auth=auth)
             with open(target_file, 'wb') as f:
                 f.write(r.content)
         except:
@@ -162,7 +171,8 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         self.log(message='Running Method "_get_data_basic_request_stream"', level='debug')
         try:
             proxies=self._build_proxy_dict(proxy_host=proxy_host, proxy_username=proxy_username, proxy_password=proxy_password)
-            with requests.get(url, stream=True, allow_redirects=True, verify=verify_ssl, proxies=proxies) as r:
+            auth = self._build_http_basic_auth_dict(username=username, password=password)
+            with requests.get(url, stream=True, allow_redirects=True, verify=verify_ssl, proxies=proxies, auth=auth) as r:
                 r.raise_for_status()
                 with open(target_file, 'wb') as f:
                     for chunk in r.iter_content(chunk_size=8192): 
