@@ -7,8 +7,10 @@ The spec will allow custom Python code to be added for post-secret retrieval pro
 The following variable will be set once the secret is retrieved:
 
 * `VALUE` - contains the secret value
-* `TYPE` - Either "string" or "binary"
+* `TYPE` - Either "string" or "binary". If the `conversionTarget` option was used the type may also be "dict"
 
+> **Note**
+> When the `delete` action is used, the `apply` action will actually be called. The reasoning is that even in a delete phase, a secret value may be required to perform a delete action on another resource. This manifest is only for reading secrets - not for creating and maintaining the secret.
 
 ```shell
 export EXTENSION_NAME="aws-boto3-get-secret-v1"
@@ -47,13 +49,29 @@ export SCENARIO_NAME="minimal"
 Example manifest: [example.yaml](/media/nicc777/data/nicc777/git/Personal/GitHub/py-animus-extensions/examples/aws-boto3-get-secret-v1/minimal/example.yaml)
 
 ```yaml
+---
+kind: AwsBoto3Session
+version: v1
+metadata:
+  name: aws-boto3-session-v1-minimal
+  skipApplyAll: true
+  skipDeleteAll: true
+spec:
+  awsRegion: us-east-1
+  profileName: my-profile
+---
 kind: AwsBoto3GetSecret
 version: v1
 metadata:
   name: aws-boto3-get-secret-v1-minimal
   skipDeleteAll: true
+  dependencies:
+    apply:
+    - aws-boto3-session-v1-minimal
+    delete:
+    - aws-boto3-session-v1-minimal
 spec:
-  awsBoto3SessionReference: my-boto3-session
+  awsBoto3SessionReference: aws-boto3-session-v1-minimal
   secretName: my-secret
 ```
 
@@ -68,12 +86,27 @@ export SCENARIO_NAME="json"
 Example manifest: [example.yaml](/media/nicc777/data/nicc777/git/Personal/GitHub/py-animus-extensions/examples/aws-boto3-get-secret-v1/json/example.yaml)
 
 ```yaml
+---
+kind: AwsBoto3Session
+version: v1
+metadata:
+  name: my-boto3-session
+  skipApplyAll: true
+  skipDeleteAll: true
+spec:
+  awsRegion: us-east-1
+  profileName: my-profile
+---
 kind: AwsBoto3GetSecret
 version: v1
 metadata:
   executeOnlyOnceOnApply: true
   name: aws-boto3-get-secret-v1-json
-  skipDeleteAll: true
+  dependencies:
+    apply:
+    - my-boto3-session
+    delete:
+    - my-boto3-session
 spec:
   awsBoto3SessionReference: my-boto3-session
   secretName: my-secret
