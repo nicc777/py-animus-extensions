@@ -18,11 +18,11 @@ export EXTENSION_NAME="aws-boto3-get-secret-v1"
 
 # Spec fields
 
-| Field | Type    | Required | In Versions | Description  |
-|-------|:-------:|:--------:|:-----------:|--------------|
-| `secretName` | str | Yes | v1 | The name of the AWS Secret |
-| `awsBoto3SessionReference` | str | Yes | v1 | The AWS credentials to use for this secret. The value is the "name" of the relevant "AwsBoto3Session" manifest to use |
-| `conversionTarget` | str | No | v1 | Optional, default=None. Other options: "dict" (assumes the original value is a JSON string) which will convert the secret value to a dict. |
+| Field                      | Type    | Required | In Versions | Description                                                                                                                                |
+|----------------------------|:-------:|:--------:|:-----------:|--------------------------------------------------------------------------------------------------------------------------------------------|
+| `secretName`               | str     | Yes      | v1          | The name of the AWS Secret                                                                                                                 |
+| `awsBoto3SessionReference` | str     | Yes      | v1          | The AWS credentials to use for this secret. The value is the "name" of the relevant "AwsBoto3Session" manifest to use                      |
+| `conversionTarget`         | str     | No       | v1          | Optional, default=None. Other options: "dict" (assumes the original value is a JSON string) which will convert the secret value to a dict. |
 
 
 # Example Usages
