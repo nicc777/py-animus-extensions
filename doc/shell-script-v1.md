@@ -61,7 +61,7 @@ docker run --rm -e "DEBUG=1" -it \
 export SCENARIO_NAME="minimal"
 ```
 
-Example manifest: [example.yaml](/media/nicc777/data/nicc777/git/Personal/GitHub/py-animus-extensions/examples/shell-script-v1/minimal/example.yaml)
+Example manifest: [example.yaml](../examples/shell-script-v1/minimal/example.yaml)
 
 ```yaml
 kind: ShellScript
@@ -86,7 +86,7 @@ This is the absolute minimal example based on required values. Dummy random data
 export SCENARIO_NAME="docker-check"
 ```
 
-Example manifest: [example.yaml](/media/nicc777/data/nicc777/git/Personal/GitHub/py-animus-extensions/examples/shell-script-v1/docker-check/example.yaml)
+Example manifest: [example.yaml](../examples/shell-script-v1/docker-check/example.yaml)
 
 ```yaml
 kind: ShellScript

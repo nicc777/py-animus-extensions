@@ -46,7 +46,7 @@ venv/bin/animus apply -m $EXAMPLE_DIR/$EXTENSION_NAME/$SCENARIO_NAME/example.yam
 export SCENARIO_NAME="minimal"
 ```
 
-Example manifest: [example.yaml](/media/nicc777/data/nicc777/git/Personal/GitHub/py-animus-extensions/examples/aws-boto3-get-secret-v1/minimal/example.yaml)
+Example manifest: [example.yaml](../examples/aws-boto3-get-secret-v1/minimal/example.yaml)
 
 ```yaml
 ---
@@ -83,7 +83,7 @@ This is the absolute minimal example based on required values. Dummy random data
 export SCENARIO_NAME="json"
 ```
 
-Example manifest: [example.yaml](/media/nicc777/data/nicc777/git/Personal/GitHub/py-animus-extensions/examples/aws-boto3-get-secret-v1/json/example.yaml)
+Example manifest: [example.yaml](../examples/aws-boto3-get-secret-v1/json/example.yaml)
 
 ```yaml
 ---
