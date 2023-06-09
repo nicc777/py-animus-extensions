@@ -225,8 +225,8 @@ variable name
                                 value_stdout_final = value_stdout_final.replace('\n', '')
                                 value_stdout_final = value_stdout_final.replace('\r', '')
                             if value_stderr_final is not None:
-                                value_stderr_final = value_stdout_final.replace('\n', '')
-                                value_stderr_final = value_stdout_final.replace('\r', '')
+                                value_stderr_final = value_stderr_final.replace('\n', '')
+                                value_stderr_final = value_stderr_final.replace('\r', '')
                         except:
                             traceback.print_exc()
                             self.log(message='Could not remove newline characters after "StripNewline" setting was set to True', level='warning')
@@ -237,7 +237,7 @@ variable name
                             if value_stdout_final is not None:
                                 value_stdout_final = ' '.join(value_stdout_final.split())
                             if value_stderr_final is not None:
-                                value_stdout_final = ' '.join(value_stderr_final.split())
+                                value_stderr_final = ' '.join(value_stderr_final.split())
                         except:
                             traceback.print_exc()
                             self.log(message='Could not remove repeating whitespace characters after "ConvertRepeatingSpaces" setting was set to True', level='warning')
@@ -248,7 +248,7 @@ variable name
                             if value_stdout_final is not None:
                                 value_stdout_final = value_stdout_final.strip()
                             if value_stderr_final is not None:
-                                value_stdout_final = value_stdout_final.strip()
+                                value_stderr_final = value_stderr_final.strip()
                         except:
                             traceback.print_exc()
                             self.log(message='Could not remove repeating whitespace characters after "ConvertRepeatingSpaces" setting was set to True', level='warning')
