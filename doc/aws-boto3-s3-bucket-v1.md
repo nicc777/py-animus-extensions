@@ -58,7 +58,7 @@ venv/bin/animus apply -m $EXAMPLE_DIR/$EXTENSION_NAME/$SCENARIO_NAME/example.yam
 export SCENARIO_NAME="minimal"
 ```
 
-Example manifest: [example.yaml](/media/nicc777/data/nicc777/git/Personal/GitHub/py-animus-extensions/examples/aws-boto3-s3-bucket-v1/minimal/example.yaml)
+Example manifest: [example.yaml](../examples/aws-boto3-s3-bucket-v1/minimal/example.yaml)
 
 ```yaml
 ---

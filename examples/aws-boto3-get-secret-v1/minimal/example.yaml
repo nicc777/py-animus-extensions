@@ -1,0 +1,8 @@
+kind: AwsBoto3GetSecret
+version: v1
+metadata:
+  name: aws-boto3-get-secret-v1-minimal
+  skipDeleteAll: true
+spec:
+  awsBoto3SessionReference: my-boto3-session
+  secretName: my-secret

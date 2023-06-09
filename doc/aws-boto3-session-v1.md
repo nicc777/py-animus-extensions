@@ -42,7 +42,7 @@ venv/bin/animus apply -m $EXAMPLE_DIR/aws-boto3-session-v1/$SCENARIO_NAME/exampl
 export SCENARIO_NAME="minimal"
 ```
 
-Example manifest: [example.yaml](/media/nicc777/data/nicc777/git/Personal/GitHub/py-animus-extensions/examples/aws-boto3-session-v1/minimal/example.yaml)
+Example manifest: [example.yaml](../examples/aws-boto3-session-v1/minimal/example.yaml)
 
 ```yaml
 kind: AwsBoto3Session
@@ -67,7 +67,7 @@ This is the absolute minimal example based on a AWS profile available through th
 export SCENARIO_NAME="aws-session-access-key-sandbox"
 ```
 
-Example manifest: [example.yaml](/media/nicc777/data/nicc777/git/Personal/GitHub/py-animus-extensions/examples/aws-boto3-session-v1/aws-session-access-key-sandbox/example.yaml)
+Example manifest: [example.yaml](../examples/aws-boto3-session-v1/aws-session-access-key-sandbox/example.yaml)
 
 ```yaml
 ---

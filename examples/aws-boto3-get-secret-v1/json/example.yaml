@@ -1,0 +1,11 @@
+kind: AwsBoto3GetSecret
+version: v1
+metadata:
+  executeOnlyOnceOnApply: true
+  name: aws-boto3-get-secret-v1-json
+  skipDeleteAll: true
+spec:
+  awsBoto3SessionReference: my-boto3-session
+  secretName: my-secret
+  conversionTarget: dict
+
