@@ -93,7 +93,7 @@ The following variable will be set once the secret is retrieved:
                 name='{}:TYPE'.format(self._var_name(target_environment=target_environment)),
                 initial_value=value_type,
                 logger=self.logger,
-                mask_in_logs=True
+                mask_in_logs=False
             ),
             overwrite_existing=True
         )
