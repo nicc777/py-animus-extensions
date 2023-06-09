@@ -90,7 +90,7 @@ Example manifest: [example.yaml](/media/nicc777/data/nicc777/git/Personal/GitHub
 kind: AwsBoto3Session
 version: v1
 metadata:
-  name: my-boto3-session
+  name: my-aws-session
   skipApplyAll: true
   skipDeleteAll: true
 spec:
@@ -100,20 +100,34 @@ spec:
 kind: AwsBoto3GetSecret
 version: v1
 metadata:
-  executeOnlyOnceOnApply: true
-  name: aws-boto3-get-secret-v1-json
+  name: my-secret
+  skipDeleteAll: true
   dependencies:
     apply:
-    - my-boto3-session
+    - my-aws-session
     delete:
-    - my-boto3-session
+    - my-aws-session
 spec:
-  awsBoto3SessionReference: my-boto3-session
-  secretName: my-secret
-  conversionTarget: dict
+  awsBoto3SessionReference: my-aws-session
+  secretName: DarkSecret
+---
+kind: ShellScript
+version: v1
+metadata:
+  name: testing-secret-retrieval-and-use
+  dependencies:
+    apply:
+    - my-secret
+spec:
+  source:
+    type: inline
+    value: 'echo "Secret: {{ .Variables.AwsBoto3GetSecret:my-secret:default:VALUE }}"'
+  convertOutputToText: true
+  stripNewline: true
+  stripLeadingTrailingSpaces: true
 ```
 
-This example will retrieve the value from the secret and assume it is JSON, which will then be converted into a Python dict.
+This is a good test to show how secrets can be used in practice.
 
 # Versions and Changelog
 
