@@ -18,7 +18,7 @@ It is important that the bucket remain under control of Animus (both through `Aw
 to avoid inconsistencies or loss of dat or data corruption.
 
 The intent of this facility is to keep file synchronized that are required for IaC activities. Ir was not really meant
-for uploading or synchronizing a large amount of files. Consider using the AWS CLI tool 
+for uploading or synchronizing a large amount of files. Consider using the AWS CLI tool
 [aws s3 sync](https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html) for bulk file uploads (1000+ files)
 
 When the apply action is complete the following variable will be set:
@@ -28,7 +28,7 @@ When the apply action is complete the following variable will be set:
 
 Both individual files, or entire directory contents can be uploaded.
 
-There are several strategies that can be followed: 
+There are several strategies that can be followed:
 
 * Ignore the current files in the bucket, and just overwrite all of them
 * A longer process can first get the checksum of each remote file and compare it with the local file and only upload the differences.
@@ -39,7 +39,7 @@ Restrictions:
 * Be aware of the AWS S3 [service quotas](https://docs.aws.amazon.com/general/latest/gr/s3.html)
 * It is encouraged to re-use the same `AwsBoto3Session` that was used to create the S3 bucket. This will avoid potential issues with end-point usage etc.
 
-    """    
+    """
 
     def __init__(self, logger=get_logger(), post_parsing_method: object=None, version: str='v1', supported_versions: tuple=(['v1'])):
         super().__init__(logger=logger, post_parsing_method=post_parsing_method, version=version, supported_versions=supported_versions)
@@ -64,7 +64,7 @@ Restrictions:
             raise_exception_on_not_found=False
         ) is False:
             raise Exception('Boto3 Session Does not exist or is not connected yet. Ensure a Boto3 Session is a dependant of this manifest and that the environments match.')
-        
+
         boto3_session = variable_cache.get_value(
             variable_name='{}:SESSION'.format(boto3_session_base_name),
             value_if_expired=False,
@@ -75,7 +75,7 @@ Restrictions:
         if boto3_session:
             return boto3_session.client('s3')
         raise Exception('Unable to create S3 client')
-    
+
     def _set_variables(self, all_ok: bool=True, checksum_differences_detected: bool=False, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
         result_txt = 'ALL_OK'
         if all_ok is False:
@@ -110,9 +110,9 @@ Restrictions:
                 if len(bucket_name) > 0:
                     return bucket_name
         raise Exception('Bucket name not found')
-    
+
     def _bucket_exists(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->bool:
-        try:        
+        try:
             client = self._get_boto3_s3_client(variable_cache=variable_cache, target_environment=target_environment)
             response = client.head_bucket(
                 Bucket=self._get_bucket_name(variable_cache=variable_cache, target_environment=target_environment)
@@ -229,7 +229,7 @@ Restrictions:
                                 file_full_path = '{}{}{}'.format(base_directory, os.sep, file_name)
                                 target_key_checksum = hashlib.sha256(file_name.encode('utf-8')).hexdigest()
                                 local_file_metadata = self._retrieve_local_file_meta_data(base_directory=base_directory, file_name_portion=file_name, verify_checksums=verify_checksums)
-                                if local_file_metadata is not None:                                    
+                                if local_file_metadata is not None:
                                     files[target_key_checksum] = local_file_metadata
                         else:
                             self.log(message='No actual files found. Ignoring this section: Problematic source_definition={}'.format(json.dumps(source_definition)), level='warning')
@@ -252,7 +252,7 @@ Restrictions:
                                 file_name = copy.deepcopy(file_full_path).replace(full_base_dir, '')
                                 target_key_checksum = hashlib.sha256(file_name.encode('utf-8')).hexdigest()
                                 local_file_metadata = self._retrieve_local_file_meta_data(base_directory=base_directory, file_name_portion=file_name, verify_checksums=verify_checksums)
-                                if local_file_metadata is not None:                                    
+                                if local_file_metadata is not None:
                                     files[target_key_checksum] = local_file_metadata
                     else:
                         self.log(message='Unsupported source type "{}" SKIPPED'.format(source_definition['sourceType']), level='warning')
@@ -311,7 +311,7 @@ Restrictions:
                         else:
                             self.log(message='Local file "{}" found in S3 - ignoring file'.format(key_data['LocalFullPath']), level='info')
         return files_to_transfer
-    
+
     def _remote_files_to_delete(self, current_s3_keys: dict, local_files: dict, work_dir: str, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->dict:
         files_to_delete = dict()
         if 'actionExtraFilesOnS3' in self.spec:
@@ -340,7 +340,7 @@ Restrictions:
     def implemented_manifest_differ_from_this_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders())->bool:
         if target_environment not in self.metadata['environments']:
             return False
-        
+
         work_dir = self._create_temporary_working_directory()
 
         s3_keys = self._get_all_s3_keys(variable_cache=variable_cache, target_environment=target_environment)
@@ -380,7 +380,7 @@ Restrictions:
             return True
 
         return False
-    
+
     def _write_transaction_log(self, message: str):
         if 'transferLogFile' in self.spec:
             try:
@@ -472,8 +472,8 @@ Restrictions:
                 target_environment=target_environment
             )
 
-        return 
-    
+        return
+
     def delete_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
         if target_environment not in self.metadata['environments']:
             self.log(message='Target environment "{}" not relevant for this manifest'.format(target_environment), level='warning')
@@ -483,8 +483,8 @@ Restrictions:
         s3_keys = self._get_all_s3_keys(variable_cache=variable_cache, target_environment=target_environment)
         for key_hash, key_data in s3_keys.items():
             self._delete_s3_key(key=key_data['Key'], variable_cache=variable_cache, target_environment=target_environment)
-            self.log(message='   Deleted known S3 key "{}"'.format(key_data['Key']), level='info')   
+            self.log(message='   Deleted known S3 key "{}"'.format(key_data['Key']), level='info')
         # TODO Delete temporary files
-        # TODO Delete temporary work directories 
+        # TODO Delete temporary work directories
         self.log(message='DELETE CALLED', level='info')
-        return 
+        return

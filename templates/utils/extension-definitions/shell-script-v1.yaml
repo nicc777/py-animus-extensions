@@ -10,7 +10,7 @@ spec:
   description: |
     Executes a shell script.
 
-    Output from STDOUT will be stored in a `Variable` with `:STDOUT` appended to the 
+    Output from STDOUT will be stored in a `Variable` with `:STDOUT` appended to the
     variable name
 
     Output from STDERR will be stored in a `Variable` with `:STDERR` appended to the
@@ -68,8 +68,8 @@ spec:
     customValidation: pass
   - fieldName: source.type
     fieldDescription: |
-      Select the source type, which can be either `filePath` that points to an 
-      existing script file on the local file system, or `inLine` with the script 
+      Select the source type, which can be either `filePath` that points to an
+      existing script file on the local file system, or `inLine` with the script
       source defined in the `spec.source.value` field
     fieldType: str
     fieldRequired: false
@@ -85,8 +85,8 @@ spec:
         raise Exception('Unsupported `spec.source.value`. Must be one of {}'.format(SUPPORTED_TYPES))
   - fieldName: source.value
     fieldDescription: |
-      If `spec.source.type` has a value of `inLine` then the value here will be 
-      assumed to be the script content of that type. if `spec.source.type` has a value 
+      If `spec.source.type` has a value of `inLine` then the value here will be
+      assumed to be the script content of that type. if `spec.source.type` has a value
       of `filePath` then this value must point to an existing file on the local filesystem
     fieldType: str
     fieldRequired: false
@@ -102,7 +102,7 @@ spec:
             raise Exception('Expected file "{}" to exist'.format(self.spec['source']['value']))
   - fieldName: workDir.path
     fieldDescription: |
-      An optional path to a working directory. The extension will create 
+      An optional path to a working directory. The extension will create
       temporary files (if needed) in this directory and execute them from here.
     fieldType: str
     fieldRequired: false
@@ -113,7 +113,7 @@ spec:
     - fieldValueIsNull: true
   - fieldName: convertOutputToText
     fieldDescription: |
-      Normally the STDOUT and STDERR will be binary encoded. Setting this value to 
+      Normally the STDOUT and STDERR will be binary encoded. Setting this value to
       true will convert those values to a normal string.
     fieldType: bool
     fieldRequired: false
@@ -142,4 +142,4 @@ spec:
         skipDeleteAll: true
     explanatoryText: |
       This example runs the command `docker --version` and will store the result in the variable named
-      
+

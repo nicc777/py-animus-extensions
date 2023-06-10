@@ -59,7 +59,7 @@ version: v1
 
 This is the absolute minimal example based on a AWS profile available through the information in `~/.aws` configuration and credential files
 
-        
+
 
 ## Example: aws-session-access-key-sandbox
 
@@ -88,7 +88,7 @@ kind: AwsBoto3Session
 version: v1
 metadata:
   dependencies:
-    apply: 
+    apply:
     - cli-get-aws-secret-sandbox
   environments:
   - sandbox
@@ -104,7 +104,7 @@ spec:
 
 This example uses AWS access and secret keys to authenticate, and the secret access key is derived from a dependant manifest. This example targets only one specific environment named `sandbox`
 
-        
+
 
 # Versions and Changelog
 

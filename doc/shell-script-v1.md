@@ -2,7 +2,7 @@
 
 Executes a shell script.
 
-Output from STDOUT will be stored in a `Variable` with `:STDOUT` appended to the 
+Output from STDOUT will be stored in a `Variable` with `:STDOUT` appended to the
 variable name
 
 Output from STDERR will be stored in a `Variable` with `:STDERR` appended to the
@@ -78,7 +78,7 @@ version: v1
 
 This is the absolute minimal example based on required values. Dummy random data was generated where required.
 
-        
+
 
 ## Example: docker-check
 
@@ -105,7 +105,7 @@ version: v1
 
 This example runs the command `docker --version` and will store the result in the variable named
 
-        
+
 
 # Versions and Changelog
 

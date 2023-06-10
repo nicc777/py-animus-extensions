@@ -187,7 +187,7 @@ python3 templates/utils/factory/animus-extension-template.py \
 After the command is run, the following files would be created:
 
 ```shell
-tree /tmp/test-create-text-file-v1 
+tree /tmp/test-create-text-file-v1
 /tmp/test-create-text-file-v1
 ├── doc
 │   └── create-text-file-v1.md
@@ -226,7 +226,7 @@ For this example, the change detection logic will go through the following steps
 
 ```python
 class CreateTextFile(ManifestBase):
-    
+
     # Some lines omitted
 
     def implemented_manifest_differ_from_this_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache())->bool:
@@ -277,7 +277,7 @@ If it is determined by `implemented_manifest_differ_from_this_manifest()` that t
 
 ```python
 class CreateTextFile(ManifestBase):
-    
+
     # Some lines omitted
 
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False):
@@ -296,7 +296,7 @@ class CreateTextFile(ManifestBase):
                 self.log(message='Failed to create file "{}". EXCEPTION: {}'.format(self.spec['outputFile'], traceback.format_exc()), level='error')
                 variable_cache.store_variable(variable=Variable(name='{}:error'.format(self.metadata['name']),initial_value=True,logger=self.logger),overwrite_existing=True)
         variable_cache.store_variable(variable=Variable(name='{}:executed'.format(self.metadata['name']),initial_value=True,logger=self.logger),overwrite_existing=True)
-        return 
+        return
 ```
 
 #### The `delete_manifest()` method
@@ -305,7 +305,7 @@ The delete method is fairly straight forward by just deleting the file as specif
 
 ```python
 class CreateTextFile(ManifestBase):
-    
+
     # Some lines omitted
 
     def delete_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False):
@@ -320,7 +320,7 @@ class CreateTextFile(ManifestBase):
         except:
             self.log(message='Failed to delete file "{}"'.format(self.spec['outputFile']), level='error')
             variable_cache.store_variable(variable=Variable(name='{}:error'.format(self.metadata['name']),initial_value=True,logger=self.logger),overwrite_existing=True)
-        return 
+        return
 ```
 
 ### Test the Implementation
@@ -342,7 +342,7 @@ Apply the manifest and run some tests to see that it worked:
 
 ```shell
 # Prepare our output directory
-mkdir mkdir /tmp/output  
+mkdir mkdir /tmp/output
 
 # Make sure the output file does not exist:
 rm -vf /tmp/output/minimal-test.txt
@@ -352,7 +352,7 @@ docker run --rm -e "DEBUG=1" -it \
   -v /tmp/test-create-text-file-v1/impl:/tmp/src \
   -v /tmp/test-create-text-file-v1/ex/minimal:/tmp/data \
   -v /tmp/output:/tmp/output \
-  ghcr.io/nicc777/py-animus:latest apply -m /tmp/data/example.yaml -s /tmp/src 
+  ghcr.io/nicc777/py-animus:latest apply -m /tmp/data/example.yaml -s /tmp/src
 
 # Test:
 cat /tmp/output/minimal-test.txt
@@ -370,7 +370,7 @@ docker run --rm -e "DEBUG=1" -it \
   -v /tmp/test-create-text-file-v1/impl:/tmp/src \
   -v /tmp/test-create-text-file-v1/ex/minimal:/tmp/data \
   -v /tmp/output:/tmp/output \
-  ghcr.io/nicc777/py-animus:latest delete -m /tmp/data/example.yaml -s /tmp/src 
+  ghcr.io/nicc777/py-animus:latest delete -m /tmp/data/example.yaml -s /tmp/src
 
 cat /tmp/output/minimal-test.txt
 # EXPECT cat: /tmp/output/minimal-test.txt: No such file or directory
@@ -378,7 +378,7 @@ cat /tmp/output/minimal-test.txt
 
 The output file should no longer be on the filesystem:
 
-## Making your extension useful 
+## Making your extension useful
 
 After the code changes have been made, the final steps include:
 
@@ -397,7 +397,7 @@ spec:
   additionalExamples:
   - exampleName: hello-world
     manifest:
-      generated: false 
+      generated: false
       specData: |
         outputFile: /tmp/output/custom-example-output.txt
         content: |
@@ -421,11 +421,11 @@ After you have created an extension, you need to decide if/how you are going to 
 There are essentially two options:
 
 1. Private, which means you do not opt to make your extension available via the [py-animus-extensions](https://github.com/nicc777/py-animus-extensions) repository (although, you can still host it in your own public repository)
-2. Public, which means you want to include your extension in the [py-animus-extensions](https://github.com/nicc777/py-animus-extensions) repository. Your extension will first be reviewed before publishing. 
- 
+2. Public, which means you want to include your extension in the [py-animus-extensions](https://github.com/nicc777/py-animus-extensions) repository. Your extension will first be reviewed before publishing.
+
 
 > **Notes**
-> The `Public` option is not available yet, as the exact process is still being refined. Please watch this space! 
+> The `Public` option is not available yet, as the exact process is still being refined. Please watch this space!
 
 | Publishing Path Documentation             |
 |-------------------------------------------|

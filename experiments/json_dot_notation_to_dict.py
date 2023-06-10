@@ -44,7 +44,7 @@ The original_data2 transformed will now look like this:
 """
 
 
-input_data_converted = json.loads(input_data)        
+input_data_converted = json.loads(input_data)
 
 
 class Field:
@@ -74,7 +74,7 @@ def create_field(dotted_name: str, value: object)->Field:
 
 def merge_dicts(A: dict, B: dict)->dict:
     # FROM https://stackoverflow.com/questions/29241228/how-can-i-merge-two-nested-dictionaries-together (Vivek Sable)
-    for i, j in B.items(): 
+    for i, j in B.items():
         if i in A:
             A[i].update(j)
         else:
@@ -98,7 +98,7 @@ for t_field_name, t_field_data in input_data_converted.items():
                         converted_t_field_data[k] = v
         output_data[t_field_name] = converted_t_field_data
     else:
-        output_data[t_field_name] = t_field_data    
-    
-    
+        output_data[t_field_name] = t_field_data
+
+
 print(json.dumps(output_data))

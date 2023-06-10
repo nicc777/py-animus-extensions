@@ -1,4 +1,4 @@
-py-animus
-requests
 boto3
 chardet
+py-animus
+requests

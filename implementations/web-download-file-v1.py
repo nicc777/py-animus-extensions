@@ -19,7 +19,7 @@ variable name. The following values can be expected:
 
 The destination file with ful path will be stored in the `Variable` named `:FILE_PATH`
 
-    """    
+    """
 
     def __init__(self, logger=get_logger(), post_parsing_method: object=None, version: str='v1', supported_versions: tuple=(['v1'])):
         super().__init__(logger=logger, post_parsing_method=post_parsing_method, version=version, supported_versions=supported_versions)
@@ -77,7 +77,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
     def implemented_manifest_differ_from_this_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders())->bool:
         if target_environment not in self.metadata['environments']:
             return False
-        
+
         remote_file_size = self._get_url_content_length(url=self.spec['sourceUrl'])
         variable_cache.store_variable(
             variable=Variable(
@@ -119,7 +119,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
                             proxies['http'] = final_proxy_str
                             proxies['https'] = final_proxy_str
         return proxies
-    
+
     def _build_http_basic_auth_dict(self, username: str, password: str)->HTTPBasicAuth:
         auth = None
         if username is not None and password is not None:
@@ -128,7 +128,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         return auth
 
     def _get_data_basic_request(
-        self, 
+        self,
         url: str,
         target_file: str,
         verify_ssl: bool,
@@ -154,7 +154,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         return True
 
     def _get_data_basic_request_stream(
-        self, 
+        self,
         url: str,
         target_file: str,
         verify_ssl: bool,
@@ -175,7 +175,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
             with requests.request(method=method, url=url, allow_redirects=True, verify=verify_ssl, proxies=proxies, auth=auth, headers=headers, stream=True, data=body) as r:
                 r.raise_for_status()
                 with open(target_file, 'wb') as f:
-                    for chunk in r.iter_content(chunk_size=8192): 
+                    for chunk in r.iter_content(chunk_size=8192):
                         f.write(chunk)
         except:
             self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
@@ -201,7 +201,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         large_file = False
         self.log(message='Checking if {} > 104857600...'.format(remote_file_size), level='info')
         if remote_file_size > 104857600:   # Anything larger than 100MiB is considered large and will be downloaded in chunks
-            large_file = True 
+            large_file = True
 
         use_ssl = False
         verify_ssl = True
@@ -223,7 +223,7 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
             use_ssl = True
         if use_ssl is True and 'skipSslVerification' in self.spec:
             verify_ssl = not self.spec['skipSslVerification']
-        
+
         if 'proxy' in self.spec:
             if 'host' in self.spec['proxy']:
                 use_proxy = True
@@ -370,9 +370,9 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
                 raise Exception('Failed to download "{}" to file "{}"'.format(url, target_file))
         else:
             raise Exception('No suitable method could be found to handle the download.')
-            
-        return 
-    
+
+        return
+
     def delete_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
         if target_environment not in self.metadata['environments']:
             self.log(message='Target environment "{}" not relevant for this manifest'.format(target_environment), level='warning')
@@ -390,4 +390,4 @@ The destination file with ful path will be stored in the `Variable` named `:FILE
         else:
             self.log(message='   Target file "{}" already deleted'.format(self.spec['targetOutputFile']), level='info')
         self._set_variables(all_ok=False, deleted=True, variable_cache=variable_cache, target_environment=target_environment)
-        return 
+        return

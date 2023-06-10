@@ -1,4 +1,4 @@
 - search: /home/[\w|\s]+/
   replacement: $HOME
-- search: '[\w|\//\\s]+py-animus-extensions/'
+- search: .+py-animus-extensions\/
   replacement: $PWD

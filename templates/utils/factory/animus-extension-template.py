@@ -71,7 +71,7 @@ class AnimusExtensionTemplate(ManifestBase):
             self.__class__.__name__,
             self.metadata['name']
         )
-    
+
     def _validate_str_or_list_or_boolean(
             self,
             spec_path: str,
@@ -137,7 +137,7 @@ class AnimusExtensionTemplate(ManifestBase):
             raise_exception_on_expired=False,
             raise_exception_on_not_found=False
         ) is False:
-            
+
             self.log(message='Not Yet Validated', level='debug')
 
             validation_config_for_string_and_list_fields = {
@@ -149,7 +149,7 @@ class AnimusExtensionTemplate(ManifestBase):
                     'set_default_when_null': True,
                     'raise_exception_when_empty': False,
 
-                }, 
+                },
                 'kind': {
                     'default_val': None,
                     'value_type': str,
@@ -157,7 +157,7 @@ class AnimusExtensionTemplate(ManifestBase):
                     'set_default_when_type_mismatch': False,
                     'set_default_when_null': False,
                     'raise_exception_when_empty': False,
-                }, 
+                },
                 'version': {
                     'default_val': None,
                     'value_type': str,
@@ -165,7 +165,7 @@ class AnimusExtensionTemplate(ManifestBase):
                     'set_default_when_type_mismatch': False,
                     'set_default_when_null': False,
                     'raise_exception_when_empty': False,
-                }, 
+                },
                 'versionChangelog': {
                     'default_val': '> **Note**\n> No changelog provided\n\n',
                     'value_type': str,
@@ -209,10 +209,10 @@ class AnimusExtensionTemplate(ManifestBase):
                 'additionalExamples': {
                     'default_val': [
                         {
-                            'exampleName': 'minimal', 
+                            'exampleName': 'minimal',
                             'manifest': {
                                 'generated': True,
-                            }, 
+                            },
                             'explanatoryText': 'This is the absolute minimal example based on required values. Dummy random data was generated where required.'
                         }
                     ],
@@ -379,7 +379,7 @@ class AnimusExtensionTemplate(ManifestBase):
                         raise_exception_when_empty=params['raise_exception_when_empty'],
                         log_indent_spaces=3
                     )
-                
+
                     if spec_str_field == 'fieldSetDefaultValueConditions':
                         if spec_str_field in spec_field_dict:
                             conditions = spec_field_dict[spec_str_field]
@@ -441,11 +441,11 @@ class AnimusExtensionTemplate(ManifestBase):
                         'manifest':{
                             'generated': True, # This will automatically generate an example spec data with the minimum required fields and default values
                             'additionalMetadata': 'skipDeleteAll: true',
-                        },  
+                        },
                         'explanatoryText': 'This is the absolute minimal example based on required values. Dummy random data was generated where required.'
                     }
                 )
-                
+
             self.log(message='final_examples_list={}'.format(final_examples_list), level='debug')
             if len(final_examples_list) == 0:
                 raise Exception('At least one example definition must be supplied')
@@ -482,7 +482,7 @@ class AnimusExtensionTemplate(ManifestBase):
             else:
                 self.log(message='Directory {} found - command not recognized - NO ACTIONS'.format(directory), level='warning')
         return actions
-    
+
     def _determine_file_actions(self, file: str, existing_actions: list, command: str, action_command: str)->list:
         actions = copy.deepcopy(existing_actions)
         file_path_object = Path(file)
@@ -547,7 +547,7 @@ class AnimusExtensionTemplate(ManifestBase):
     def implemented_manifest_differ_from_this_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders())->bool:
         self._validate(variable_cache=variable_cache)
         command = variable_cache.get_value(variable_name='{}:command'.format(self._var_name()))
-        
+
         self.log(message='----------------------- running implemented_manifest_differ_from_this_manifest() ----------------------', level='info')
         self.log(message='spec as JSON: {}'.format(json.dumps(self.spec)), level='debug')
 
@@ -690,8 +690,8 @@ class AnimusExtensionTemplate(ManifestBase):
             command=command,
             action_command=action_command
         )
-        
-        
+
+
         ###
         ### DONE
         ###
@@ -701,7 +701,7 @@ class AnimusExtensionTemplate(ManifestBase):
         variable_cache.store_variable(variable=Variable(name='{}:actions'.format(self._var_name()),initial_value=actions,ttl=-1,logger=self.logger,mask_in_logs=False),overwrite_existing=False)
         if len(actions) > 0:
             return True
-        
+
         return False
 
     def _action_create_dir(self, directory_name: str):
@@ -833,7 +833,7 @@ ___EXAMPLE_MANIFEST__
 ```
 
 __EXAMPLE_DESCRIPTION__
-        '''        
+        '''
         minimal_example_override = False
         if 'additionalExamples' in self.spec:
             for additional_example_data in self.spec['additionalExamples']:
@@ -1007,7 +1007,7 @@ __EXAMPLE_DESCRIPTION__
 
         ###
         ### Create Directories
-        ### 
+        ###
         remaining_actions = list()
         for action in actions:
             for action_name, action_data in action.items():
@@ -1063,8 +1063,8 @@ __EXAMPLE_DESCRIPTION__
         variable_cache.delete_variable(variable_name='{}:command'.format(self._var_name()))
         variable_cache.delete_variable(variable_name='{}:actions'.format(self._var_name()))
         variable_cache.store_variable(variable=Variable(name='{}'.format(self._var_name()),initial_value=True,ttl=-1,logger=self.logger,mask_in_logs=False),overwrite_existing=False)
-        return 
-    
+        return
+
     def delete_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
         variable_cache.store_variable(variable=Variable(name='{}:command'.format(self._var_name()),initial_value='delete',ttl=-1,logger=self.logger,mask_in_logs=False),overwrite_existing=False)
         self.log(message='DELETE CALLED', level='info')
@@ -1074,7 +1074,7 @@ __EXAMPLE_DESCRIPTION__
         actions = variable_cache.get_value(variable_name='{}:actions'.format(self._var_name()), value_if_expired=list(), raise_exception_on_expired=False, raise_exception_on_not_found=False,default_value_if_not_found=list(), for_logging=False)
         self.log(message='Deleting Manifest', level='info')
         self.log(message='   Implementation Name           : {}'.format(self.metadata['name']), level='info')
-        
+
         ###
         ### Delete Source File
         ###
@@ -1089,7 +1089,7 @@ __EXAMPLE_DESCRIPTION__
 
         ###
         ### Delete Documentation
-        ###        
+        ###
         remaining_actions = list()
         for action in actions:
             for action_name, action_data in action.items():
@@ -1113,7 +1113,7 @@ __EXAMPLE_DESCRIPTION__
 
         ###
         ### Recursively Delete Directories
-        ### 
+        ###
         remaining_actions = list()
         for action in actions:
             for action_name, action_data in action.items():
@@ -1121,7 +1121,7 @@ __EXAMPLE_DESCRIPTION__
                     self._action_delete_dir_recursively(directory_name=action_data)
                 else:
                     remaining_actions.append(copy.deepcopy(action))
-        
+
         ###
         ### DONE
         ###
@@ -1131,7 +1131,7 @@ __EXAMPLE_DESCRIPTION__
         variable_cache.delete_variable(variable_name=self._var_name())
         variable_cache.delete_variable(variable_name='{}:command'.format(self._var_name()))
         variable_cache.delete_variable(variable_name='{}:actions'.format(self._var_name()))
-        return 
+        return
 
 
 if __name__ == '__main__':

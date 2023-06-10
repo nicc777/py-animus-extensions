@@ -113,7 +113,7 @@ version: v1
 metadata:
   name: web-download-file-v1-minimal
   dependencies:
-    apply: 
+    apply:
     - cli-get-password
   environments:
   - sandbox

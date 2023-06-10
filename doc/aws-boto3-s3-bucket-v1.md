@@ -66,7 +66,7 @@ kind: AwsBoto3Session
 version: v1
 metadata:
   name: aws-boto3-session-v1-minimal
-  skipApplyAll: true 
+  skipApplyAll: true
   skipDeleteAll: true
 spec:
   awsRegion: us-east-1

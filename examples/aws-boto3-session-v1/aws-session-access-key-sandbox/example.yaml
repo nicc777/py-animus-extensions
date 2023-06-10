@@ -18,7 +18,7 @@ version: v1
 metadata:
   name: aws-boto3-session-v1-aws-session-access-key-sandbox
   dependencies:
-    apply: 
+    apply:
     - cli-get-aws-secret-sandbox
   environments:
   - sandbox

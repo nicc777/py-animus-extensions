@@ -88,7 +88,7 @@ spec:
   additionalExamples:
   - exampleName: hello-world
     manifest:
-      generated: false 
+      generated: false
       specData: |
         outputFile: /tmp/output/custom-example-output.txt
         content: |
@@ -110,7 +110,7 @@ As pre-requisite the [py-animus-extensions](https://github.com/nicc777/py-animus
 It is highly recommended to create a Python virtual environment and install the requirements:
 
 ```shell
-# Assuming your $PWD is the root of the local clone of the py-animus-extensions github repository 
+# Assuming your $PWD is the root of the local clone of the py-animus-extensions github repository
 python3 -m venv venv
 . venv/bin/activate
 pip3 install -r requirements.txt
@@ -125,7 +125,7 @@ python3 templates/utils/factory/animus-extension-template.py apply -m /tmp/templ
 After running this command, you should now have the following:
 
 ```shell
-tree /tmp/test-create-text-file-v1 
+tree /tmp/test-create-text-file-v1
 # /tmp/test-create-text-file-v1
 # ├── doc
 # │   └── create-text-file-v1.md
@@ -195,14 +195,14 @@ docker run --rm -e "DEBUG=0" -it \
 Verify:
 
 ```shell
-ls -lahrt /tmp/output/custom-example-output.txt 
+ls -lahrt /tmp/output/custom-example-output.txt
 # -rw-r--r-- 1 root root 12 Apr  8 12:26 /tmp/output/custom-example-output.txt
 
 cat /tmp/output/custom-example-output.txt
 # Hello Venus
 ```
 
-> **Note** 
+> **Note**
 > The file may be owned by `root` depending on your setup with Docker
 
 To test the delete function, run:

@@ -11,7 +11,7 @@ import chardet
 class ShellScript(ManifestBase):
     """Executes a shell script.
 
-Output from STDOUT will be stored in a `Variable` with `:STDOUT` appended to the 
+Output from STDOUT will be stored in a `Variable` with `:STDOUT` appended to the
 variable name
 
 Output from STDERR will be stored in a `Variable` with `:STDERR` appended to the
@@ -23,7 +23,7 @@ empty sting.
 The exit status will be stored in a `Variable` with `:EXIT_CODE` appended to the
 variable name
 
-    """    
+    """
 
     def __init__(self, logger=get_logger(), post_parsing_method: object=None, version: str='v1', supported_versions: tuple=(['v1'])):
         super().__init__(logger=logger, post_parsing_method=post_parsing_method, version=version, supported_versions=supported_versions)
@@ -79,7 +79,7 @@ variable name
                 except:
                     self.log(message='   EXCEPTION: {}'.format(traceback.format_exc()), level='error')
         return source
-    
+
     def _get_work_dir(self)->str:
         work_dir = tempfile.gettempdir()
         if 'workDir' in self.spec:
@@ -87,7 +87,7 @@ variable name
                 work_dir = self.spec['workDir']['path']
         self.log(message='   Workdir set to "{}"'.format(work_dir), level='info')
         return work_dir
-    
+
     def _del_file(self, file: str):
         try:
             os.unlink(file)
@@ -125,7 +125,7 @@ variable name
         if self.implemented_manifest_differ_from_this_manifest(manifest_lookup_function=manifest_lookup_function, variable_cache=variable_cache, target_environment=target_environment, value_placeholders=value_placeholders) is False:
             self.log(message='   Script already executed', level='info')
             return
-        
+
         ###
         ### PREP SOURCE FILE
         ###
@@ -217,7 +217,7 @@ variable name
                             value_stdout_final = value_stdout_final.decode(value_stdout_encoding)
                         if value_stderr_encoding is not None:
                             value_stderr_final = value_stderr_final.decode(value_stderr_encoding)
-                
+
                 if 'stripNewline' in self.spec:
                     if self.spec['stripNewline'] is True:
                         try:
@@ -285,11 +285,11 @@ variable name
         ### DONE
         ###
         self._del_file(file=work_file)
-        return 
-    
+        return
+
     def delete_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
         self.log(message='DELETE CALLED', level='info')
         variable_cache.delete_variable(variable_name='{}:EXIT_CODE'.format(self._var_name(target_environment=target_environment)))
         variable_cache.delete_variable(variable_name='{}:STDOUT'.format(self._var_name(target_environment=target_environment)))
         variable_cache.delete_variable(variable_name='{}:STDERR'.format(self._var_name(target_environment=target_environment)))
-        return 
+        return

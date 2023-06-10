@@ -11,13 +11,13 @@ assignees: ''
 
 Complete the following information:
 
-## `Kind` name (e.g. "ShellScript") 
+## `Kind` name (e.g. "ShellScript")
 
- _**provide value**_ 
+ _**provide value**_
 
-## Brief description of functionality to be provided 
+## Brief description of functionality to be provided
 
-_**provide value**_ 
+_**provide value**_
 
 ## Issue Dependencies
 

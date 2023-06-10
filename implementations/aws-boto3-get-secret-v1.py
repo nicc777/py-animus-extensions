@@ -15,7 +15,7 @@ The following variable will be set once the secret is retrieved:
 * `VALUE` - contains the secret value
 * `TYPE` - Either "string" or "binary"
 
-    """    
+    """
 
     def __init__(self, logger=get_logger(), post_parsing_method: object=None, version: str='v1', supported_versions: tuple=(['v1'])):
         super().__init__(logger=logger, post_parsing_method=post_parsing_method, version=version, supported_versions=supported_versions)
@@ -26,7 +26,7 @@ The following variable will be set once the secret is retrieved:
             self.metadata['name'],
             target_environment
         )
-    
+
     def _get_boto3_s3_client(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
         boto3_session_base_name = 'AwsBoto3Session:{}:{}'.format(
             self.spec['awsBoto3SessionReference'],
@@ -40,7 +40,7 @@ The following variable will be set once the secret is retrieved:
             raise_exception_on_not_found=False
         ) is False:
             raise Exception('Boto3 Session Does not exist or is not connected yet. Ensure a Boto3 Session is a dependant of this manifest and that the environments match.')
-        
+
         boto3_session = variable_cache.get_value(
             variable_name='{}:SESSION'.format(boto3_session_base_name),
             value_if_expired=False,
@@ -98,8 +98,8 @@ The following variable will be set once the secret is retrieved:
             overwrite_existing=True
         )
 
-        return 
-    
+        return
+
     def delete_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
         if target_environment not in self.metadata['environments']:
             self.log(message='Target environment "{}" not relevant for this manifest'.format(target_environment), level='warning')
@@ -112,4 +112,4 @@ The following variable will be set once the secret is retrieved:
             target_environment=target_environment,
             value_placeholders=value_placeholders
         )
-        return 
+        return

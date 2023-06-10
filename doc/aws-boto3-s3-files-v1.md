@@ -6,7 +6,7 @@ It is important that the bucket remain under control of Animus (both through `Aw
 to avoid inconsistencies or loss of dat or data corruption.
 
 The intent of this facility is to keep file synchronized that are required for IaC activities. Ir was not really meant
-for uploading or synchronizing a large amount of files. Consider using the AWS CLI tool 
+for uploading or synchronizing a large amount of files. Consider using the AWS CLI tool
 [aws s3 sync](https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html) for bulk file uploads (1000+ files)
 
 When the apply action is complete the following variable will be set:
@@ -16,7 +16,7 @@ When the apply action is complete the following variable will be set:
 
 Both individual files, or entire directory contents can be uploaded.
 
-There are several strategies that can be followed: 
+There are several strategies that can be followed:
 
 * Ignore the current files in the bucket, and just overwrite all of them
 * A longer process can first get the checksum of each remote file and compare it with the local file and only upload the differences.
@@ -174,7 +174,7 @@ spec:
 ```
 
 This is the absolute minimal example based on required values. Dummy random data was generated where required.
-        
+
 
 # Versions and Changelog
 

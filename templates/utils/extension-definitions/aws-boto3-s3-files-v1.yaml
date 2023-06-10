@@ -14,7 +14,7 @@ spec:
     to avoid inconsistencies or loss of dat or data corruption.
 
     The intent of this facility is to keep file synchronized that are required for IaC activities. Ir was not really meant
-    for uploading or synchronizing a large amount of files. Consider using the AWS CLI tool 
+    for uploading or synchronizing a large amount of files. Consider using the AWS CLI tool
     [aws s3 sync](https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html) for bulk file uploads (1000+ files)
 
     When the apply action is complete the following variable will be set:
@@ -24,7 +24,7 @@ spec:
 
     Both individual files, or entire directory contents can be uploaded.
 
-    There are several strategies that can be followed: 
+    There are several strategies that can be followed:
 
     * Ignore the current files in the bucket, and just overwrite all of them
     * A longer process can first get the checksum of each remote file and compare it with the local file and only upload the differences.
@@ -153,7 +153,7 @@ spec:
   - fieldName: onError
     fieldDescription: |
       The only excepted values is `warn` (just create a warning log entry and carry on) and `exception` which will halt the
-      apply action with an exception. 
+      apply action with an exception.
     fieldType: str
     fieldRequired: true
     fieldDefaultValue: 'warn'
@@ -177,5 +177,4 @@ spec:
     - fieldValueIsNull: true
     customValidation: |
       self.log(message='No custom validation for promptText', level='debug')
-  
-  
+

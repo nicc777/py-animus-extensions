@@ -17,7 +17,7 @@ Using this manifest depends on `AwsBoto3Session` and will need a dependency for 
 
 Since the introduction of environments and variables, it will be possible to use one manifest for buckets in different accounts, assuming at least one AWS account per environment.
 
-    """    
+    """
 
     def __init__(self, logger=get_logger(), post_parsing_method: object=None, version: str='v1', supported_versions: tuple=(['v1'])):
         super().__init__(logger=logger, post_parsing_method=post_parsing_method, version=version, supported_versions=supported_versions)
@@ -42,7 +42,7 @@ Since the introduction of environments and variables, it will be possible to use
             raise_exception_on_not_found=False
         ) is False:
             raise Exception('Boto3 Session Does not exist or is not connected yet. Ensure a Boto3 Session is a dependant of this manifest and that the environments match.')
-        
+
         boto3_session = variable_cache.get_value(
             variable_name='{}:SESSION'.format(boto3_session_base_name),
             value_if_expired=False,
@@ -55,7 +55,7 @@ Since the introduction of environments and variables, it will be possible to use
         raise Exception('Unable to create S3 client')
 
     def _bucket_exists(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->bool:
-        try:        
+        try:
             client = self._get_boto3_s3_client(variable_cache=variable_cache, target_environment=target_environment)
             response = client.head_bucket(
                 Bucket=self.spec['name']
@@ -68,7 +68,7 @@ Since the introduction of environments and variables, it will be possible to use
 
     def implemented_manifest_differ_from_this_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders())->bool:
         if target_environment not in self.metadata['environments']:
-            return False        
+            return False
         return not self._bucket_exists(variable_cache=variable_cache, target_environment=target_environment)
 
     def _set_variables(self, exists: bool=True, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
@@ -106,7 +106,7 @@ Since the introduction of environments and variables, it will be possible to use
             self.log(message='    Bucket "{}" already appears to exist for environment "{}"'.format(self.spec['name'], target_environment), level='info')
             self._set_variables(exists=True, variable_cache=variable_cache, target_environment=target_environment)
             return
-        
+
         parameters = dict()
         parameters['Bucket'] = self.spec['name']
         parameters = self._add_parameter(spec_param_name='acl', boto3_param_name='ACL', current_parameters=copy.deepcopy(parameters), type_def=str)
@@ -118,7 +118,7 @@ Since the introduction of environments and variables, it will be possible to use
         parameters = self._add_parameter(spec_param_name='objectLockEnabledForBucket', boto3_param_name='ObjectLockEnabledForBucket', current_parameters=copy.deepcopy(parameters), type_def=bool)
         parameters = self._add_parameter(spec_param_name='objectOwnership', boto3_param_name='ObjectOwnership', current_parameters=copy.deepcopy(parameters), type_def=str)
 
-        try:        
+        try:
             client = self._get_boto3_s3_client(variable_cache=variable_cache, target_environment=target_environment)
             response = client.create_bucket(**parameters)
             self.log(message='response={}'.format(json.dumps(response, default=str)), level='debug')
@@ -127,10 +127,10 @@ Since the introduction of environments and variables, it will be possible to use
             self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
             self._set_variables(exists=False, variable_cache=variable_cache, target_environment=target_environment)
 
-        return 
-    
+        return
+
     def _is_bucket_empty(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->bool:
-        try:        
+        try:
             client = self._get_boto3_s3_client(variable_cache=variable_cache, target_environment=target_environment)
             response = client.list_objects_v2(Bucket=self.spec['name'],MaxKeys=2)
             self.log(message='response={}'.format(json.dumps(response, default=str)), level='debug')
@@ -153,7 +153,7 @@ Since the introduction of environments and variables, it will be possible to use
         return True
 
     def _delete_bucket(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
-        try:        
+        try:
             client = self._get_boto3_s3_client(variable_cache=variable_cache, target_environment=target_environment)
             response = client.delete_bucket(Bucket=self.spec['name'])
             self.log(message='response={}'.format(json.dumps(response, default=str)), level='debug')
@@ -162,7 +162,7 @@ Since the introduction of environments and variables, it will be possible to use
 
     def _get_s3_keys(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->list:
         keys = list()
-        try:        
+        try:
             client = self._get_boto3_s3_client(variable_cache=variable_cache, target_environment=target_environment)
             response = client.list_objects_v2(Bucket=self.spec['name'],MaxKeys=100)
             self.log(message='response={}'.format(json.dumps(response, default=str)), level='debug')
@@ -173,7 +173,7 @@ Since the introduction of environments and variables, it will be possible to use
         except:
             self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
         return keys
-    
+
     def _delete_keys_batch(self, keys: list, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->list:
         client = self._get_boto3_s3_client(variable_cache=variable_cache, target_environment=target_environment)
         response = client.delete_objects(Bucket=self.spec['name'],Delete={'Objects': keys})
@@ -245,4 +245,4 @@ Since the introduction of environments and variables, it will be possible to use
             else:
                 self.log(message='    Bucket "{}" in environment "{}" was NOT deleted (bucket NOT empty, deleteStrategy=IGNORE (assumed due to unrecognized delete strategy))'.format(self.spec['name'], target_environment), level='warning')
 
-        return 
+        return

@@ -9,7 +9,7 @@ class CliInputPrompt(ManifestBase):
 
     Spec fields:
 
-    * `spec.promptText` - (str, optional, default=None) The text to display on screen 
+    * `spec.promptText` - (str, optional, default=None) The text to display on screen
     * `spec.promptCharacter` - (str, optional, default='> ') The character for the actual prompt
     * `spec.valueExpires` - (bool, optional, default=False) If set to true, the value will expire after `spec.valueTTL` seconds
     * `spec.valueTTL` - (int, optional, default=60) If `spec.valueExpires` is used, use this value to fine tune the exact timeout period in seconds
@@ -41,7 +41,7 @@ class CliInputPrompt(ManifestBase):
 
     def __init__(self, logger=get_logger(), post_parsing_method: object=None, version: str='v1', supported_versions: tuple=('v1',)):
         super().__init__(logger=logger, post_parsing_method=post_parsing_method, version=version, supported_versions=supported_versions)
-        
+
 
     def _var_name(self, target_environment: str='default'):
         return '{}:{}:{}'.format(
@@ -49,7 +49,7 @@ class CliInputPrompt(ManifestBase):
             self.metadata['name'],
             target_environment
         )
-    
+
     def _validate(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
         if self.spec is None:
             self.spec = dict()
@@ -63,7 +63,7 @@ class CliInputPrompt(ManifestBase):
             raise_exception_on_expired=False,
             raise_exception_on_not_found=False
         ):
-            
+
             self.log(message='Not Yet Validated', level='debug')
 
             if 'promptText' not in self.spec:
@@ -81,7 +81,7 @@ class CliInputPrompt(ManifestBase):
                     self.spec['containsCredentials'] = False
                 if isinstance(self.spec['containsCredentials'], bool) is False:
                     self.spec['containsCredentials'] = False
-            
+
             if 'promptCharacter' not in self.spec:
                 self.spec['promptCharacter'] = '> '
             else:
@@ -91,7 +91,7 @@ class CliInputPrompt(ManifestBase):
                     self.spec['promptCharacter'] = '> '
                 if len(self.spec['promptCharacter']) > 64:
                     self.spec['promptCharacter'] = '> '
-            
+
             if 'valueExpires' not in self.spec:
                 self.spec['valueExpires'] = False
             else:
@@ -138,7 +138,7 @@ class CliInputPrompt(ManifestBase):
     def implemented_manifest_differ_from_this_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders())->bool:
         if target_environment not in self.metadata['environments']:
             return False
-        self._validate(variable_cache=variable_cache)        
+        self._validate(variable_cache=variable_cache)
         current_value = variable_cache.get_value(
             variable_name=self._var_name(target_environment=target_environment),
             value_if_expired=None,
@@ -149,7 +149,7 @@ class CliInputPrompt(ManifestBase):
         variable_cache.store_variable(variable=Variable(name='{}:working'.format(self._var_name(target_environment=target_environment)),logger=self.logger, initial_value=current_value))
         if current_value is None:
             return True
-        
+
         return False
 
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
@@ -214,8 +214,8 @@ class CliInputPrompt(ManifestBase):
             ),
             level='info'
         )
-        return 
-    
+        return
+
     def delete_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
         variable_cache.delete_variable(variable_name=self._var_name(target_environment=target_environment))
-        return 
+        return
