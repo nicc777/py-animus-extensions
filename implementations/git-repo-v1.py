@@ -76,6 +76,12 @@ The following variables will be set and can be referenced in other manifests usi
         branch: str
     ):
         env = dict()
+        if skip_ssl is True:
+            env = dict(GIT_SSL_NO_VERIFY='1')
+        if username is not None and password is not None:
+            url_parts = url.split('/')
+            url_parts[2] = '{}:{}@{}'.format(username,password,url_parts[2])
+            url = '{}//{}'.format(url_parts[0], '/'.join(url_parts[2:]))
         Repo.clone_from(url=url, to_path=target_dir, env=env, branch=branch)
 
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
@@ -89,6 +95,35 @@ The following variables will be set and can be referenced in other manifests usi
             target_environment=target_environment,
             value_placeholders=value_placeholders
         )
+
+        branch = 'main'
+        if 'checkoutBranch' in self.spec:
+            if self.spec['checkoutBranch'] is not None:
+                branch = '{}'.format(self.spec['checkoutBranch'])
+
+        if self.spec['cloneUrl'].lower().startswith('http') is True:
+            username = None
+            password = None
+            if 'authentication' in self.spec:
+                if 'type' in self.spec['authentication']:
+                    if self.spec['authentication']['type'].lower().startswith('http') is True:
+                        try:
+                            username = self.spec['authentication']['httpAuthentication']['username']
+                            password = self.spec['authentication']['httpAuthentication']['password']
+                        except:
+                            self.log(message='Failed to set username and password. Continuing with an attempt to clone anonymously.', level='warning')
+            self._git_clone_from_https(
+                url=self.spec['cloneUrl'].lower(),
+                username=username,
+                password=password,
+                skip_ssl=False,
+                target_dir=variable_cache.get_value(
+                    variable_name='{}:GIT_DIR'.format(self._var_name),
+                    raise_exception_on_expired=True,
+                    raise_exception_on_not_found=True
+                ),
+                branch=branch
+            )
         return
 
     def delete_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
