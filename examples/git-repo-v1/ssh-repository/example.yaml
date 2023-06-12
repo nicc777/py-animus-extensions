@@ -1,0 +1,14 @@
+---
+kind: GitRepo
+version: v1
+metadata:
+  executeOnlyOnceOnApply: true
+  name: git-repo-v1-ssh-repository
+  skipDeleteAll: true
+spec:
+  authentication:
+    type: ssh
+    sshAuthentication:
+      sshPrivateKeyFile: /path/to/ssh-privatekey
+  checkoutBranch: feature/abc
+  cloneUrl: git@github.com:my-org/my-private-repo.git

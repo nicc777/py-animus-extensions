@@ -1,0 +1,42 @@
+---
+kind: AwsBoto3Session
+version: v1
+metadata:
+  name: my-boto3-session
+  skipApplyAll: true
+  skipDeleteAll: true
+spec:
+  awsRegion: us-east-1
+  profileName: my-profile
+---
+kind: AwsBoto3GetSecret
+version: v1
+metadata:
+  name: my-private-git-password
+  skipDeleteAll: true
+  dependencies:
+    apply:
+    - my-boto3-session
+spec:
+  awsBoto3SessionReference: my-boto3-session
+  secretName: my-secret
+---
+kind: GitRepo
+version: v1
+metadata:
+  name: git-repo-v1-http-with-authentication-self-signed-certificate
+  executeOnlyOnceOnApply: true
+  skipDeleteAll: true
+  dependencies:
+    apply:
+    - my-private-git-password
+spec:
+  authentication:
+    type: http
+    httpAuthentication:
+      username: my-username
+      password: '{{ .Variables.AwsBoto3GetSecret:my-private-git-password:default:VALUE }}'
+  checkoutBranch: feature/abc
+  cloneUrl: https://private-git/example.git
+  options:
+    skipSslVerify: true
