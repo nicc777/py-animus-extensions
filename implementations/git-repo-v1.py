@@ -66,6 +66,18 @@ The following variables will be set and can be referenced in other manifests usi
             )
         return True
 
+    def _git_clone_from_https(
+        self,
+        url: str,
+        username: str,
+        password: str,
+        skip_ssl: bool,
+        target_dir: str,
+        branch: str
+    ):
+        env = dict()
+        Repo.clone_from(url=url, to_path=target_dir, env=env, branch=branch)
+
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
         if target_environment not in self.metadata['environments']:
             self.log(message='Target environment "{}" not relevant for this manifest'.format(target_environment), level='warning')
