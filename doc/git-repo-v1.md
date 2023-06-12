@@ -14,6 +14,9 @@ The following variables will be set and can be referenced in other manifests usi
 * `GIT_DIR` - Path to the working directory
 * `BRANCH` - The branch checked out
 
+> **Note**
+> The `apply` action will also be called on an explicit `delete` action. If the Git repository is not required for any
+> other delete actions, it is safe to add the `skipDeleteAll` option in the meta data section of the manifest.
 
 ```shell
 export EXTENSION_NAME="git-repo-v1"
