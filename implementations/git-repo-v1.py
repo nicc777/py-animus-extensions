@@ -84,6 +84,16 @@ The following variables will be set and can be referenced in other manifests usi
             url = '{}//{}'.format(url_parts[0], '/'.join(url_parts[2:]))
         Repo.clone_from(url=url, to_path=target_dir, env=env, branch=branch)
 
+    def _git_clone_from_ssh(
+        self,
+        url: str,
+        private_key: str,
+        target_dir: str,
+        branch: str
+    ):
+        env=dict(GIT_SSH_COMMAND='ssh -i {}'.format(private_key))
+        Repo.clone_from(url=url, to_path=target_dir, env=env, branch=branch)
+
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
         if target_environment not in self.metadata['environments']:
             self.log(message='Target environment "{}" not relevant for this manifest'.format(target_environment), level='warning')
@@ -100,6 +110,14 @@ The following variables will be set and can be referenced in other manifests usi
         if 'checkoutBranch' in self.spec:
             if self.spec['checkoutBranch'] is not None:
                 branch = '{}'.format(self.spec['checkoutBranch'])
+        variable_cache.store_variable(
+            variable=Variable(
+                name='{}:BRANCH'.format(self._var_name),
+                initial_value=branch,
+                logger=self.logger
+            ),
+            overwrite_existing=True
+        )
 
         if self.spec['cloneUrl'].lower().startswith('http') is True:
             username = None
@@ -124,6 +142,34 @@ The following variables will be set and can be referenced in other manifests usi
                 ),
                 branch=branch
             )
+        else:
+            if 'authentication' in self.spec:
+                if 'type' in self.spec['authentication']:
+                    if self.spec['authentication']['type'].lower().startswith('ssh') is True:
+                        private_key = None
+                        try:
+                            pass
+                        except:
+                            private_key = self.spec['authentication']['sshAuthentication']['sshPrivateKeyFile']
+                        if private_key is not None:
+                            self._git_clone_from_ssh(
+                                url=self.spec['cloneUrl'].lower(),
+                                private_key=private_key,
+                                target_dir=variable_cache.get_value(
+                                    variable_name='{}:GIT_DIR'.format(self._var_name),
+                                    raise_exception_on_expired=True,
+                                    raise_exception_on_not_found=True
+                                ),
+                                branch=branch
+                            )
+                        else:
+                            self.log(message='Failed to clone Git repo - ssh repo without a private key cannot currently be cloned', level='error')
+                    else:
+                        self.log(message='Failed to clone Git repo - Provided authentication type not recognized.', level='error')
+                else:
+                    self.log(message='Failed to clone Git repo - Authentication type required but not present', level='error')
+            else:
+                self.log(message='Failed to clone Git repo - http not configured and unable to guess protocol and authentication method', level='error')
         return
 
     def delete_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
