@@ -65,6 +65,7 @@ Example manifest: [example.yaml](../examples/shell-script-v1/minimal/example.yam
 
 ```yaml
 kind: ShellScript
+version: v1
 metadata:
   name: shell-script-v1-minimal
   skipDeleteAll: true
@@ -72,8 +73,6 @@ spec:
   source:
     type: inline
     value: echo "not yet fully implemented"
-version: v1
-
 ```
 
 This is the absolute minimal example based on required values. Dummy random data was generated where required.
