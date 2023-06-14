@@ -44,7 +44,7 @@
 | `Rest*`  #3                                  | Not yet created                                                          | [REST Methods](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods)                                                                         | Planned    |
 | `SmtpClient`                                 | Not yet created                                                          | Defines a SMTP client that can send messages                                                                                                      | Planned    |
 | `AwsSnsPublish`                              | Not yet created                                                          | Publishes a message to an AWS SNS Topic. (Depends on `AwsBoto3Session`)                                                                           | Planned    |
-| `WriteFile`                                  | [#000031](https://github.com/nicc777/py-animus-extensions/issues/31)     | Publishes a message to an AWS SNS Topic. (Depends on `AwsBoto3Session`)                                                                           | Planned    |
+| `WriteFile`                                  | [#000031](https://github.com/nicc777/py-animus-extensions/issues/31)     | Write data to file - typically from a `Value` or a `Variable`                                                                                     | Planned    |
 
 Notes:
 
