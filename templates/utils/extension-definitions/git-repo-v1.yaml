@@ -1,0 +1,187 @@
+---
+kind: AnimusExtensionTemplate
+version: v1
+metadata:
+  name: git-repo-v1
+  skipDeleteAll: true
+  executeOnlyOnceOnApply: true
+  executeOnlyOnceOnDelete: true
+spec:
+  description: |
+    Defines a Git repository.
+
+    Running `apply` will clone the Git repository to a local working directory and checkout the default or selected
+    branch.
+
+    If the work directory exists, it will first be deleted in order to clone a fresh copy of the selected repository.
+
+    The `delete` action will simply remove the working directory.
+
+    The following variables will be set and can be referenced in other manifests using [variable substitution](https://github.com/nicc777/py-animus/blob/main/doc/placeholder_values.md#variables-and-manifest-dependencies)
+
+    * `GIT_DIR` - Path to the working directory
+    * `BRANCH` - The branch checked out
+
+    > **Note**
+    > The `apply` action will also be called on an explicit `delete` action. If the Git repository is not required for any
+    > other delete actions, it is safe to add the `skipDeleteAll` option in the meta data section of the manifest.
+  kind: GitRepo
+  version: v1
+  versionChangelog: |
+    This is the initial version
+  supportedVersions:
+  - 'v1'
+  baseClass: ManifestBase
+  # outputPaths:              # If any of these are null/NoneType, the global defaults will be used (which is this repo)
+  #   doc: /tmp/git-repo-v1/doc
+  #   examples: /tmp/git-repo-v1/examples
+  #   implementations: /tmp/git-repo-v1/impl
+  pipRequirements:
+  - 'py-animus'
+  importStatements:
+  - 'from py_animus.manifest_management import *'
+  - 'from py_animus import get_logger, get_utc_timestamp'
+  - 'from py_animus.file_io import *'
+  - 'import traceback'
+  - 'from git import Repo'
+  specFields:
+  - fieldName: cloneUrl
+    fieldDescription: |
+      The URL to the GIt repository to clone locally into the working directory
+    fieldType: str
+    fieldRequired: true
+    fieldDefaultValue: None
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: false
+    - fieldValueTypeMismatch: false
+    - fieldValueIsNull: false
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: authentication.type
+    fieldDescription: |
+      Must be either "http" or "ssh". If not supplied, no authentication will be used and the repository will be assumed to be public.
+    fieldType: str
+    fieldRequired: false
+    fieldDefaultValue: None
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: false
+    - fieldValueTypeMismatch: false
+    - fieldValueIsNull: false
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: authentication.httpAuthentication.username
+    fieldDescription: |
+      The username for HTTP(S) based Git repositories. Only required if `authentication.type` is set to `http`
+    fieldType: str
+    fieldRequired: false
+    fieldDefaultValue: None
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: false
+    - fieldValueTypeMismatch: false
+    - fieldValueIsNull: false
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: authentication.httpAuthentication.password
+    fieldDescription: |
+      The password for HTTP(S) based Git repositories. Only required if `authentication.type` is set to `http`. Never put the actual password. See https://github.com/nicc777/py-animus/blob/main/doc/placeholder_values.md and https://github.com/nicc777/py-animus/blob/main/doc/placeholder_values.md#variables-and-manifest-dependencies
+    fieldType: str
+    fieldRequired: false
+    fieldDefaultValue: None
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: false
+    - fieldValueTypeMismatch: false
+    - fieldValueIsNull: false
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: authentication.sshAuthentication.sshPrivateKeyFile
+    fieldDescription: |
+      The full path to the SSH private key. Only required if `authentication.type` is set to `ssh`. For SSH this is for now the only supported option.
+    fieldType: str
+    fieldRequired: false
+    fieldDefaultValue: None
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: false
+    - fieldValueTypeMismatch: false
+    - fieldValueIsNull: false
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: workDir
+    fieldDescription: |
+      If supplied, this directory will be used to clone the Git repository into. If not supplied, a random temporary directory will be created. The final value will be in the `GIT_DIR` variable.
+    fieldType: str
+    fieldRequired: false
+    fieldDefaultValue: None
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: checkoutBranch
+    fieldDescription: |
+      If supplied, this branch will be checked out. Default=main
+    fieldType: str
+    fieldRequired: false
+    fieldDefaultValue: 'main'
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: options.skipSslVerify
+    fieldDescription: |
+      If `authentication.type` is `http` and there is a need to skip SSL verification, set this to `true`. Default=false
+    fieldType: bool
+    fieldRequired: false
+    fieldDefaultValue: false
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  additionalExamples:
+  - exampleName: minimal  # This will also be used to compile the the value of metadata.name
+    manifest:
+      generated: false # This will automatically generate an example spec data with the minimum required fields and default values
+      additionalMetadata: |
+        skipDeleteAll: true
+        executeOnlyOnceOnApply: true
+      specData: |
+        cloneUrl: https://github.com/aws-cloudformation/aws-cloudformation-samples.git
+    explanatoryText: |
+      Minimal example cloning a public repository
+  - exampleName: http-with-authentication-self-signed-certificate
+    manifest:
+      generated: false  # The kind, version and metadata (name only) will be autogenerated. Spec data needs to be supplied and additional metadata can be added
+      additionalMetadata: |
+        skipDeleteAll: true
+        executeOnlyOnceOnApply: true
+      specData: |
+        cloneUrl: https://private-git/example.git
+        authentication:
+          type: http
+          httpAuthentication:
+            username: my-username
+            password: {{ .Variables.AwsBoto3GetSecret:my-private-git-password:default:VALUE }}
+        checkoutBranch: feature/abc
+        options:
+          skipSslVerify: true
+    explanatoryText: |
+      This example shows a local HTTPS based repository that requires authentication, but with the option to skip SSL verification (_**Warning**_: this approach is not secure)
+  - exampleName: ssh-repository
+    manifest:
+      generated: false  # The kind, version and metadata (name only) will be autogenerated. Spec data needs to be supplied and additional metadata can be added
+      additionalMetadata: |
+        skipDeleteAll: true
+        executeOnlyOnceOnApply: true
+      specData: |
+        cloneUrl: git@github.com:my-org/my-private-repo.git
+        authentication:
+          type: ssh
+          sshAuthentication:
+            sshPrivateKeyFile: /path/to/ssh-privatekey
+        checkoutBranch: feature/abc
+    explanatoryText: |
+      Demonstrates cloning of a typical private repository on Github using SSH
