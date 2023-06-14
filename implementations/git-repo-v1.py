@@ -92,6 +92,10 @@ The following variables will be set and can be referenced in other manifests usi
         branch: str
     ):
         env=dict(GIT_SSH_COMMAND='ssh -i {}'.format(private_key))
+        self.log(message='_git_clone_from_ssh(): url         = {}'.format( url         ), level='debug')
+        self.log(message='_git_clone_from_ssh(): private_key = {}'.format( private_key ), level='debug')
+        self.log(message='_git_clone_from_ssh(): target_dir  = {}'.format( target_dir  ), level='debug')
+        self.log(message='_git_clone_from_ssh(): branch      = {}'.format( branch      ), level='debug')
         Repo.clone_from(url=url, to_path=target_dir, env=env, branch=branch)
 
     def _get_branch(self, variable_cache: VariableCache=VariableCache())->str:
@@ -139,9 +143,9 @@ The following variables will be set and can be referenced in other manifests usi
                 if self.spec['authentication']['type'].lower().startswith('ssh') is True:
                     private_key = None
                     try:
-                        pass
-                    except:
                         private_key = self.spec['authentication']['sshAuthentication']['sshPrivateKeyFile']
+                    except:
+                        self.log(message='PRIVATE KEY NOT SET - Attempting to clone repository anyway', level='warning')
                     if private_key is not None:
                         self._git_clone_from_ssh(
                             url=self.spec['cloneUrl'].lower(),
@@ -175,8 +179,10 @@ The following variables will be set and can be referenced in other manifests usi
         )
         branch = self._get_branch(variable_cache=variable_cache)
         if self.spec['cloneUrl'].lower().startswith('http') is True:
+            self.log(message='Cloning a HTTP repository', level='info')
             self._process_http_based_git_repo(branch=branch, variable_cache=variable_cache)
         else:
+            self.log(message='Cloning a SSH repository', level='info')
             self._process_other_git_repo(branch=branch, variable_cache=variable_cache)
         return
 
