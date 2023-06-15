@@ -64,7 +64,7 @@ spec:
   - fieldName: actionIfFileAlreadyExists
     fieldDescription: 'optional (default=overwrite). Allowed values: overwrite (write the data to the file anyway - overwriting any previous data), skip (leave the current file as is and skip'
     fieldType: str
-    fieldRequired: true
+    fieldRequired: false
     fieldDefaultValue: 'overwrite'
     fieldSetDefaultValueConditions:
     - fieldDefinitionNotPresentInManifest: true
@@ -75,7 +75,7 @@ spec:
   - fieldName: fileMode
     fieldDescription: 'optional (default=normal). Allowed values: normal (chmod 600) or executable (chmod 700)'
     fieldType: str
-    fieldRequired: true
+    fieldRequired: false
     fieldDefaultValue: 'normal'
     fieldSetDefaultValueConditions:
     - fieldDefinitionNotPresentInManifest: true
