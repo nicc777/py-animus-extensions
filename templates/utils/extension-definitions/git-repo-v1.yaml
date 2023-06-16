@@ -38,6 +38,7 @@ spec:
   #   implementations: /tmp/git-repo-v1/impl
   pipRequirements:
   - 'py-animus'
+  - 'GitPython'
   importStatements:
   - 'from py_animus.manifest_management import *'
   - 'from py_animus import get_logger, get_utc_timestamp'

@@ -1,0 +1,98 @@
+---
+kind: AnimusExtensionTemplate
+version: v1
+metadata:
+  name: write-file-v1
+  skipDeleteAll: true
+  executeOnlyOnceOnApply: true
+  executeOnlyOnceOnDelete: true
+spec:
+  description: |
+    This manifest will take provided data and write it to a file. The file can be (optionally) marked as executable.
+
+    The `apply` action will create the file and the `delete` action will delete the file. To retain files on `delete`
+    action, set the manifest skip option in the meta data.
+
+    The following variables will be defined:
+
+    * `FILE_PATH` - The full path to the file
+    * `WRITTEN` - Boolean, where a TRUE value means the file was processed.
+    * `EXECUTABLE` - Boolean value which will be TRUE if the file has been set as executable
+    * `SIZE` - The file size in BYTES
+    * `SHA256_CHECKSUM` - The calculated file checksum (SHA256)
+  kind: WriteFile
+  version: v1
+  versionChangelog: |
+    This is the initial version
+  supportedVersions:
+  - 'v1'
+  baseClass: ManifestBase
+  # outputPaths:
+  #   doc: /tmp/write-file-v1/doc
+  #   examples: /tmp/write-file-v1/examples
+  #   implementations: /tmp/write-file-v1/impl
+  pipRequirements:
+  - 'py-animus'
+  importStatements:
+  - 'from py_animus.manifest_management import *'
+  - 'from py_animus import get_logger, get_utc_timestamp'
+  - 'from py_animus.file_io import *'
+  - 'import traceback'
+  - 'import os'
+  - 'import stat'
+  specFields:
+  - fieldName: targetFile
+    fieldDescription: Full path to a file
+    fieldType: str
+    fieldRequired: true
+    fieldDefaultValue: None
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: false
+    - fieldValueTypeMismatch: false
+    - fieldValueIsNull: false
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: data
+    fieldDescription: The actual content of the file. Typically a `Value` or `Variable` reference will be used here
+    fieldType: str
+    fieldRequired: true
+    fieldDefaultValue: ''
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: actionIfFileAlreadyExists
+    fieldDescription: 'optional (default=overwrite). Allowed values: overwrite (write the data to the file anyway - overwriting any previous data), skip (leave the current file as is and skip)'
+    fieldType: str
+    fieldRequired: false
+    fieldDefaultValue: 'overwrite'
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: fileMode
+    fieldDescription: 'optional (default=normal). Allowed values: normal (chmod 600) or executable (chmod 700)'
+    fieldType: str
+    fieldRequired: false
+    fieldDefaultValue: 'normal'
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  additionalExamples:
+  - exampleName: minimal  # This will also be used to compile the the value of metadata.name
+    manifest:
+      generated: false # This will automatically generate an example spec data with the minimum required fields and default values
+      additionalMetadata: |
+        executeOnlyOnceOnApply: true
+      specData: |
+        targetFile: /tmp/greetings.txt
+        data: 'Hello World!'
+    explanatoryText: |
+      Minimal example creating a text file in the /tmp directory containing a simple greeting.
