@@ -1,0 +1,8 @@
+kind: WriteFile
+version: v1
+metadata:
+  executeOnlyOnceOnApply: true
+  name: write-file-v1-minimal
+spec:
+  data: Hello World!
+  targetFile: /tmp/greetings.txt

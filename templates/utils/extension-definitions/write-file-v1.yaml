@@ -16,7 +16,7 @@ spec:
     The following variables will be defined:
 
     * `FILE_PATH` - The full path to the file
-    * `WRITTEN` - Boolean, where a TRUE value means the file was freshly created (or recreated) and FALSE means the file already existed and no action was taken.
+    * `WRITTEN` - Boolean, where a TRUE value means the file was processed.
     * `EXECUTABLE` - Boolean value which will be TRUE if the file has been set as executable
     * `SIZE` - The file size in BYTES
     * `SHA256_CHECKSUM` - The calculated file checksum (SHA256)
@@ -62,7 +62,7 @@ spec:
     customValidation: |
       self.log(message='No custom validation for promptText', level='debug')
   - fieldName: actionIfFileAlreadyExists
-    fieldDescription: 'optional (default=overwrite). Allowed values: overwrite (write the data to the file anyway - overwriting any previous data), skip (leave the current file as is and skip'
+    fieldDescription: 'optional (default=overwrite). Allowed values: overwrite (write the data to the file anyway - overwriting any previous data), skip (leave the current file as is and skip)'
     fieldType: str
     fieldRequired: false
     fieldDefaultValue: 'overwrite'
