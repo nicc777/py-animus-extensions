@@ -51,7 +51,7 @@ spec:
     customValidation: |
       self.log(message='No custom validation for promptText', level='debug')
   - fieldName: data
-    fieldDescription: The actual content of the file. Typically a `Value`` or `Variable`` reference will be used here
+    fieldDescription: The actual content of the file. Typically a `Value` or `Variable` reference will be used here
     fieldType: str
     fieldRequired: true
     fieldDefaultValue: ''
