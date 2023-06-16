@@ -3,7 +3,7 @@ kind: AnimusExtensionTemplate
 version: v1
 metadata:
   name: write-file-v1
-  skipDeleteAll: false # FIXME
+  skipDeleteAll: true
   executeOnlyOnceOnApply: true
   executeOnlyOnceOnDelete: true
 spec:
@@ -27,10 +27,10 @@ spec:
   supportedVersions:
   - 'v1'
   baseClass: ManifestBase
-  outputPaths:              # If any of these are null/NoneType, the global defaults will be used (which is this repo)
-    doc: /tmp/write-file-v1/doc
-    examples: /tmp/write-file-v1/examples
-    implementations: /tmp/write-file-v1/impl
+  # outputPaths:
+  #   doc: /tmp/write-file-v1/doc
+  #   examples: /tmp/write-file-v1/examples
+  #   implementations: /tmp/write-file-v1/impl
   pipRequirements:
   - 'py-animus'
   importStatements:
