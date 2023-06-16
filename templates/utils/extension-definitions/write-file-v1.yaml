@@ -38,6 +38,8 @@ spec:
   - 'from py_animus import get_logger, get_utc_timestamp'
   - 'from py_animus.file_io import *'
   - 'import traceback'
+  - 'import os'
+  - 'import stat'
   specFields:
   - fieldName: targetFile
     fieldDescription: Full path to a file
