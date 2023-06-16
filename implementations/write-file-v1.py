@@ -45,6 +45,7 @@ The following variables will be defined:
             raise_exception_on_not_found=False
         )
         file_exists = os.path.exists(self.spec['targetFile'])
+
         action_if_exists = 'overwrite'
         if 'actionIfFileAlreadyExists' in self.spec:
             if self.spec['actionIfFileAlreadyExists'].lower() in ('overwrite', 'skip',):
@@ -53,6 +54,9 @@ The following variables will be defined:
         if written_before is False:
             if file_exists is True and action_if_exists == 'overwrite':
                 return True
+
+        if file_exists is False and written_before is False:
+            return True
 
         return False
 
