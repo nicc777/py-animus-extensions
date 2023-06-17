@@ -1,0 +1,57 @@
+---
+kind: AnimusExtensionTemplate
+version: v1
+metadata:
+  name: aws_boto3_cloud_formation_template_tags-v1
+  skipDeleteAll: true
+  executeOnlyOnceOnApply: true
+  executeOnlyOnceOnDelete: true
+spec:
+  description: |
+    Defines a group of tags that can be linked to one or more CloudFormation templates.
+
+    The data will be stored in the following Variable objects:
+
+    * `TAG_KEYS` - A list of keys
+    * `TAGS` - A dictionary in the format { "<<tag_key>>": "<<tag_value>>" }. All tag_value values will be strings
+  kind: AwsBoto3CloudFormationTemplateTags
+  version: v1
+  versionChangelog: |
+    This is the initial version
+  supportedVersions:
+  - 'v1'
+  baseClass: ManifestBase
+  # outputPaths:
+  #   doc: /tmp/aws_boto3_cloud_formation_template_tags-v1/doc
+  #   examples: /tmp/aws_boto3_cloud_formation_template_tags-v1/examples
+  #   implementations: /tmp/aws_boto3_cloud_formation_template_tags-v1/impl
+  pipRequirements:
+  - 'py-animus'
+  importStatements:
+  - 'from py_animus.manifest_management import *'
+  - 'from py_animus import get_logger, get_utc_timestamp'
+  specFields:
+  - fieldName: tags
+    fieldDescription: List of tags
+    fieldType: list
+    fieldRequired: true
+    fieldDefaultValue: []
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  additionalExamples:
+  - exampleName: minimal  # This will also be used to compile the the value of metadata.name
+    manifest:
+      generated: false # This will automatically generate an example spec data with the minimum required fields and default values
+      additionalMetadata: |
+        executeOnlyOnceOnApply: true
+      specData: |
+        tags:
+        - tagName: 'Owner'
+          tagValue: 'Mickey Mouse'
+    explanatoryText: |
+      At least one tag must be defined. Each tag object have two keys: `tagName` and `tagValue`. The `tagValue` will
+      be converted to it's string representation.

@@ -1,0 +1,10 @@
+kind: AwsBoto3CloudFormationTemplateTags
+version: v1
+metadata:
+  executeOnlyOnceOnApply: true
+  name: aws_boto3_cloud_formation_template_tags-v1-minimal
+spec:
+  tags:
+  - tagName: Owner
+    tagValue: Mickey Mouse
+
