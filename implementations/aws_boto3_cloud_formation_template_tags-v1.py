@@ -41,9 +41,12 @@ The data will be stored in the following Variable objects:
 
     def _set_variables(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default', input_data: list=list()):
         data = dict()
+        self.log(message='input_data={}'.format(input_data), level='debug')
         for tag_pair in input_data:
+            self.log(message='   Processing tag_pair={}'.format(tag_pair), level='debug')
             if 'tagName' in tag_pair and 'tagValue' in tag_pair:
                 data[tag_pair['tagName']] = '{}'.format(tag_pair['tagValue'])
+        self.log(message='data={}'.format(data), level='debug')
         variable_cache.store_variable(
             variable=Variable(
                 name='{}:TAG_KEYS'.format(self._var_name(target_environment=target_environment)),
@@ -71,7 +74,11 @@ The data will be stored in the following Variable objects:
             target_environment=target_environment,
             value_placeholders=value_placeholders
         ) is True:
+            self.log(message='Setting tag variables', level='info')
             self._set_variables(variable_cache=variable_cache, target_environment=target_environment, input_data=self.spec['tags'])
+            return
+
+        self.log(message='Nothing to do', level='info')
 
         return
 

@@ -51,7 +51,7 @@ spec:
       specData: |
         tags:
         - tagName: 'Owner'
-        - tagValue: 'Mickey Mouse'
+          tagValue: 'Mickey Mouse'
     explanatoryText: |
       At least one tag must be defined. Each tag object have two keys: `tagName` and `tagValue`. The `tagValue` will
       be converted to it's string representation.

@@ -51,7 +51,7 @@ metadata:
 spec:
   tags:
   - tagName: 'Owner'
-  - tagValue: 'Mickey Mouse'
+    tagValue: 'Mickey Mouse'
 ```
 
 At least one tag must be defined. Each tag object have two keys: `tagName` and `tagValue`. The `tagValue` will

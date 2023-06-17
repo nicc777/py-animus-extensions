@@ -6,5 +6,5 @@ metadata:
 spec:
   tags:
   - tagName: Owner
-  - tagValue: Mickey Mouse
+    tagValue: Mickey Mouse
 
