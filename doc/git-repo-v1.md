@@ -57,7 +57,7 @@ venv/bin/animus apply -m $EXAMPLE_DIR/$EXTENSION_NAME/$SCENARIO_NAME/example.yam
 export SCENARIO_NAME="minimal"
 ```
 
-Example manifest: [example.yaml](/media/nicc777/data/nicc777/git/Personal/GitHub/py-animus-extensions/examples/git-repo-v1/minimal/example.yaml)
+Example manifest: [example.yaml](examples/git-repo-v1/minimal/example.yaml)
 
 ```yaml
 kind: GitRepo
@@ -78,7 +78,7 @@ Minimal example cloning a public repository
 export SCENARIO_NAME="http-with-authentication-self-signed-certificate"
 ```
 
-Example manifest: [example.yaml](/media/nicc777/data/nicc777/git/Personal/GitHub/py-animus-extensions/examples/git-repo-v1/http-with-authentication-self-signed-certificate/example.yaml)
+Example manifest: [example.yaml](examples/git-repo-v1/http-with-authentication-self-signed-certificate/example.yaml)
 
 ```yaml
 ---
@@ -133,7 +133,7 @@ This example shows a local HTTPS based repository that requires authentication, 
 export SCENARIO_NAME="ssh-repository"
 ```
 
-Example manifest: [example.yaml](/media/nicc777/data/nicc777/git/Personal/GitHub/py-animus-extensions/examples/git-repo-v1/ssh-repository/example.yaml)
+Example manifest: [example.yaml](examples/git-repo-v1/ssh-repository/example.yaml)
 
 ```yaml
 ---
