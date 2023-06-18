@@ -15,7 +15,6 @@ spec:
     ```yaml
     parameterName: string # Required: Will be the"parameter_key"
     parameterValue: string
-    maskParameter: boolean # Optional (default=False). If set to True, the value will be masked in logs. Remember to use "NoEcho" in the actual CloudFormation template to protect sensitive data.
     ```
 
     The data will be stored in the following Variable objects:

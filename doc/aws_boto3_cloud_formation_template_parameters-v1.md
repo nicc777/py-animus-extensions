@@ -23,8 +23,10 @@ The structure of each parameter object in the list of `parameters`:
 ```yaml
 parameterName: string # Required: Will be the"parameter_key"
 parameterValue: string
-maskParameter: boolean # Optional (default=False). If set to True, the value will be masked in logs. Remember to use "NoEcho" in the actual CloudFormation template to protect sensitive data.
 ```
+
+> **Warning**
+> Note that in debug mode sensitive values will be echoed in logs/STDOUT
 
 # Example Usages
 
