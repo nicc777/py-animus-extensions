@@ -1,0 +1,10 @@
+---
+kind: AwsBoto3CloudFormationTemplateParameters
+version: v1
+metadata:
+  executeOnlyOnceOnApply: true
+  name: aws_boto3_cloud_formation_template_parameters-v1-minimal
+spec:
+  parameters:
+  - parameterName: 'InstanceAmiParameter'
+    parameterValue: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2' # See: https://aws.amazon.com/blogs/compute/query-for-the-latest-amazon-linux-ami-ids-using-aws-systems-manager-parameter-store/

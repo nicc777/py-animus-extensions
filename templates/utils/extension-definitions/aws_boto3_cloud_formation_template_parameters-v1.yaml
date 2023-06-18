@@ -1,0 +1,64 @@
+---
+kind: AnimusExtensionTemplate
+version: v1
+metadata:
+  name: aws_boto3_cloud_formation_template_parameters-v1
+  skipDeleteAll: true
+  executeOnlyOnceOnApply: true
+  executeOnlyOnceOnDelete: true
+spec:
+  description: |
+    Defines a list of parameters that can be linked to one or more CloudFormation templates.
+
+    The structure of each parameter object:
+
+    ```yaml
+    parameterName: string # Required: Will be the"parameter_key"
+    parameterValue: string
+    ```
+
+    The data will be stored in the following Variable objects:
+
+    * `PARAMETER_KEYS` - A list of keys
+    * `PARAMETERS` - A dictionary in the format `{ "<<parameter_key>>": "<<parameter_value>>" }`. All `parameter_value` values will be strings
+  kind: AwsBoto3CloudFormationTemplateParameters
+  version: v1
+  versionChangelog: |
+    This is the initial version
+  supportedVersions:
+  - 'v1'
+  baseClass: ManifestBase
+  # outputPaths:
+  #   doc: /tmp/aws_boto3_cloud_formation_template_parameters-v1/doc
+  #   examples: /tmp/aws_boto3_cloud_formation_template_parameters-v1/examples
+  #   implementations: /tmp/aws_boto3_cloud_formation_template_parameters-v1/impl
+  pipRequirements:
+  - 'py-animus'
+  importStatements:
+  - 'from py_animus.manifest_management import *'
+  - 'from py_animus import get_logger, get_utc_timestamp'
+  specFields:
+  - fieldName: parameters
+    fieldDescription: List of parameters
+    fieldType: list
+    fieldRequired: true
+    fieldDefaultValue: []
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  additionalExamples:
+  - exampleName: minimal  # This will also be used to compile the the value of metadata.name
+    manifest:
+      generated: false # This will automatically generate an example spec data with the minimum required fields and default values
+      additionalMetadata: |
+        executeOnlyOnceOnApply: true
+      specData: |
+        parameters:
+        - parameterName: 'InstanceAmiParameter'
+          parameterValue: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2' # See: https://aws.amazon.com/blogs/compute/query-for-the-latest-amazon-linux-ami-ids-using-aws-systems-manager-parameter-store/
+    explanatoryText: |
+      At least one parameter must be defined. Each parameter object have two keys: `parameterName` and `parameterValue`. The `parameterValue` will
+      be converted to it's string representation.
