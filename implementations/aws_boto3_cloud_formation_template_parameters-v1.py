@@ -16,7 +16,7 @@ maskParameter: boolean # Optional (default=False). If set to True, the value wil
 The data will be stored in the following Variable objects:
 
 * `PARAMETER_KEYS` - A list of keys
-* `PARAMETERS` - A dictionary in the format `{ "<<parameter_key>>": "<<parameter_value>>" }`. All `parameter_value`` values will be strings
+* `PARAMETERS` - A dictionary in the format `{ "<<parameter_key>>": "<<parameter_value>>" }`. All `parameter_value` values will be strings
 
     """
 
