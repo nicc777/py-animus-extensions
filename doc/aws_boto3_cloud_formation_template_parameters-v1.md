@@ -47,7 +47,7 @@ venv/bin/animus apply -m $EXAMPLE_DIR/$EXTENSION_NAME/$SCENARIO_NAME/example.yam
 export SCENARIO_NAME="minimal"
 ```
 
-Example manifest: [example.yaml](/media/nicc777/data/nicc777/git/Personal/GitHub/py-animus-extensions/examples/aws_boto3_cloud_formation_template_parameters-v1/minimal/example.yaml)
+Example manifest: [example.yaml](examples/aws_boto3_cloud_formation_template_parameters-v1/minimal/example.yaml)
 
 ```yaml
 ---
