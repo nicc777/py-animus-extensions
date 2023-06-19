@@ -1,0 +1,69 @@
+---
+kind: AnimusExtensionTemplate
+version: v1
+metadata:
+  name: aws_boto3_cloud_formation_template-v1
+  skipDeleteAll: false # FIXME deletre when done
+  executeOnlyOnceOnApply: true
+  executeOnlyOnceOnDelete: true
+spec:
+  description: |
+    Defines a group of tags that can be linked to one or more CloudFormation templates.
+
+    The data will be stored in the following Variable objects:
+
+    * `TAG_KEYS` - A list of keys
+    * `TAGS` - A dictionary in the format { "<<tag_key>>": "<<tag_value>>" }. All tag_value values will be strings
+  kind: AwsBoto3CloudFormationTemplate
+  version: v1
+  versionChangelog: |
+    This is the initial version
+  supportedVersions:
+  - 'v1'
+  baseClass: ManifestBase
+  outputPaths:
+    doc: /tmp/aws_boto3_cloud_formation_template-v1/doc
+    examples: /tmp/aws_boto3_cloud_formation_template-v1/examples
+    implementations: /tmp/aws_boto3_cloud_formation_template-v1/impl
+  pipRequirements:
+  - 'py-animus'
+  importStatements:
+  - 'from py_animus.manifest_management import *'
+  - 'from py_animus import get_logger, get_utc_timestamp'
+  specFields:
+  - fieldName: awsBoto3SessionReference
+    fieldDescription: |
+      The AWS credentials to use for this template. The value is the "name" of the relevant "AwsBoto3Session" manifest to use
+    fieldType: string
+    fieldRequired: true
+    fieldDefaultValue: None
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: tagReferences
+    fieldDescription: |
+      Reference to the names of a "AwsBoto3CloudFormationTemplateTags" manifests. All tags from these references will be added to the CloudFormation template
+    fieldType: list
+    fieldRequired: false
+    fieldDefaultValue: []
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: parameterReferences
+    fieldDescription: |
+      Reference to the names of  "AwsBoto3CloudFormationTemplateParameters" manifests. All parameters from these references will be added to the CloudFormation template
+    fieldType: list
+    fieldRequired: false
+    fieldDefaultValue: []
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
