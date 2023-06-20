@@ -67,3 +67,16 @@ spec:
     - fieldValueIsNull: true
     customValidation: |
       self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: templatePath
+    fieldDescription: |
+      Path to the CloudFormation file. The file must be on the local filesystem. If the file is in a Git repository,
+      first use "GitRepo" to get the files onto the local system (as an example)
+    fieldType: string
+    fieldRequired: true
+    fieldDefaultValue: null
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
