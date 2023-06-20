@@ -102,3 +102,14 @@ spec:
     - fieldValueIsNull: true
     customValidation: |
       self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: options.notificationARNs
+    fieldDescription: 'maps to "NotificationARNs" option in the AWS API'
+    fieldType: list
+    fieldRequired: false
+    fieldDefaultValue: []
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
