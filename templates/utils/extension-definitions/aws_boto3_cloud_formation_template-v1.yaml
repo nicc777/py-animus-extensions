@@ -218,3 +218,19 @@ spec:
     - fieldValueIsNull: true
     customValidation: |
       self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: variableMappings.outputs
+    fieldDescription: |
+      Maps the template outputs to `Variable` objects. Each list item must have the following fields:
+      <ul>
+        <li>`variableName` (string) - The name of the "Variable", for example `INSTANCE_ID` (the other parts of the name will be automatically added)</li>
+        <li>`outputKey` (string) - The value of the output key. The same as the CloudFormation output "Logical ID" for example "InstanceID"</li>
+      </ul>
+    fieldType: list
+    fieldRequired: false
+    fieldDefaultValue: []
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
