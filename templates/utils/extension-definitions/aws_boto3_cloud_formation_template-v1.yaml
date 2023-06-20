@@ -91,3 +91,14 @@ spec:
     - fieldValueIsNull: true
     customValidation: |
       self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: options.timeoutInMinutes
+    fieldDescription: 'maps to "TimeoutInMinutes" option in the AWS API'
+    fieldType: integer
+    fieldRequired: false
+    fieldDefaultValue: 600
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
