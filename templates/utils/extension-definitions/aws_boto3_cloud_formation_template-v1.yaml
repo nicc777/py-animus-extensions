@@ -148,3 +148,16 @@ spec:
     - fieldValueIsNull: true
     customValidation: |
       self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: changeDetection.features.remoteTemplateValueEvaluation
+    fieldDescription: |
+      See https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudformation/client/get_template.html
+      - the remote template will be compared with the current one.
+    fieldType: boolean
+    fieldRequired: false
+    fieldDefaultValue: true
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
