@@ -190,3 +190,31 @@ spec:
     - fieldValueIsNull: true
     customValidation: |
       self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: raiseExceptionOnFinalStatusValues
+    fieldDescription: |
+      Add one or more of the following status codes that will force an exception to be raised (causing further deployment processing to stop). Possible options:
+      <ul>
+        <li>`CREATE_FAILED` (included in default)</li>
+        <li>`DELETE_FAILED` (included in default)</li>
+        <li>`ROLLBACK_FAILED` (included in default)</li>
+        <li>`UPDATE_FAILED` (included in default)</li>
+        <li>`UPDATE_ROLLBACK_FAILED` (included in default)</li>
+        <li>`IMPORT_ROLLBACK_FAILED` (included in default)</li>
+        <li>`CREATE_COMPLETE`</li>
+        <li>`DELETE_COMPLETE`</li>
+        <li>`ROLLBACK_COMPLETE`</li>
+        <li>`UPDATE_COMPLETE`</li>
+        <li>`UPDATE_ROLLBACK_COMPLETE`</li>
+        <li>`IMPORT_COMPLETE`</li>
+        <li>`IMPORT_ROLLBACK_COMPLETE`</li>
+      </ul>
+      An empty list will ignore any status
+    fieldType: list
+    fieldRequired: false
+    fieldDefaultValue: ["CREATE_FAILED", "DELETE_FAILED", "ROLLBACK_FAILED", "UPDATE_FAILED", "UPDATE_ROLLBACK_FAILED", "IMPORT_ROLLBACK_FAILED"]
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
