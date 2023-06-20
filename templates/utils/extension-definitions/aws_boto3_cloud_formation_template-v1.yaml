@@ -241,9 +241,9 @@ spec:
         <li>`logicalResourceId` (string) - The value of the resource key. The same as the CloudFormation output "Logical ID" for example "InstanceID"</li>
         <li>`variables` (list) - Contains a list  of at least ONE item with the following fieldDescription:
           <ul>
-            <li>`physicalResourceId` (string) - `Variable`` name for storing the "PhysicalResourceId"</li>
-            <li>`resourceType` (string) - `Variable`` name for storing the "ResourceType"</li>
-            <li>`resourceStatus` (string) - `Variable`` name for storing the "ResourceStatus"</li>
+            <li>`physicalResourceId` (string) - `Variable` name for storing the "PhysicalResourceId"</li>
+            <li>`resourceType` (string) - `Variable` name for storing the "ResourceType"</li>
+            <li>`resourceStatus` (string) - `Variable` name for storing the "ResourceStatus"</li>
           </ul>
         </li>
       </ul>
