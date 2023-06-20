@@ -81,7 +81,7 @@ spec:
     customValidation: |
       self.log(message='No custom validation for promptText', level='debug')
   - fieldName: options.disableRollback
-    fieldDescription: 'maps to "DisableRollback" option in the AWS API'
+    fieldDescription: 'Maps to "DisableRollback" option in the AWS API'
     fieldType: boolean
     fieldRequired: false
     fieldDefaultValue: false
@@ -92,7 +92,7 @@ spec:
     customValidation: |
       self.log(message='No custom validation for promptText', level='debug')
   - fieldName: options.timeoutInMinutes
-    fieldDescription: 'maps to "TimeoutInMinutes" option in the AWS API'
+    fieldDescription: 'Maps to "TimeoutInMinutes" option in the AWS API'
     fieldType: integer
     fieldRequired: false
     fieldDefaultValue: 600
@@ -103,7 +103,7 @@ spec:
     customValidation: |
       self.log(message='No custom validation for promptText', level='debug')
   - fieldName: options.notificationARNs
-    fieldDescription: 'maps to "NotificationARNs" option in the AWS API'
+    fieldDescription: 'Maps to "NotificationARNs" option in the AWS API'
     fieldType: list
     fieldRequired: false
     fieldDefaultValue: []
@@ -115,7 +115,7 @@ spec:
       self.log(message='No custom validation for promptText', level='debug')
   - fieldName: options.capabilities
     fieldDescription: |
-      'maps to "Capabilities" option in the AWS API. If supplied, can be "CAPABILITY_IAM" and/or "CAPABILITY_NAMED_IAM"
+      'Maps to "Capabilities" option in the AWS API. If supplied, can be "CAPABILITY_IAM" and/or "CAPABILITY_NAMED_IAM"
       and/or "CAPABILITY_AUTO_EXPAND"'
     fieldType: list
     fieldRequired: false
@@ -131,6 +131,17 @@ spec:
     fieldType: string
     fieldRequired: false
     fieldDefaultValue: ROLLBACK
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: options.enableTerminationProtection
+    fieldDescription: 'Maps to "EnableTerminationProtection" option in the AWS API'
+    fieldType: boolean
+    fieldRequired: false
+    fieldDefaultValue: false
     fieldSetDefaultValueConditions:
     - fieldDefinitionNotPresentInManifest: true
     - fieldValueTypeMismatch: true
