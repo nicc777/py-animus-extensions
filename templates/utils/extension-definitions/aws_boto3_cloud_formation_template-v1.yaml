@@ -113,3 +113,16 @@ spec:
     - fieldValueIsNull: true
     customValidation: |
       self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: options.capabilities
+    fieldDescription: |
+      'maps to "Capabilities" option in the AWS API. If supplied, can be "CAPABILITY_IAM" and/or "CAPABILITY_NAMED_IAM"
+      and/or "CAPABILITY_AUTO_EXPAND"'
+    fieldType: list
+    fieldRequired: false
+    fieldDefaultValue: []
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
