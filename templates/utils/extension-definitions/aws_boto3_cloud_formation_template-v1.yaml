@@ -80,3 +80,14 @@ spec:
     - fieldValueIsNull: true
     customValidation: |
       self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: options.disableRollback
+    fieldDescription: 'maps to "DisableRollback" option in the AWS API'
+    fieldType: boolean
+    fieldRequired: false
+    fieldDefaultValue: false
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
