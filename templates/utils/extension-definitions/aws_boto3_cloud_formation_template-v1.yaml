@@ -126,3 +126,14 @@ spec:
     - fieldValueIsNull: true
     customValidation: |
       self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: options.onFailure
+    fieldDescription: 'Default "ROLLBACK". If supplied, one of "DO_NOTHING" or "ROLLBACK" or "DELETE"'
+    fieldType: string
+    fieldRequired: false
+    fieldDefaultValue: ROLLBACK
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
