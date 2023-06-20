@@ -174,3 +174,19 @@ spec:
     - fieldValueIsNull: true
     customValidation: |
       self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: changeDetection.customEvaluations.variableEvaluations
+    fieldDescription: |
+      Based on the value of a prior set `Variable`, a change can be assumed. Each list item is an object with the
+      following fields: <ul> <li>`variableName` (string) - The name of the "Variable".</li> <li>`expectedValue`
+      (string) - The Python string representation of a variable value.</li> <li>`changeDetectedIfValueMatch`
+      (boolean, default=true) - If the "expectedValue" is matched, assume changes were detected. If "False" and value
+      OTHER than the "expectedValue" will indicate change was detected.</li> </ul>
+    fieldType: list
+    fieldRequired: false
+    fieldDefaultValue: []
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
