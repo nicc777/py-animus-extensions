@@ -161,3 +161,16 @@ spec:
     - fieldValueIsNull: true
     customValidation: |
       self.log(message='No custom validation for promptText', level='debug')
+  - fieldName: changeDetection.features.alwaysCreateChangeset
+    fieldDescription: |
+      Regardless if changes are present or not, create a changeset. This makes other change evaluation more or less
+      redundant.
+    fieldType: boolean
+    fieldRequired: false
+    fieldDefaultValue: false
+    fieldSetDefaultValueConditions:
+    - fieldDefinitionNotPresentInManifest: true
+    - fieldValueTypeMismatch: true
+    - fieldValueIsNull: true
+    customValidation: |
+      self.log(message='No custom validation for promptText', level='debug')
