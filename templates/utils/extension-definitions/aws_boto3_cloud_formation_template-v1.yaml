@@ -8,12 +8,41 @@ metadata:
   executeOnlyOnceOnDelete: true
 spec:
   description: |
-    Defines a group of tags that can be linked to one or more CloudFormation templates.
+    Creates a new stack or applies a changeset in AWS CloudFormation.
 
-    The data will be stored in the following Variable objects:
+    When called with "apply" does one of two actions (default):
 
-    * `TAG_KEYS` - A list of keys
-    * `TAGS` - A dictionary in the format { "<<tag_key>>": "<<tag_value>>" }. All tag_value values will be strings
+    1. If the template has not been applied before, apply the new template
+    2. If the template was applied before, create and apply a change set
+
+    The behavior can be fine tuned with the `spec.changeDetection` settings
+
+    Variables to be set:
+
+    * `FINAL_STATUS` - string with the final CLoudFormation status
+    * `LOCAL_TEMPLATE_CHECKSUM` - string with the SHA256 checksum of the template in the local file (processed template - not the file checksum)
+    * `REMOTE_TEMPLATE_CHECKSUM` - string with the SHA256 checksum of the remote template (processed template - not the raw string checksum)
+    * And any additional mappings as defined in `spec.variableMappings`
+
+    The following CloudFormation status codes is assumed to indicate that the stack deployment is complete:
+
+    * `CREATE_COMPLETE`
+    * `CREATE_FAILED`
+    * `DELETE_COMPLETE`
+    * `DELETE_FAILED`
+    * `ROLLBACK_COMPLETE`
+    * `ROLLBACK_FAILED`
+    * `UPDATE_COMPLETE`
+    * `UPDATE_FAILED`
+    * `UPDATE_ROLLBACK_COMPLETE`
+    * `UPDATE_ROLLBACK_FAILED`
+    * `IMPORT_ROLLBACK_FAILED`
+    * `IMPORT_ROLLBACK_COMPLETE`
+
+    References:
+
+    * https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudformation.html
+    * https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-describing-stacks.html
   kind: AwsBoto3CloudFormationTemplate
   version: v1
   versionChangelog: |
