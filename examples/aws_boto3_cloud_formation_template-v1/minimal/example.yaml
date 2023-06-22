@@ -1,0 +1,18 @@
+---
+kind: AwsBoto3Session
+version: v1
+metadata:
+  name: aws-boto3-session-v1-minimal
+  skipApplyAll: true
+  skipDeleteAll: true
+spec:
+  awsRegion: us-east-1
+  profileName: my-profile
+---
+kind: AwsBoto3CloudFormationTemplate
+version: v1
+metadata:
+  name: aws_boto3_cloud_formation_template-v1-minimal
+spec:
+  awsBoto3SessionReference: aws-boto3-session-v1-minimal
+  templatePath: /path/to/template.yaml

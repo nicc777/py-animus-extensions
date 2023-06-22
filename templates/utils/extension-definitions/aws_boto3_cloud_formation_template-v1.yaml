@@ -50,10 +50,10 @@ spec:
   supportedVersions:
   - 'v1'
   baseClass: ManifestBase
-  outputPaths:
-    doc: /tmp/aws_boto3_cloud_formation_template-v1/doc
-    examples: /tmp/aws_boto3_cloud_formation_template-v1/examples
-    implementations: /tmp/aws_boto3_cloud_formation_template-v1/impl
+  # outputPaths:
+  #   doc: /tmp/aws_boto3_cloud_formation_template-v1/doc
+  #   examples: /tmp/aws_boto3_cloud_formation_template-v1/examples
+  #   implementations: /tmp/aws_boto3_cloud_formation_template-v1/impl
   pipRequirements:
   - 'py-animus'
   importStatements:
