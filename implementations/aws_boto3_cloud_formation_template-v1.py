@@ -3,6 +3,8 @@ from py_animus.manifest_management import *
 from py_animus import get_logger, get_utc_timestamp
 import re
 import boto3
+import hashlib
+import json
 
 class AwsBoto3CloudFormationTemplate(ManifestBase):
     """Creates a new stack or applies a changeset in AWS CloudFormation.
@@ -156,7 +158,7 @@ References:
         )
 
     def _calculate_dict_checksum(self, data: dict=dict())->str:
-        pass
+        return hashlib.sha256(json.dumps(data, sort_keys=True, ensure_ascii=True).encode('utf-8')).hexdigest()
 
     def _stack_exists(self, client, stack_name: str)->bool:
         return False

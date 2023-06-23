@@ -61,6 +61,8 @@ spec:
   - 'from py_animus import get_logger, get_utc_timestamp'
   - 'import re'
   - 'import boto3'
+  - 'import hashlib'
+  - 'import json'
   specFields:
   - fieldName: awsBoto3SessionReference
     fieldDescription: |
