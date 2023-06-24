@@ -141,20 +141,50 @@ spec:
   awsRegion: eu-central-1
   profileName: my-profile
 ---
+kind: AwsBoto3CloudFormationTemplateParameters
+version: v1
+metadata:
+  name: aws-s3-example-bucket-deployment-parameters
+  executeOnlyOnceOnApply: true
+  skipApplyAll: true
+  skipDeleteAll: true
+spec:
+  parameters:
+  - parameterName: 'BucketNameParameter'
+    parameterValue: '{{ .Variables.ShellScript:random-s3-bucket-name:default:STDOUT }}'
+---
+kind: AwsBoto3CloudFormationTemplateTags
+version: v1
+metadata:
+  name: aws-s3-example-bucket-deployment-tags
+  executeOnlyOnceOnApply: true
+  skipApplyAll: true
+  skipDeleteAll: true
+spec:
+  tags:
+  - tagName: 'Comment'
+    tagValue: 'Demonstrating Animus Deployment'
+---
 kind: AwsBoto3CloudFormationTemplate
 version: v1
 metadata:
-  name: aws_boto3_cloud_formation_template-v1-minimal
+  name: aws-s3-example-bucket-deployment
   dependencies:
     apply:
     - s3-example-bucket
     - random-s3-bucket-name
+    - aws-s3-example-bucket-deployment-parameters
+    - aws-s3-example-bucket-deployment-tags
     - aws-boto3-session
   executeOnlyOnceOnApply: true
   skipDeleteAll: true
 spec:
   awsBoto3SessionReference: aws-boto3-session
   templatePath: '{{ .Variables.WriteFile:s3-example-bucket:default:FILE_PATH }}'
+  parameterReferences:
+  - aws-s3-example-bucket-deployment-parameters
+  tagReferences:
+  - aws-s3-example-bucket-deployment-tags
 ```
 
 This is the absolute minimal example based on required values. Dummy random data was generated where required.
