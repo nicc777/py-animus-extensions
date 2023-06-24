@@ -88,23 +88,73 @@ Example manifest: [example.yaml](/media/nicc777/data/nicc777/git/Personal/GitHub
 
 ```yaml
 ---
+kind: WriteFile
+version: v1
+metadata:
+  name: s3-example-bucket
+  executeOnlyOnceOnApply: true
+spec:
+  targetFile: /tmp/cfn-s3-example.yaml
+  data: |
+    ---
+    AWSTemplateFormatVersion: "2010-09-09"
+    Description: 'An example S3 bucket template'
+    Parameters:
+      BucketNameParameter:
+        Type: String
+    Resources:
+      S3ExampleBucket:
+        Type: 'AWS::S3::Bucket'
+        DeletionPolicy: Retain
+        Properties:
+          BucketName: !Ref BucketNameParameter
+    Outputs:
+      ExampleS3Bucket:
+        Description: 'Example S3 Bucket Name'
+        Value: !Ref S3ExampleBucket
+        Export:
+          Name: !Join [ ":", [ !Ref "AWS::StackName", !Ref S3ExampleBucket ] ]
+---
+kind: ShellScript
+version: v1
+metadata:
+  name: random-s3-bucket-name
+  skipDeleteAll: true
+spec:
+  shellInterpreter: bash
+  source:
+    type: inLine
+    value: |
+      chars=abcdefghijklmnopqrstuvwxyz-1234567890
+      for i in {1..16} ; do
+      echo -n "${chars:RANDOM%${#chars}:1}"
+      done
+      echo
+---
 kind: AwsBoto3Session
 version: v1
 metadata:
-  name: aws-boto3-session-v1-minimal
+  name: aws-boto3-session
   skipApplyAll: true
   skipDeleteAll: true
 spec:
-  awsRegion: us-east-1
+  awsRegion: eu-central-1
   profileName: my-profile
 ---
 kind: AwsBoto3CloudFormationTemplate
 version: v1
 metadata:
   name: aws_boto3_cloud_formation_template-v1-minimal
+  dependencies:
+    apply:
+    - s3-example-bucket
+    - random-s3-bucket-name
+    - aws-boto3-session
+  executeOnlyOnceOnApply: true
+  skipDeleteAll: true
 spec:
-  awsBoto3SessionReference: aws-boto3-session-v1-minimal
-  templatePath: /path/to/template.yaml
+  awsBoto3SessionReference: aws-boto3-session
+  templatePath: '{{ .Variables.WriteFile:s3-example-bucket:default:FILE_PATH }}'
 ```
 
 This is the absolute minimal example based on required values. Dummy random data was generated where required.
