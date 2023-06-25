@@ -1,6 +1,6 @@
 
 from py_animus.manifest_management import *
-from py_animus import get_logger, get_utc_timestamp
+from py_animus import get_logger, get_utc_timestamp, parse_raw_yaml_data
 import re
 import boto3
 import hashlib
@@ -157,22 +157,68 @@ References:
             overwrite_existing=True
         )
 
+    def _attempt_to_convert_template_data_to_dict(self, data_as_str: str)->dict:
+        parse_exception = False
+        stack_template_data_as_dict =dict()
+        try:
+            stack_template_data_as_dict = json.loads(data_as_str)
+        except:
+            self.log(message='Failed to convert JSON to DICT - attempting YAML to DICT conversion.', level='warning')
+            try:
+                stack_template_data_as_dict = parse_raw_yaml_data(yaml_data=data_as_str, logger=self.logger)['part_1']
+            except:
+                self.log(message='All attempts to parse the remote template failed!', level='error')
+                parse_exception = True
+        if parse_exception is True:
+            raise Exception('Failed to parse the remote CloudFormation Template data')
+        return stack_template_data_as_dict
+
     def _calculate_dict_checksum(self, data: dict=dict())->str:
         return hashlib.sha256(json.dumps(data, sort_keys=True, ensure_ascii=True).encode('utf-8')).hexdigest()
 
+    def _calculate_local_template_checksum(self)->str:
+        file_content_as_str = None
+        with open(self.spec['templatePath'], 'r') as f:
+            file_content_as_str = f.read()
+        return self._calculate_dict_checksum(data=self._attempt_to_convert_template_data_to_dict(data_as_str=file_content_as_str))
+
     def _stack_exists(self, client, stack_name: str)->bool:
+        remote_stack = self._get_current_remote_stack_status(cloudformation_client=client)
+        if len(remote_stack) > 0:
+            return True
         return False
 
     def _delete_stack(self, client, stack_name: str):
+        # TODO complete implementation...
         pass
 
     def _get_current_remote_stack_status(
             self,
-            cloudformation_client,
-            VariableCache=VariableCache(),
-            target_environment: str='default'
+            cloudformation_client
         )->dict:
-        pass
+        remote_stack_data = dict()  # Refer to https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudformation/client/describe_stacks.html
+        try:
+            response = cloudformation_client.describe_stacks(
+                StackName=self._format_template_name_as_stack_name()
+            )
+            if 'Stacks' in response:
+                remote_stack_data = response['Stacks'][0]
+        except:
+            self.log(message='It appears that the remote stack named "{}" does not exists'.format(self._format_template_name_as_stack_name()), level='error')
+        return remote_stack_data
+
+    def _get_current_remote_stack_template(
+            self,
+            cloudformation_client
+        )->dict:
+        remote_stack_template = dict()  # Convert the template to DICT
+        response = cloudformation_client.get_template(
+            StackName=self._format_template_name_as_stack_name(),
+            TemplateStage='Original'
+        )
+        if 'TemplateBody' in response:
+            remote_stack_template = self._attempt_to_convert_template_data_to_dict(data_as_str=response['TemplateBody'])
+        return remote_stack_template
 
     def _format_template_name_as_stack_name(self)->str:
         tmp_name = re.sub('[^0-9a-zA-Z]+', '_', self.metadata['name'])
@@ -181,6 +227,10 @@ References:
             if len(word) > 0:
                 name = '{}{}'.format(name, word.capitalize())
         return name
+
+    def _is_local_template_and_parameters_different_from_remote_template_and_parameters(self, remote_template_meta_data: dict, remote_template_as_dict: dict)->bool:
+        # TODO complete implemention
+        return False
 
     def implemented_manifest_differ_from_this_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders())->bool:
         if target_environment not in self.metadata['environments']:
@@ -194,15 +244,54 @@ References:
             raise_exception_on_expired=False,
             raise_exception_on_not_found=False
         )
+        current_processing_status = variable_cache.get_value(
+            variable_name='{}:NEXT_ACTION'.format(self._var_name(target_environment=target_environment)),
+            value_if_expired='PENDING',
+            default_value_if_not_found='NOT_YET_CHECKED',
+            raise_exception_on_expired=False,
+            raise_exception_on_not_found=False
+        )
 
         action_get_remote_stack_data = False
         action_calculate_local_template_checksum = False
+        action_compare_checksums_and_parameters = False
+
+        remote_stack_data = dict()
 
         if current_processing_status == 'NOT_STARTED':
             action_get_remote_stack_data = True
             action_calculate_local_template_checksum = True
         elif current_processing_status == 'DONE':
             return False
+
+        if action_get_remote_stack_data is True:
+            remote_stack_data = self._get_current_remote_stack_status(cloudformation_client)
+        if len(remote_stack_data) > 0:
+            action_compare_checksums_and_parameters = True
+            current_processing_status = variable_cache.get_value(
+                variable_name='{}:NEXT_ACTION'.format(self._var_name(target_environment=target_environment)),
+                value_if_expired='CHANGE_SET_DECISION_PENDING',
+                default_value_if_not_found='NOT_YET_CHECKED',
+                raise_exception_on_expired=False,
+                raise_exception_on_not_found=False
+            )
+            self.log(message='Stack was deployed previously. Next step is to compare checksums of the templates and parameters to see if a changeset is required.', level='info')
+        else:
+            current_processing_status = variable_cache.get_value(
+                variable_name='{}:NEXT_ACTION'.format(self._var_name(target_environment=target_environment)),
+                value_if_expired='CREATE_NEW_STACK',
+                default_value_if_not_found='NOT_YET_CHECKED',
+                raise_exception_on_expired=False,
+                raise_exception_on_not_found=False
+            )
+            self.log(message='First/New deployment - A new stack will be created', level='info')
+            return True
+
+        if action_calculate_local_template_checksum is True:
+            pass
+
+        if action_compare_checksums_and_parameters is True:
+            pass
 
         return False
 
