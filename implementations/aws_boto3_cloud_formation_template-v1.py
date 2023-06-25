@@ -232,10 +232,116 @@ References:
         # TODO complete implemention
         return False
 
+    def _get_parameters(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->list:
+        parameters = list()
+        if 'parameterReferences' in self.spec:
+            for parameter_reference in self.spec['parameterReferences']:
+                self.log(message='Processing parameter reference "{}"'.format(parameter_reference), level='info')
+                if ':' not in parameter_reference:
+                    parameter_variable_name = 'AwsBoto3CloudFormationTemplateParameters:{}:{}'.format(
+                        parameter_reference,
+                        target_environment
+                    )
+                else:
+                    parameter_variable_name = parameter_reference
+                self.log(message='   Looking up parameters variable named "{}"'.format(parameter_variable_name), level='debug')
+                for parameter_key, parameter_value in variable_cache.get_value( # Expect format "{ "<<parameter_key>>": "<<parameter_value>>" }"
+                    variable_name='{}:PARAMETERS'.format(parameter_variable_name),
+                    value_if_expired=dict(),
+                    default_value_if_not_found=dict(),
+                    raise_exception_on_expired=False,
+                    raise_exception_on_not_found=False
+                ).items():                                                      # Convert into format {'ParameterKey': 'string', 'ParameterValue': 'string'}
+                    final_value = '{}'.format(parameter_value)
+                    if parameter_value is None:
+                        final_value = parameter_value
+                    elif isinstance(parameter_value, bool):
+                        final_value = parameter_value
+                    parameters.append(
+                        {
+                            'ParameterKey': parameter_key,
+                            'ParameterValue': final_value,
+                        }
+                    )
+        self.log(message='parameters: {}'.format(json.dumps(parameters)), level='debug')
+        return parameters
+
+    def _get_tags(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->list:
+        tags = list()
+        if 'tagReferences' in self.spec:
+            for tag_reference in self.spec['tagReferences']:
+                self.log(message='Processing tags reference "{}"'.format(tag_reference), level='info')
+                if ':' not in tag_reference:
+                    tag_variable_name = 'AwsBoto3CloudFormationTemplateTags:{}:{}'.format(
+                        tag_reference,
+                        target_environment
+                    )
+                else:
+                    tag_variable_name = tag_reference
+                self.log(message='   Looking up parameters variable named "{}"'.format(tag_variable_name), level='debug')
+                for tag_key, tag_value in variable_cache.get_value(             # Expect format "{ "<<tag_key>>": "<<tag_value>>" }"
+                    variable_name='{}:TAGS'.format(tag_variable_name),
+                    value_if_expired=dict(),
+                    default_value_if_not_found=dict(),
+                    raise_exception_on_expired=False,
+                    raise_exception_on_not_found=False
+                ).items():                                                      # Convert into format {'Key': 'string', 'Value': 'string'}
+                    final_value = '{}'.format(tag_value)
+                    if tag_value is None:
+                        final_value = tag_value
+                    elif isinstance(tag_value, bool):
+                        final_value = tag_value
+                    tags.append(
+                        {
+                            'Key': tag_key,
+                            'Value': final_value,
+                        }
+                    )
+        self.log(message='parameters: {}'.format(json.dumps(tags)), level='debug')
+        return tags
+
     def implemented_manifest_differ_from_this_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders())->bool:
         if target_environment not in self.metadata['environments']:
             return False
 
+        ###
+        ### Process Parameters and Tags
+        ###
+        current_parsed_parameters = variable_cache.get_value(
+            variable_name='{}:PARSED_PARAMETERS_AS_LIST'.format(self._var_name(target_environment=target_environment)),
+            value_if_expired=self._get_parameters(variable_cache=variable_cache, target_environment=target_environment),
+            default_value_if_not_found=self._get_parameters(variable_cache=variable_cache, target_environment=target_environment),
+            raise_exception_on_expired=False,
+            raise_exception_on_not_found=False
+        )
+        current_parsed_tags = variable_cache.get_value(
+            variable_name='{}:PARSED_TAGS_AS_LIST'.format(self._var_name(target_environment=target_environment)),
+            value_if_expired=self._get_tags(variable_cache=variable_cache, target_environment=target_environment),
+            default_value_if_not_found=self._get_tags(variable_cache=variable_cache, target_environment=target_environment),
+            raise_exception_on_expired=False,
+            raise_exception_on_not_found=False
+        )
+        variable_cache.store_variable(
+            variable=Variable(
+                name='{}:PARSED_PARAMETERS_AS_LIST'.format(self._var_name(target_environment=target_environment)),
+                initial_value=current_parsed_parameters,
+                logger=self.logger
+            ),
+            overwrite_existing=False
+        )
+        variable_cache.store_variable(
+            variable=Variable(
+                name='{}:PARSED_TAGS_AS_LIST'.format(self._var_name(target_environment=target_environment)),
+                initial_value=current_parsed_tags,
+                logger=self.logger
+            ),
+            overwrite_existing=False
+        )
+
+
+        ###
+        ### Check previous processing status to determine next actions
+        ###
         cloudformation_client = self._get_boto3_cloudformation_client(variable_cache=variable_cache, target_environment=target_environment)
         current_processing_status = variable_cache.get_value(
             variable_name='{}:PROCESSING_STATUS'.format(self._var_name(target_environment=target_environment)),
