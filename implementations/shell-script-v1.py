@@ -54,7 +54,7 @@ variable name
         return True
 
     def _id_source(self)->str:
-        source = 'inline'
+        source = 'inLine'
         if 'source' in self.spec:
             if 'type' in self.spec['source']:
                 if self.spec['source']['type'] in ('inLine', 'filePath',):
@@ -130,7 +130,7 @@ variable name
         ### PREP SOURCE FILE
         ###
         script_source = 'exit 0'
-        if self._id_source() == 'inline':
+        if self._id_source().lower() == 'inline':
             shabang = '#!/bin/sh'
             if 'shellInterpreter' in self.spec:
                 shabang = self.spec['shellInterpreter']
