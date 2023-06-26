@@ -415,6 +415,7 @@ References:
             target_environment=target_environment,
             value_placeholders=value_placeholders
         ) is False:
+            self.log(message='Stack already deployed and no new changes detected.', level='info')
             return
 
         return
