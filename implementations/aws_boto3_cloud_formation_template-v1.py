@@ -418,6 +418,15 @@ References:
             self.log(message='Stack already deployed and no new changes detected.', level='info')
             return
 
+        change_type = variable_cache.get_value(
+            variable_name='{}:NEXT_ACTION'.format(self._var_name(target_environment=target_environment)),
+            value_if_expired='NONE',
+            default_value_if_not_found='NONE',
+            raise_exception_on_expired=False,
+            raise_exception_on_not_found=False
+        )
+        self.log(message='Apply Action: {}'.format(change_type), level='info')
+
         return
 
     def delete_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
