@@ -36,7 +36,7 @@ spec:
   source:
     type: inLine
     value: |
-      chars=abcdefghijklmnopqrstuvwxyz-1234567890
+      chars=abcdefghijklmnopqrstuvwxyz1234567890
       for i in {1..16} ; do
       echo -n "${chars:RANDOM%${#chars}:1}"
       done
