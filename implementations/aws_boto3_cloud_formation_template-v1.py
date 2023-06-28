@@ -350,7 +350,7 @@ References:
             raise_exception_on_expired=False,
             raise_exception_on_not_found=False
         )
-        current_processing_status = variable_cache.get_value(
+        next_action = variable_cache.get_value(
             variable_name='{}:NEXT_ACTION'.format(self._var_name(target_environment=target_environment)),
             value_if_expired='PENDING',
             default_value_if_not_found='NOT_YET_CHECKED',
@@ -374,21 +374,15 @@ References:
             remote_stack_data = self._get_current_remote_stack_status(cloudformation_client)
         if len(remote_stack_data) > 0:
             action_compare_checksums_and_parameters = True
-            current_processing_status = variable_cache.get_value(
-                variable_name='{}:NEXT_ACTION'.format(self._var_name(target_environment=target_environment)),
-                value_if_expired='CHANGE_SET_DECISION_PENDING',
-                default_value_if_not_found='NOT_YET_CHECKED',
-                raise_exception_on_expired=False,
-                raise_exception_on_not_found=False
-            )
             self.log(message='Stack was deployed previously. Next step is to compare checksums of the templates and parameters to see if a changeset is required.', level='info')
         else:
-            current_processing_status = variable_cache.get_value(
-                variable_name='{}:NEXT_ACTION'.format(self._var_name(target_environment=target_environment)),
-                value_if_expired='CREATE_NEW_STACK',
-                default_value_if_not_found='NOT_YET_CHECKED',
-                raise_exception_on_expired=False,
-                raise_exception_on_not_found=False
+            variable_cache.store_variable(
+                variable=Variable(
+                    name='{}:NEXT_ACTION'.format(self._var_name(target_environment=target_environment)),
+                    initial_value='DEPLOY_NEW_STACK',
+                    logger=self.logger
+                ),
+                overwrite_existing=True
             )
             self.log(message='First/New deployment - A new stack will be created', level='info')
             return True
@@ -426,6 +420,9 @@ References:
             raise_exception_on_not_found=False
         )
         self.log(message='Apply Action: {}'.format(change_type), level='info')
+
+        if change_type == 'DEPLOY_NEW_STACK':
+            pass
 
         return
 
