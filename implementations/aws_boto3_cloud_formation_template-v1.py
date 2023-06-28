@@ -395,6 +395,79 @@ References:
 
         return False
 
+    def _set_stack_options(self)->dict:
+        stack_options = {
+            'DisableRollback': False,
+            'TimeoutInMinutes': 10,
+            'NotificationARNs': list(),
+            'Capabilities': list(),
+            'OnFailure': 'ROLLBACK',
+            'EnableTerminationProtection': False,
+        }
+        use_disable_rollback = False
+        if 'options' in self.spec:
+
+            if 'onFailure' not in self.spec['options']:
+                use_disable_rollback = True
+                stack_options.pop('OnFailure')
+            else:
+                stack_options.pop('DisableRollback')
+
+            if 'disableRollback' in self.spec['options'] and use_disable_rollback is True:
+                if isinstance(self.spec['options']['disableRollback'], bool):
+                    stack_options['DisableRollback'] = self.spec['options']['disableRollback']
+            elif 'disableRollback' in self.spec['options'] and use_disable_rollback is False:
+                self.log(message='Cannot use "disableRollback" together with "onFailure" - it is either the one or the other. The "onFailure" option gets priority.', level='warning')
+            if 'timeoutInMinutes' in self.spec['options']:
+                if isinstance(self.spec['options']['timeoutInMinutes'], int):
+                    if self.spec['options']['timeoutInMinutes'] < 10:
+                        self.log(message='timeoutInMinutes less than minimum of value 10 - using value 10', level='warning')
+                        stack_options['TimeoutInMinutes'] = 10
+                    elif self.spec['options']['timeoutInMinutes'] > 60:
+                        self.log(message='timeoutInMinutes greater than maximum of value 60 - using value 60', level='warning')
+                        stack_options['TimeoutInMinutes'] = 60
+                    else:
+                        stack_options['TimeoutInMinutes'] = self.spec['options']['timeoutInMinutes']
+            if 'notificationARNs' in self.spec['options']:
+                if isinstance(self.spec['options']['notificationARNs'], list):
+                    arns = list()
+                    for arn in self.spec['options']['notificationARNs']:
+                        if arn is not None:
+                            if isinstance(arn, str):
+                                if arn.startswith('arn:'):
+                                    arns.append(arn)
+                    stack_options['NotificationARNs'] = arns
+            else:
+                stack_options.pop('NotificationARNs')
+            if 'capabilities' in self.spec['options']:
+                if isinstance(self.spec['options']['capabilities'], bool):
+                    capabilities = list()
+                    for capability in self.spec['options']['capabilities']:
+                        if capability is not None:
+                            if isinstance(capability, str):
+                                if self.spec['options']['capabilities'] in ('CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM', 'CAPABILITY_AUTO_EXPAND', ):
+                                    capabilities.append(capability)
+                    stack_options['Capabilities'] = capabilities
+            else:
+                stack_options.pop('Capabilities')
+            if 'onFailure' in self.spec['options'] and use_disable_rollback is False:
+                if self.spec['options']['onFailure'] is not None:
+                    if isinstance(self.spec['options']['onFailure'], str):
+                        if self.spec['options']['onFailure'] in ('DO_NOTHING', 'ROLLBACK', 'DELETE'):
+                            stack_options['OnFailure'] = self.spec['options']['onFailure']
+            if 'enableTerminationProtection' in self.spec['options']:
+                if isinstance(self.spec['options']['enableTerminationProtection'], bool):
+                    stack_options['EnableTerminationProtection'] = self.spec['options']['enableTerminationProtection']
+        else:
+            stack_options.pop('DisableRollback')
+            stack_options.pop('NotificationARNs')
+            stack_options.pop('Capabilities')
+        self.log(message='Initial stack_options: {}'.format(json.dumps(stack_options)), level='info')
+
+    def _apply_cloudformation_stack(self, variable_cache: VariableCache=VariableCache()):
+        parameters = self._set_stack_options()
+        # TODO complete...
+
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
         if target_environment not in self.metadata['environments']:
             self.log(message='Target environment "{}" not relevant for this manifest'.format(target_environment), level='warning')
@@ -420,9 +493,11 @@ References:
             raise_exception_on_not_found=False
         )
         self.log(message='Apply Action: {}'.format(change_type), level='info')
+        if change_type in ('NONE', 'NOTHING'):
+            return
 
         if change_type == 'DEPLOY_NEW_STACK':
-            pass
+            self._apply_cloudformation_stack(variable_cache=variable_cache)
 
         return
 
