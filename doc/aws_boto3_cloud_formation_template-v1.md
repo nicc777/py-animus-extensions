@@ -91,10 +91,10 @@ Example manifest: [example.yaml](/media/nicc777/data/nicc777/git/Personal/GitHub
 kind: WriteFile
 version: v1
 metadata:
-  name: s3-example-bucket
+  name: s3-example-bucket-cfn-template
   executeOnlyOnceOnApply: true
 spec:
-  targetFile: /tmp/cfn-s3-example.yaml
+  targetFile: /tmp/cloudformation_templates/cfn-example.yaml
   data: |
     ---
     AWSTemplateFormatVersion: "2010-09-09"
@@ -141,10 +141,53 @@ spec:
   awsRegion: eu-central-1
   profileName: my-profile
 ---
+kind: AwsBoto3S3Bucket
+version: v1
+metadata:
+  name: animus-artifacts-for-cloudformation
+  dependencies:
+    apply:
+    -  aws-boto3-session
+    delete:
+    -  aws-boto3-session
+  executeOnlyOnceOnApply: true
+spec:
+  awsBoto3Session:  aws-boto3-session
+  name: animus-artifacts-for-cloudformation
+---
+kind: AwsBoto3S3Files
+version: v1
+metadata:
+  name: cfn-upload-to-s3
+  dependencies:
+    apply:
+    - aws-boto3-session
+    - animus-artifacts-for-cloudformation
+    delete:
+    - aws-boto3-session
+    - animus-artifacts-for-cloudformation
+spec:
+  awsBoto3Session: aws-boto3-session
+  s3Bucket: '{{ .Variables.AwsBoto3S3Bucket:animus-artifacts-for-cloudformation:default:NAME }}'
+  globalOverwrite: true
+  destinationDirectory: /default
+  transferLogFile: /tmp/log/file_transfer.log
+  sources:
+  - sourceType: localDirectories
+    recurse: true
+    baseDirectory: /tmp
+    verifyChecksums: false
+    directories:
+    - cloudformation_templates
+  ifFileExists:
+    overWrite: true
+  onError: warn
+  actionExtraFilesOnS3: keep
+---
 kind: AwsBoto3CloudFormationTemplateParameters
 version: v1
 metadata:
-  name: aws-s3-example-bucket-deployment-parameters
+  name: aws-s3-example-bucket-cfn-template-deployment-parameters
   executeOnlyOnceOnApply: true
   skipApplyAll: true
   skipDeleteAll: true
@@ -156,7 +199,7 @@ spec:
 kind: AwsBoto3CloudFormationTemplateTags
 version: v1
 metadata:
-  name: aws-s3-example-bucket-deployment-tags
+  name: aws-s3-example-bucket-cfn-template-deployment-tags
   executeOnlyOnceOnApply: true
   skipApplyAll: true
   skipDeleteAll: true
@@ -168,23 +211,27 @@ spec:
 kind: AwsBoto3CloudFormationTemplate
 version: v1
 metadata:
-  name: aws-s3-example-bucket-deployment
+  name: aws-s3-example-bucket-cfn-template-deployment
   dependencies:
     apply:
-    - s3-example-bucket
+    - s3-example-bucket-cfn-template
     - random-s3-bucket-name
-    - aws-s3-example-bucket-deployment-parameters
-    - aws-s3-example-bucket-deployment-tags
+    - aws-s3-example-bucket-cfn-template-deployment-parameters
+    - aws-s3-example-bucket-cfn-template-deployment-tags
     - aws-boto3-session
+    - cfn-upload-to-s3
   executeOnlyOnceOnApply: true
   skipDeleteAll: true
 spec:
   awsBoto3SessionReference: aws-boto3-session
-  templatePath: '{{ .Variables.WriteFile:s3-example-bucket:default:FILE_PATH }}'
+  templateURL:
+    s3BucketReference: animus-artifacts-for-cloudformation
+    pathToTemplate: /default/cfn-example.yaml
+  templatePath: '{{ .Variables.WriteFile:s3-example-bucket-cfn-template:default:FILE_PATH }}'
   parameterReferences:
-  - aws-s3-example-bucket-deployment-parameters
+  - aws-s3-example-bucket-cfn-template-deployment-parameters
   tagReferences:
-  - aws-s3-example-bucket-deployment-tags
+  - aws-s3-example-bucket-cfn-template-deployment-tags
 ```
 
 This is the absolute minimal example based on required values. Dummy random data was generated where required.
