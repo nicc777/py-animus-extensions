@@ -464,8 +464,28 @@ References:
             stack_options.pop('Capabilities')
         self.log(message='Initial stack_options: {}'.format(json.dumps(stack_options)), level='info')
 
-    def _apply_cloudformation_stack(self, variable_cache: VariableCache=VariableCache()):
+    def _apply_cloudformation_stack(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
         parameters = self._set_stack_options()
+        parameters_as_list = variable_cache.get_value(
+            variable_name='{}:PARSED_PARAMETERS_AS_LIST'.format(self._var_name(target_environment=target_environment)),
+            value_if_expired=list(),
+            default_value_if_not_found=list(),
+            raise_exception_on_expired=False,
+            raise_exception_on_not_found=False
+        )
+        tags_as_list = variable_cache.get_value(
+            variable_name='{}:PARSED_TAGS_AS_LIST'.format(self._var_name(target_environment=target_environment)),
+            value_if_expired=list(),
+            default_value_if_not_found=list(),
+            raise_exception_on_expired=False,
+            raise_exception_on_not_found=False
+        )
+        if len(parameters_as_list) > 0:
+            parameters['Parameters'] = parameters_as_list
+        if len(tags_as_list) > 0:
+            parameters['Tags'] = tags_as_list
+        parameters['StackName'] = self._format_template_name_as_stack_name()
+
         # TODO complete...
 
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
@@ -497,7 +517,7 @@ References:
             return
 
         if change_type == 'DEPLOY_NEW_STACK':
-            self._apply_cloudformation_stack(variable_cache=variable_cache)
+            self._apply_cloudformation_stack(variable_cache=variable_cache, target_environment=target_environment)
 
         return
 
