@@ -93,7 +93,7 @@ Example manifest: [example.yaml](/media/nicc777/data/nicc777/git/Personal/GitHub
 kind: WriteFile
 version: v1
 metadata:
-  name: s3-example-bucket-cfn-template
+  name: my-credentials-sm-cfn-template
   executeOnlyOnceOnApply: true
 spec:
   targetFile: /tmp/cloudformation_templates/cfn-example.yaml
@@ -102,32 +102,43 @@ spec:
     AWSTemplateFormatVersion: "2010-09-09"
     Description: 'An example S3 bucket template'
     Parameters:
-      BucketNameParameter:
+      UsernameParameter:
         Type: String
     Resources:
-      S3ExampleBucket:
-        Type: 'AWS::S3::Bucket'
-        DeletionPolicy: Retain
+      MyCredentials:
+        Type: 'AWS::SecretsManager::Secret'
         Properties:
-          BucketName: !Ref BucketNameParameter
+          Name: MyCredentialsForXyz
+          Description: "An example secret"
+          GenerateSecretString:
+            SecretStringTemplate: !Sub
+            - '{"username": "${Username}"}'
+            - Username: !Ref UsernameParameter
+            GenerateStringKey: "password"
+            PasswordLength: 40
     Outputs:
-      ExampleS3Bucket:
-        Description: 'Example S3 Bucket Name'
-        Value: !Ref S3ExampleBucket
+      MyCredentialsArn:
+        Description: 'ARN for MyCredentials'
+        Value: !Ref MyCredentials
         Export:
-          Name: !Join [ ":", [ !Ref "AWS::StackName", !Ref S3ExampleBucket ] ]
+          Name: !Join [ ":", [ !Ref "AWS::StackName", "MyCredentialsArn" ] ]
+      MyCredentialsId:
+        Description: 'ID for MyCredentials'
+        Value: !Get MyCredentials.Id
+        Export:
+          Name: !Join [ ":", [ !Ref "AWS::StackName", "MyCredentialsId" ] ]
 ---
 kind: ShellScript
 version: v1
 metadata:
-  name: random-s3-bucket-name
+  name: random-username
   skipDeleteAll: true
 spec:
   shellInterpreter: bash
   source:
     type: inLine
     value: |
-      chars=abcdefghijklmnopqrstuvwxyz-1234567890
+      chars=abcdefghijklmnopqrstuvwxyz1234567890
       for i in {1..16} ; do
       echo -n "${chars:RANDOM%${#chars}:1}"
       done
@@ -189,19 +200,19 @@ spec:
 kind: AwsBoto3CloudFormationTemplateParameters
 version: v1
 metadata:
-  name: aws-s3-example-bucket-cfn-template-deployment-parameters
+  name: aws-my-credentials-sm-cfn-template-deployment-parameters
   executeOnlyOnceOnApply: true
   skipApplyAll: true
   skipDeleteAll: true
 spec:
   parameters:
-  - parameterName: 'BucketNameParameter'
-    parameterValue: '{{ .Variables.ShellScript:random-s3-bucket-name:default:STDOUT }}'
+  - parameterName: 'UsernameParameter'
+    parameterValue: '{{ .Variables.ShellScript:random-username:default:STDOUT }}'
 ---
 kind: AwsBoto3CloudFormationTemplateTags
 version: v1
 metadata:
-  name: aws-s3-example-bucket-cfn-template-deployment-tags
+  name: aws-my-credentials-sm-cfn-template-deployment-tags
   executeOnlyOnceOnApply: true
   skipApplyAll: true
   skipDeleteAll: true
@@ -213,13 +224,13 @@ spec:
 kind: AwsBoto3CloudFormationTemplate
 version: v1
 metadata:
-  name: aws-s3-example-bucket-cfn-template-deployment
+  name: aws-my-credentials-sm-cfn-template-deployment
   dependencies:
     apply:
-    - s3-example-bucket-cfn-template
-    - random-s3-bucket-name
-    - aws-s3-example-bucket-cfn-template-deployment-parameters
-    - aws-s3-example-bucket-cfn-template-deployment-tags
+    - my-credentials-sm-cfn-template
+    - random-username
+    - aws-my-credentials-sm-cfn-template-deployment-parameters
+    - aws-my-credentials-sm-cfn-template-deployment-tags
     - aws-boto3-session
     - cfn-upload-to-s3
   executeOnlyOnceOnApply: true
@@ -229,11 +240,11 @@ spec:
   templateURL:
     s3BucketReference: animus-artifacts-for-cloudformation
     pathToTemplate: /default/cfn-example.yaml
-  templatePath: '{{ .Variables.WriteFile:s3-example-bucket-cfn-template:default:FILE_PATH }}'
+  templatePath: '{{ .Variables.WriteFile:my-credentials-sm-cfn-template:default:FILE_PATH }}'
   parameterReferences:
-  - aws-s3-example-bucket-cfn-template-deployment-parameters
+  - aws-my-credentials-sm-cfn-template-deployment-parameters
   tagReferences:
-  - aws-s3-example-bucket-cfn-template-deployment-tags
+  - aws-my-credentials-sm-cfn-template-deployment-tags
 ```
 
 This is the absolute minimal example based on required values. Dummy random data was generated where required.
