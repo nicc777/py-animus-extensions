@@ -63,7 +63,6 @@ export EXTENSION_NAME="aws_boto3_cloud_formation_template-v1"
 | `variableMappings.resources`                             | list    | No       | v1          | Maps the created resources data to `Variable` objects. Each list item has the following structure:<ul>  <li>`logicalResourceId` (string) - The value of the resource key. The same as the CloudFormation output "Logical ID" for example "InstanceID"</li>  <li>`variables` (list) - Contains a list  of at least ONE item with the following fieldDescription:    <ul>      <li>`physicalResourceId` (string) - `Variable` name for storing the "PhysicalResourceId"</li>      <li>`resourceType` (string) - `Variable` name for storing the "ResourceType"</li>      <li>`resourceStatus` (string) - `Variable` name for storing the "ResourceStatus"</li>    </ul>  </li></ul>                                                                   |
 
 TODO - Add s3 path references
-TODO - Add different CloudFormation template example
 
 # Example Usages
 
