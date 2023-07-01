@@ -1,6 +1,6 @@
 
 from py_animus.manifest_management import *
-from py_animus import get_logger, get_utc_timestamp, parse_raw_yaml_data
+from py_animus import get_logger, get_utc_timestamp, parse_raw_yaml_data, logging
 import re
 import boto3
 import hashlib
@@ -47,6 +47,8 @@ References:
 
     def __init__(self, logger=get_logger(), post_parsing_method: object=None, version: str='v1', supported_versions: tuple=(['v1'])):
         super().__init__(logger=logger, post_parsing_method=post_parsing_method, version=version, supported_versions=supported_versions)
+        logging.getLogger('boto3').setLevel(logging.CRITICAL)
+        logging.getLogger('botocore').setLevel(logging.CRITICAL)
 
     def _var_name(self, target_environment: str='default'):
         return '{}:{}:{}'.format(
