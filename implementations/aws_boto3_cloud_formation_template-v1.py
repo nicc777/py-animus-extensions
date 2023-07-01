@@ -498,18 +498,18 @@ References:
         loop_count = 0
         while end_state_reached is False:
             loop_count += 1
+            self.log(message='    Sleeping 1 minute', level='info')
+            time.sleep(60)
             response = cloudformation_client.describe_stacks(StackName='{}'.format(stack_id))
             if 'Stacks' in response:
                 for stack_data in response['Stacks']:
                     if stack_data['StackId'] == stack_id:
-                        self.log(message='    Stack ID "{}" progress status: {}'.format(stack_id, stack_data['StackStatus']), level='info')
+                        self.log(message='        Stack ID "{}" progress status: {}'.format(stack_id, stack_data['StackStatus']), level='info')
                         if stack_data['StackStatus'] in final_states:
                             end_state_reached = True
                             final_state = stack_data['StackStatus']
             else:
                 raise Exception('Failed to get stack status')
-            self.log(message='        Sleeping 1 minute', level='info')
-            time.sleep(60)
             if loop_count > 120:
                 self.log(message='Waited for more than 2 hours - giving up', level='warning')
                 end_state_reached = True

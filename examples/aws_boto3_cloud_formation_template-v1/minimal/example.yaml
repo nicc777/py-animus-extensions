@@ -115,6 +115,7 @@ metadata:
   dependencies:
     apply:
     - animus-artifacts-for-cloudformation
+    - my-credentials-sm-cfn-template
     delete:
     - animus-artifacts-for-cloudformation
   skipApplyAll: true
