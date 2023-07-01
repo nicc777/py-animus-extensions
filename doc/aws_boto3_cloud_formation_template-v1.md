@@ -89,7 +89,6 @@ Example manifest: [example.yaml](/media/nicc777/data/nicc777/git/Personal/GitHub
 
 ```yaml
 ---
----
 kind: ShellScript
 version: v1
 metadata:
