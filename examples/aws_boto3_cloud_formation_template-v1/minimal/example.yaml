@@ -168,6 +168,7 @@ metadata:
   name: aws-my-credentials-sm-cfn-template-deployment
   dependencies:
     apply:
+    - random-username
     - aws-boto3-session
     - aws-my-credentials-sm-cfn-template-deployment-parameters
     - aws-my-credentials-sm-cfn-template-deployment-tags
