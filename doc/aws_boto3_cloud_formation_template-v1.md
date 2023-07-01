@@ -156,6 +156,10 @@ spec:
       echo -n "${chars:RANDOM%${#chars}:1}"
       done
       echo
+  convertOutputToText: true
+  stripNewline: true
+  convertRepeatingSpaces: true
+  stripLeadingTrailingSpaces: true
 ---
 kind: AwsBoto3Session
 version: v1
