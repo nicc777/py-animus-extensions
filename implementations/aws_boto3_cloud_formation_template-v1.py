@@ -1,10 +1,11 @@
-
 from py_animus.manifest_management import *
 from py_animus import get_logger, get_utc_timestamp, parse_raw_yaml_data, logging
 import re
 import boto3
 import hashlib
 import json
+import time
+
 
 class AwsBoto3CloudFormationTemplate(ManifestBase):
     """Creates a new stack or applies a changeset in AWS CloudFormation.
@@ -467,6 +468,71 @@ References:
         self.log(message='Initial stack_options: {}'.format(json.dumps(stack_options)), level='info')
         return stack_options
 
+    def _track_progress_until_end_state(self, stack_id: str, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->str:
+        final_states = (
+            'CREATE_FAILED',
+            'CREATE_COMPLETE',
+            'ROLLBACK_FAILED',
+            'ROLLBACK_COMPLETE',
+            'DELETE_FAILED',
+            'DELETE_COMPLETE',
+            'UPDATE_COMPLETE',
+            'UPDATE_FAILED',
+            'UPDATE_ROLLBACK_FAILED',
+            'UPDATE_ROLLBACK_COMPLETE',
+        )
+        error_states = (
+            'CREATE_FAILED',
+            'ROLLBACK_FAILED',
+            'ROLLBACK_COMPLETE',
+            'DELETE_FAILED',
+            'UPDATE_FAILED',
+            'UPDATE_ROLLBACK_FAILED',
+            'UPDATE_ROLLBACK_COMPLETE',
+            'UNKNOWN',
+        )
+        end_state_reached = False
+        cloudformation_client = self._get_boto3_cloudformation_client(variable_cache=variable_cache, target_environment=target_environment)
+        final_state = 'UNKNOWN'
+        self.log(message='Waiting for stack "{}" to finish'.format(stack_id), level='info')
+        loop_count = 0
+        while end_state_reached is False:
+            loop_count += 1
+            response = cloudformation_client.describe_stacks(StackName='{}'.format(stack_id))
+            if 'Stacks' in response:
+                for stack_data in response['Stacks']:
+                    if stack_data['StackId'] == stack_id:
+                        self.log(message='    Stack ID "{}" progress status: {}'.format(stack_id, stack_data['StackStatus']), level='info')
+                        if stack_data['StackStatus'] in final_states:
+                            end_state_reached = True
+                            final_state = stack_data['StackStatus']
+            else:
+                raise Exception('Failed to get stack status')
+            self.log(message='        Sleeping 1 minute', level='info')
+            time.sleep(60)
+            if loop_count > 120:
+                self.log(message='Waited for more than 2 hours - giving up', level='warning')
+                end_state_reached = True
+        raise_Exception_on_final_states_tuple = (
+            'CREATE_FAILED',
+            'ROLLBACK_FAILED',
+            'DELETE_FAILED',
+            'UPDATE_FAILED',
+            'UPDATE_ROLLBACK_FAILED',
+            'IMPORT_ROLLBACK_FAILED',
+            'UNKNOWN',
+        )
+        if final_state in error_states:
+            if 'raiseExceptionOnFinalStatusValues' not in self.spec:
+                self.spec['raiseExceptionOnFinalStatusValues'] = list(raise_Exception_on_final_states_tuple)
+            if isinstance(self.spec['raiseExceptionOnFinalStatusValues'], list):
+                for state in self.spec['raiseExceptionOnFinalStatusValues']:
+                    if state is not None:
+                        if isinstance(state, str):
+                            if state.upper() == final_state:
+                                raise Exception('Cannot proceed due to final state being "{}"'.format(final_state))
+        return final_state
+
     def _apply_cloudformation_stack(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
         parameters = self._set_stack_options()
         self.log(message='parameters={}'.format(json.dumps(parameters)), level='debug')
@@ -509,12 +575,14 @@ References:
         self.log(message='Final Parameters for Boto3 CloudFormation Stack: {}'.format(json.dumps(parameters)), level='debug')
         try:
             cloudformation_client = self._get_boto3_cloudformation_client(variable_cache=variable_cache, target_environment=target_environment)
-            # response = cloudformation_client.create_stack(**parameters)
+            response = cloudformation_client.create_stack(**parameters)
             self.log(message='New cloudwatch Stack AWS API Response: {}'.format(json.dumps(response)), level='info')
         except:
             self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
 
-        # TODO complete...
+        if 'StackId' in response:
+            final_state = self._track_progress_until_end_state(stack_id=response['StackId'], variable_cache=variable_cache, target_environment=target_environment)
+        self.log(message='Stack ID "{}" applied with final status "{}"'.format(response['StackId'], final_state), level='info')
 
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
         if target_environment not in self.metadata['environments']:
