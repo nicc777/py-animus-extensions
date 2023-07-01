@@ -506,6 +506,7 @@ References:
         parameters['StackName'] = self._format_template_name_as_stack_name()
 
         response = dict()
+        self.log(message='Final Parameters for Boto3 CloudFormation Stack: {}'.format(json.dumps(parameters)), level='debug')
         try:
             cloudformation_client = self._get_boto3_cloudformation_client(variable_cache=variable_cache, target_environment=target_environment)
             # response = cloudformation_client.create_stack(**parameters)
