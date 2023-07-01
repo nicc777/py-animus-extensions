@@ -3,6 +3,7 @@ kind: ShellScript
 version: v1
 metadata:
   name: create-directory
+  skipApplyAll: true
   skipDeleteAll: true
 spec:
   shellInterpreter: bash
@@ -18,6 +19,8 @@ metadata:
   dependencies:
     apply:
     - create-directory
+  skipApplyAll: true
+  skipDeleteAll: true
 spec:
   targetFile: /tmp/cloudformation_templates/cfn-example.yaml
   data: |
@@ -55,6 +58,7 @@ kind: ShellScript
 version: v1
 metadata:
   name: random-username
+  skipApplyAll: true
   skipDeleteAll: true
 spec:
   shellInterpreter: bash
@@ -111,13 +115,13 @@ metadata:
   name: cfn-upload-to-s3
   dependencies:
     apply:
-    - aws-boto3-session
     - animus-artifacts-for-cloudformation
     delete:
-    - aws-boto3-session
     - animus-artifacts-for-cloudformation
+  skipApplyAll: true
+  skipDeleteAll: true
 spec:
-  awsBoto3Session: aws-boto3-session
+  awsBoto3Session: aws-boto3-session-global
   s3Bucket: '{{ .Variables.AwsBoto3S3Bucket:animus-artifacts-for-cloudformation:default:NAME }}'
   globalOverwrite: true
   destinationDirectory: default
@@ -139,6 +143,8 @@ metadata:
   executeOnlyOnceOnApply: true
   skipApplyAll: true
   skipDeleteAll: true
+  apply:
+    - random-username
 spec:
   parameters:
   - parameterName: 'UsernameParameter'
@@ -162,11 +168,9 @@ metadata:
   name: aws-my-credentials-sm-cfn-template-deployment
   dependencies:
     apply:
-    - my-credentials-sm-cfn-template
-    - random-username
+    - aws-boto3-session
     - aws-my-credentials-sm-cfn-template-deployment-parameters
     - aws-my-credentials-sm-cfn-template-deployment-tags
-    - aws-boto3-session
     - cfn-upload-to-s3
   executeOnlyOnceOnApply: true
   skipDeleteAll: true

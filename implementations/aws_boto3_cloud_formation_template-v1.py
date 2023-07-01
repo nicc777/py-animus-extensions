@@ -463,9 +463,11 @@ References:
             stack_options.pop('NotificationARNs')
             stack_options.pop('Capabilities')
         self.log(message='Initial stack_options: {}'.format(json.dumps(stack_options)), level='info')
+        return stack_options
 
     def _apply_cloudformation_stack(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
         parameters = self._set_stack_options()
+        self.log(message='parameters={}'.format(json.dumps(parameters)), level='debug')
 
         if 'templatePath' in self.spec:
             if self.spec['templatePath'].lower().startswith('https://s3.amazonaws.com/'):
