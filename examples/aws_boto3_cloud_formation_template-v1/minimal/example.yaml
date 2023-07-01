@@ -77,18 +77,28 @@ spec:
   awsRegion: eu-central-1
   profileName: my-profile
 ---
+kind: AwsBoto3Session
+version: v1
+metadata:
+  name: aws-boto3-session-global
+  skipApplyAll: true
+  skipDeleteAll: true
+spec:
+  awsRegion: us-east-1
+  profileName: my-profile
+---
 kind: AwsBoto3S3Bucket
 version: v1
 metadata:
   name: animus-artifacts-for-cloudformation
   dependencies:
     apply:
-    -  aws-boto3-session
+    -  aws-boto3-session-global
     delete:
-    -  aws-boto3-session
+    -  aws-boto3-session-global
   executeOnlyOnceOnApply: true
 spec:
-  awsBoto3Session:  aws-boto3-session
+  awsBoto3Session:  aws-boto3-session-global
   name: animus-artifacts-for-cloudformation
 ---
 kind: AwsBoto3S3Files
