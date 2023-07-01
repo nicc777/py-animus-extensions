@@ -466,6 +466,21 @@ References:
 
     def _apply_cloudformation_stack(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
         parameters = self._set_stack_options()
+
+        if 'templatePath' in self.spec:
+            if self.spec['templatePath'].lower().startswith('https://s3.amazonaws.com/'):
+                parameters['TemplateURL'] = '{}'.format(self.spec['templatePath'])
+            else:
+                content = ''
+                with open(self.spec['templatePath'], 'r') as f:
+                    content = f.read()
+                if len(content) > 0:
+                    parameters['TemplateBody'] = content
+                else:
+                    raise Exception('Could not load content')
+        else:
+            raise Exception('Expected field "templatePath" in spec.')
+
         parameters_as_list = variable_cache.get_value(
             variable_name='{}:PARSED_PARAMETERS_AS_LIST'.format(self._var_name(target_environment=target_environment)),
             value_if_expired=list(),
@@ -485,6 +500,14 @@ References:
         if len(tags_as_list) > 0:
             parameters['Tags'] = tags_as_list
         parameters['StackName'] = self._format_template_name_as_stack_name()
+
+        response = dict()
+        try:
+            cloudformation_client = self._get_boto3_cloudformation_client(variable_cache=variable_cache, target_environment=target_environment)
+            # response = cloudformation_client.create_stack(**parameters)
+            self.log(message='New cloudwatch Stack AWS API Response: {}'.format(json.dumps(response)), level='info')
+        except:
+            self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
 
         # TODO complete...
 

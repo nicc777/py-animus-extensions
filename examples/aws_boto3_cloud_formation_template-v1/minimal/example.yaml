@@ -1,9 +1,23 @@
 ---
+kind: ShellScript
+version: v1
+metadata:
+  name: create-directory
+  skipDeleteAll: true
+spec:
+  shellInterpreter: bash
+  source:
+    type: inLine
+    value: mkdir /tmp/cloudformation_templates
+---
 kind: WriteFile
 version: v1
 metadata:
   name: my-credentials-sm-cfn-template
   executeOnlyOnceOnApply: true
+  dependencies:
+    apply:
+    - create-directory
 spec:
   targetFile: /tmp/cloudformation_templates/cfn-example.yaml
   data: |
@@ -92,15 +106,13 @@ spec:
   awsBoto3Session: aws-boto3-session
   s3Bucket: '{{ .Variables.AwsBoto3S3Bucket:animus-artifacts-for-cloudformation:default:NAME }}'
   globalOverwrite: true
-  destinationDirectory: /default
+  destinationDirectory: default
   transferLogFile: /tmp/log/file_transfer.log
   sources:
-  - sourceType: localDirectories
-    recurse: true
-    baseDirectory: /tmp
-    verifyChecksums: false
-    directories:
-    - cloudformation_templates
+  - sourceType: localFiles
+    baseDirectory: /tmp/cloudformation_templates
+    files:
+    - cfn-example.yaml
   ifFileExists:
     overWrite: true
   onError: warn
@@ -146,10 +158,7 @@ metadata:
   skipDeleteAll: true
 spec:
   awsBoto3SessionReference: aws-boto3-session
-  templateURL:
-    s3BucketReference: animus-artifacts-for-cloudformation
-    pathToTemplate: /default/cfn-example.yaml
-  templatePath: '{{ .Variables.WriteFile:my-credentials-sm-cfn-template:default:FILE_PATH }}'
+  templatePath: 'https://s3.amazonaws.com/{{ .Variables.AwsBoto3S3Bucket:animus-artifacts-for-cloudformation:default:NAME }}/default/cfn-example.yaml'
   parameterReferences:
   - aws-my-credentials-sm-cfn-template-deployment-parameters
   tagReferences:

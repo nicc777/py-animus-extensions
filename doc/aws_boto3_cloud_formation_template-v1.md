@@ -48,7 +48,7 @@ export EXTENSION_NAME="aws_boto3_cloud_formation_template-v1"
 | `awsBoto3SessionReference`                               | string  | Yes      | v1          | The AWS credentials to use for this template. The value is the "name" of the relevant "AwsBoto3Session" manifest to use                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | `tagReferences`                                          | list    | No       | v1          | Reference to the names of a "AwsBoto3CloudFormationTemplateTags" manifests. All tags from these references will be added to the CloudFormation template                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | `parameterReferences`                                    | list    | No       | v1          | Reference to the names of  "AwsBoto3CloudFormationTemplateParameters" manifests. All parameters from these references will be added to the CloudFormation template                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `templatePath`                                           | string  | Yes      | v1          | Path to the CloudFormation file. The file must be on the local filesystem. If the file is in a Git repository,first use "GitRepo" to get the files onto the local system (as an example)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `templatePath`                                           | string  | Yes      | v1          | Path to the CloudFormation file. The file must be on the local filesystem or point to a valid S3 URL. If the file is in a Git repository,first use "GitRepo" to get the files onto the local system (as an example)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | `options.disableRollback`                                | boolean | No       | v1          | Maps to "DisableRollback" option in the AWS API                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `options.timeoutInMinutes`                               | integer | No       | v1          | Maps to "TimeoutInMinutes" option in the AWS API                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `options.notificationARNs`                               | list    | No       | v1          | Maps to "NotificationARNs" option in the AWS API                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
@@ -89,11 +89,25 @@ Example manifest: [example.yaml](/media/nicc777/data/nicc777/git/Personal/GitHub
 
 ```yaml
 ---
+kind: ShellScript
+version: v1
+metadata:
+  name: create-directory
+  skipDeleteAll: true
+spec:
+  shellInterpreter: bash
+  source:
+    type: inLine
+    value: mkdir /tmp/cloudformation_templates
+---
 kind: WriteFile
 version: v1
 metadata:
   name: my-credentials-sm-cfn-template
   executeOnlyOnceOnApply: true
+  dependencies:
+    apply:
+    - create-directory
 spec:
   targetFile: /tmp/cloudformation_templates/cfn-example.yaml
   data: |
@@ -182,15 +196,13 @@ spec:
   awsBoto3Session: aws-boto3-session
   s3Bucket: '{{ .Variables.AwsBoto3S3Bucket:animus-artifacts-for-cloudformation:default:NAME }}'
   globalOverwrite: true
-  destinationDirectory: /default
+  destinationDirectory: default
   transferLogFile: /tmp/log/file_transfer.log
   sources:
-  - sourceType: localDirectories
-    recurse: true
-    baseDirectory: /tmp
-    verifyChecksums: false
-    directories:
-    - cloudformation_templates
+  - sourceType: localFiles
+    baseDirectory: /tmp/cloudformation_templates
+    files:
+    - cfn-example.yaml
   ifFileExists:
     overWrite: true
   onError: warn
@@ -236,10 +248,7 @@ metadata:
   skipDeleteAll: true
 spec:
   awsBoto3SessionReference: aws-boto3-session
-  templateURL:
-    s3BucketReference: animus-artifacts-for-cloudformation
-    pathToTemplate: /default/cfn-example.yaml
-  templatePath: '{{ .Variables.WriteFile:my-credentials-sm-cfn-template:default:FILE_PATH }}'
+  templatePath: 'https://s3.amazonaws.com/{{ .Variables.AwsBoto3S3Bucket:animus-artifacts-for-cloudformation:default:NAME }}/default/cfn-example.yaml'
   parameterReferences:
   - aws-my-credentials-sm-cfn-template-deployment-parameters
   tagReferences:
