@@ -573,12 +573,9 @@ References:
 
         response = dict()
         self.log(message='Final Parameters for Boto3 CloudFormation Stack: {}'.format(json.dumps(parameters)), level='debug')
-        try:
-            cloudformation_client = self._get_boto3_cloudformation_client(variable_cache=variable_cache, target_environment=target_environment)
-            response = cloudformation_client.create_stack(**parameters)
-            self.log(message='New cloudwatch Stack AWS API Response: {}'.format(json.dumps(response)), level='info')
-        except:
-            self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
+        cloudformation_client = self._get_boto3_cloudformation_client(variable_cache=variable_cache, target_environment=target_environment)
+        response = cloudformation_client.create_stack(**parameters)
+        self.log(message='New cloudwatch Stack AWS API Response: {}'.format(json.dumps(response)), level='info')
 
         if 'StackId' in response:
             final_state = self._track_progress_until_end_state(stack_id=response['StackId'], variable_cache=variable_cache, target_environment=target_environment)

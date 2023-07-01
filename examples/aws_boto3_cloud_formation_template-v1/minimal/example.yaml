@@ -24,7 +24,6 @@ metadata:
 spec:
   targetFile: /tmp/cloudformation_templates/cfn-example.yaml
   data: |
-    ---
     AWSTemplateFormatVersion: "2010-09-09"
     Description: 'An example S3 bucket template'
     Parameters:
@@ -50,7 +49,7 @@ spec:
           Name: !Join [ ":", [ !Ref "AWS::StackName", "MyCredentialsArn" ] ]
       MyCredentialsId:
         Description: 'ID for MyCredentials'
-        Value: !Get MyCredentials.Id
+        Value: !GetAtt MyCredentials.Id
         Export:
           Name: !Join [ ":", [ !Ref "AWS::StackName", "MyCredentialsId" ] ]
 ---
