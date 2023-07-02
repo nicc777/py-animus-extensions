@@ -183,3 +183,15 @@ spec:
   - aws-my-credentials-sm-cfn-template-deployment-parameters
   tagReferences:
   - aws-my-credentials-sm-cfn-template-deployment-tags
+  variableMappings:
+    outputs:
+    - variableName: 'SECRET_ARN'
+      outputKey: 'MyCredentialsArn'
+    - variableName: 'SECRET_ID'
+      outputKey: 'MyCredentialsId'
+    resources:
+    - logicalResourceId: 'MyCredentials'
+      variables:
+      - physicalResourceId: 'CREDS_PHYSICAL_RESOURCE_ID'
+      - resourceType: 'CREDS_RESOURCE_TYPE'
+      - resourceStatus: 'CREDS_RESOURCE_STATUS'

@@ -211,13 +211,13 @@ References:
         return self._calculate_dict_checksum(data=self._attempt_to_convert_template_data_to_dict(data_as_str=file_content_as_str))
 
     def _stack_exists(self, client, stack_name: str)->bool:
-        remote_stack = self._get_current_remote_stack_status(cloudformation_client=client)
+        remote_stack = self._get_current_remote_stack_data(cloudformation_client=client)
         if len(remote_stack) > 0:
             return True
         return False
 
     def _delete_stack(self, cloudformation_client, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
-        stack_data = self._get_current_remote_stack_status(cloudformation_client=cloudformation_client)
+        stack_data = self._get_current_remote_stack_data(cloudformation_client=cloudformation_client)
         retry = True
         loop_counter = 0
         while retry is True:
@@ -234,7 +234,7 @@ References:
         final_state = self._track_progress_until_end_state(stack_id=stack_data['StackId'], variable_cache=variable_cache, target_environment=target_environment)
         self.log(message='Stack ID "{}" deleted with final status "{}"'.format(stack_data['StackId'], final_state), level='info')
 
-    def _get_current_remote_stack_status(
+    def _get_current_remote_stack_data(
             self,
             cloudformation_client
         )->dict:
@@ -415,7 +415,7 @@ References:
             return False
 
         if action_get_remote_stack_data is True:
-            remote_stack_data = self._get_current_remote_stack_status(cloudformation_client)
+            remote_stack_data = self._get_current_remote_stack_data(cloudformation_client)
         if len(remote_stack_data) > 0:
             action_compare_checksums_and_parameters = True
             self.log(message='Stack was deployed previously. Next step is to compare checksums of the templates and parameters to see if a changeset is required.', level='info')
@@ -519,7 +519,7 @@ References:
             loop_count += 1
             self.log(message='    Sleeping 30 seconds', level='info')
             time.sleep(30)
-            stack_data = self._get_current_remote_stack_status(cloudformation_client)
+            stack_data = self._get_current_remote_stack_data(cloudformation_client)
             self.log(message='stack_data: {}'.format(json.dumps(stack_data, default=str)), level='debug')
             try:
                 if stack_data['StackId'] == stack_id:
@@ -605,6 +605,8 @@ References:
             # TODO Get outputs...
             # TODO Get resources...
             # TODO Get remote checksum of template and parameters
+
+            stack_data = self._get_current_remote_stack_data(cloudformation_client)
 
             self._set_variables(
                 variable_cache=variable_cache,
