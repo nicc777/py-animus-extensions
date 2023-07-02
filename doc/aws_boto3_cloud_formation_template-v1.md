@@ -81,6 +81,12 @@ venv/bin/animus apply -m $EXAMPLE_DIR/$EXTENSION_NAME/$SCENARIO_NAME/example.yam
 
 ## Example: minimal
 
+Although the following example is considered a "_minimal_" example, it is a full working example for provisioning a secret in AWS SecretsManager using all the required manifests to accomplish this task.
+
+What makes the example even better is that he "_username_" parameter is generated radomly everytime, so on a second apply round, a stack change set should be expected.
+
+When the stack is deleted, the S3 bucket and related artifacts remain in place. This, for now, is the intent of the example.
+
 ```shell
 export SCENARIO_NAME="minimal"
 ```
