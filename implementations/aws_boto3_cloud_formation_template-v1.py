@@ -18,7 +18,7 @@ FINAL_STATES = (
     'UPDATE_FAILED',
     'UPDATE_ROLLBACK_FAILED',
     'UPDATE_ROLLBACK_COMPLETE',
-    'UNKNOWN',
+    'NOT_FOUND',
 )
 ERROR_STATES = (
     'CREATE_FAILED',
@@ -528,8 +528,8 @@ References:
                         end_state_reached = True
                         final_state = stack_data['StackStatus']
             except:
-                self.log(message='Stack data could not be retrieved - likely because stack does not exist (yet). Setting final_state to "UNKNOWN"', level='info')
-                final_state = 'UNKNOWN'
+                self.log(message='Stack data could not be retrieved - likely because stack does not exist (yet). Setting final_state to "NOT_FOUND"', level='info')
+                final_state = 'NOT_FOUND'
                 end_state_reached = True
             if loop_count > 120:
                 self.log(message='Waited for more than 2 hours - giving up', level='warning')
