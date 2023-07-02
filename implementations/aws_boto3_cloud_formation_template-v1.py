@@ -7,6 +7,31 @@ import json
 import time
 
 
+FINAL_STATES = (
+    'CREATE_FAILED',
+    'CREATE_COMPLETE',
+    'ROLLBACK_FAILED',
+    'ROLLBACK_COMPLETE',
+    'DELETE_FAILED',
+    'DELETE_COMPLETE',
+    'UPDATE_COMPLETE',
+    'UPDATE_FAILED',
+    'UPDATE_ROLLBACK_FAILED',
+    'UPDATE_ROLLBACK_COMPLETE',
+    'UNKNOWN',
+)
+ERROR_STATES = (
+    'CREATE_FAILED',
+    'ROLLBACK_FAILED',
+    'ROLLBACK_COMPLETE',
+    'DELETE_FAILED',
+    'UPDATE_FAILED',
+    'UPDATE_ROLLBACK_FAILED',
+    'UPDATE_ROLLBACK_COMPLETE',
+    'UNKNOWN',
+)
+
+
 class AwsBoto3CloudFormationTemplate(ManifestBase):
     """Creates a new stack or applies a changeset in AWS CloudFormation.
 
@@ -191,9 +216,23 @@ References:
             return True
         return False
 
-    def _delete_stack(self, client, stack_name: str):
-        # TODO complete implementation...
-        pass
+    def _delete_stack(self, cloudformation_client, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
+        stack_data = self._get_current_remote_stack_status(cloudformation_client=cloudformation_client)
+        retry = True
+        loop_counter = 0
+        while retry is True:
+            loop_counter += 1
+            if stack_data['StackStatus'] in FINAL_STATES:
+                retry = False
+                cloudformation_client.delete_stack(StackName=stack_data['StackName'])
+            else:
+                self.log(message='CloudFormation stack "{}" is not yet in a final state to be deleted. Waiting...'.format(stack_data['StackName']), level='info')
+                if loop_counter > 60:
+                    raise Exception('CloudFormation stack "{}" did not get into a final state within an hour - aborting.'.format(stack_data['StackName']))
+                time.sleep(60)
+        time.sleep(10)
+        final_state = self._track_progress_until_end_state(stack_id=stack_data['StackId'], variable_cache=variable_cache, target_environment=target_environment)
+        self.log(message='Stack ID "{}" deleted with final status "{}"'.format(stack_data['StackId'], final_state), level='info')
 
     def _get_current_remote_stack_status(
             self,
@@ -205,7 +244,9 @@ References:
                 StackName=self._format_template_name_as_stack_name()
             )
             if 'Stacks' in response:
-                remote_stack_data = response['Stacks'][0]
+                for stack_data in response['Stacks']:
+                    if stack_data['StackName'] == self._format_template_name_as_stack_name():
+                        remote_stack_data = copy.deepcopy(stack_data)
         except:
             self.log(message='It appears that the remote stack named "{}" does not exists'.format(self._format_template_name_as_stack_name()), level='error')
         return remote_stack_data
@@ -469,28 +510,6 @@ References:
         return stack_options
 
     def _track_progress_until_end_state(self, stack_id: str, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->str:
-        final_states = (
-            'CREATE_FAILED',
-            'CREATE_COMPLETE',
-            'ROLLBACK_FAILED',
-            'ROLLBACK_COMPLETE',
-            'DELETE_FAILED',
-            'DELETE_COMPLETE',
-            'UPDATE_COMPLETE',
-            'UPDATE_FAILED',
-            'UPDATE_ROLLBACK_FAILED',
-            'UPDATE_ROLLBACK_COMPLETE',
-        )
-        error_states = (
-            'CREATE_FAILED',
-            'ROLLBACK_FAILED',
-            'ROLLBACK_COMPLETE',
-            'DELETE_FAILED',
-            'UPDATE_FAILED',
-            'UPDATE_ROLLBACK_FAILED',
-            'UPDATE_ROLLBACK_COMPLETE',
-            'UNKNOWN',
-        )
         end_state_reached = False
         cloudformation_client = self._get_boto3_cloudformation_client(variable_cache=variable_cache, target_environment=target_environment)
         final_state = 'UNKNOWN'
@@ -500,16 +519,12 @@ References:
             loop_count += 1
             self.log(message='    Sleeping 1 minute', level='info')
             time.sleep(60)
-            response = cloudformation_client.describe_stacks(StackName='{}'.format(stack_id))
-            if 'Stacks' in response:
-                for stack_data in response['Stacks']:
-                    if stack_data['StackId'] == stack_id:
-                        self.log(message='        Stack ID "{}" progress status: {}'.format(stack_id, stack_data['StackStatus']), level='info')
-                        if stack_data['StackStatus'] in final_states:
-                            end_state_reached = True
-                            final_state = stack_data['StackStatus']
-            else:
-                raise Exception('Failed to get stack status')
+            stack_data = self._get_current_remote_stack_status(cloudformation_client)
+            if stack_data['StackId'] == stack_id:
+                self.log(message='        Stack ID "{}" progress status: {}'.format(stack_id, stack_data['StackStatus']), level='info')
+                if stack_data['StackStatus'] in FINAL_STATES:
+                    end_state_reached = True
+                    final_state = stack_data['StackStatus']
             if loop_count > 120:
                 self.log(message='Waited for more than 2 hours - giving up', level='warning')
                 end_state_reached = True
@@ -522,7 +537,7 @@ References:
             'IMPORT_ROLLBACK_FAILED',
             'UNKNOWN',
         )
-        if final_state in error_states:
+        if final_state in ERROR_STATES:
             if 'raiseExceptionOnFinalStatusValues' not in self.spec:
                 self.spec['raiseExceptionOnFinalStatusValues'] = list(raise_Exception_on_final_states_tuple)
             if isinstance(self.spec['raiseExceptionOnFinalStatusValues'], list):
@@ -578,6 +593,7 @@ References:
         self.log(message='New cloudwatch Stack AWS API Response: {}'.format(json.dumps(response)), level='info')
 
         if 'StackId' in response:
+            time.sleep(10)
             final_state = self._track_progress_until_end_state(stack_id=response['StackId'], variable_cache=variable_cache, target_environment=target_environment)
         self.log(message='Stack ID "{}" applied with final status "{}"'.format(response['StackId'], final_state), level='info')
 
@@ -624,6 +640,6 @@ References:
         stack_name = self._format_template_name_as_stack_name()
 
         if self._stack_exists(client=cloudformation_client, stack_name=stack_name) is True:
-            self._delete_stack(client=cloudformation_client, stack_name=stack_name)
+            self._delete_stack(cloudformation_client=cloudformation_client, variable_cache=variable_cache, target_environment=target_environment)
 
         return

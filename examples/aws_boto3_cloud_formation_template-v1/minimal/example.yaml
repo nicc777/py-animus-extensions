@@ -173,8 +173,9 @@ metadata:
     - aws-my-credentials-sm-cfn-template-deployment-parameters
     - aws-my-credentials-sm-cfn-template-deployment-tags
     - cfn-upload-to-s3
+    delete:
+    - aws-boto3-session
   executeOnlyOnceOnApply: true
-  skipDeleteAll: true
 spec:
   awsBoto3SessionReference: aws-boto3-session
   templatePath: 'https://s3.amazonaws.com/{{ .Variables.AwsBoto3S3Bucket:animus-artifacts-for-cloudformation:default:NAME }}/default/cfn-example.yaml'
