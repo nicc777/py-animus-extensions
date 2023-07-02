@@ -601,6 +601,21 @@ References:
         if 'StackId' in response:
             time.sleep(10)
             final_state = self._track_progress_until_end_state(stack_id=response['StackId'], variable_cache=variable_cache, target_environment=target_environment)
+
+            # TODO Get outputs...
+            # TODO Get resources...
+            # TODO Get remote checksum of template and parameters
+
+            self._set_variables(
+                variable_cache=variable_cache,
+                target_environment=target_environment,
+                status=final_state,
+                is_status_final=True,
+                local_template_checksum='',
+                remote_template_checksum='',
+                outputs=dict(),
+                resources=dict()
+            )
         self.log(message='Stack ID "{}" applied with final status "{}"'.format(response['StackId'], final_state), level='info')
 
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
