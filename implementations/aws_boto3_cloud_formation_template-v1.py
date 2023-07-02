@@ -520,7 +520,7 @@ References:
             self.log(message='    Sleeping 1 minute', level='info')
             time.sleep(60)
             stack_data = self._get_current_remote_stack_status(cloudformation_client)
-            self.log(message='stack_data: {}'.format(json.dumps(stack_data)), level='debug')
+            self.log(message='stack_data: {}'.format(json.dumps(stack_data, default=str)), level='debug')
             try:
                 if stack_data['StackId'] == stack_id:
                     self.log(message='        Stack ID "{}" progress status: {}'.format(stack_id, stack_data['StackStatus']), level='info')
@@ -530,6 +530,7 @@ References:
             except:
                 self.log(message='Stack data could not be retrieved - likely because stack does not exist (yet). Setting final_state to "UNKNOWN"', level='info')
                 final_state = 'UNKNOWN'
+                end_state_reached = True
             if loop_count > 120:
                 self.log(message='Waited for more than 2 hours - giving up', level='warning')
                 end_state_reached = True
