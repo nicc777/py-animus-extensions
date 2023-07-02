@@ -179,6 +179,7 @@ metadata:
 spec:
   awsBoto3SessionReference: aws-boto3-session
   templatePath: 'https://s3.amazonaws.com/{{ .Variables.AwsBoto3S3Bucket:animus-artifacts-for-cloudformation:default:NAME }}/default/cfn-example.yaml'
+  localTemplatePath: '{{ .Variables.WriteFile:my-credentials-sm-cfn-template:default:FILE_PATH }}'
   parameterReferences:
   - aws-my-credentials-sm-cfn-template-deployment-parameters
   tagReferences:

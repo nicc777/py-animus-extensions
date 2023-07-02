@@ -211,13 +211,20 @@ References:
         return stack_template_data_as_dict
 
     def _calculate_dict_checksum(self, data: dict=dict())->str:
-        return hashlib.sha256(json.dumps(data, sort_keys=True, ensure_ascii=True).encode('utf-8')).hexdigest()
+        return hashlib.sha256(json.dumps(data, default=str, sort_keys=True, ensure_ascii=True).encode('utf-8')).hexdigest()
 
-    def _calculate_local_template_checksum(self)->str:
+    def _calculate_local_template_checksum(self, parameters: list=list(), tags: list=list())->str:
         file_content_as_str = None
-        with open(self.spec['templatePath'], 'r') as f:
+        with open(self.spec['localTemplatePath'], 'r') as f:
             file_content_as_str = f.read()
-        return self._calculate_dict_checksum(data=self._attempt_to_convert_template_data_to_dict(data_as_str=file_content_as_str))
+        file_content_as_dict = self._attempt_to_convert_template_data_to_dict(data_as_str=file_content_as_str)
+        file_content_as_dict['_PARAMETERS'] = list()
+        file_content_as_dict['_TAGS'] = list()
+        if len(parameters) > 0:
+            file_content_as_dict['_PARAMETERS'] = parameters
+        if len(tags) > 0:
+            file_content_as_dict['_TAGS'] = tags
+        return self._calculate_dict_checksum(data=file_content_as_dict)
 
     def _stack_exists(self, client, stack_name: str)->bool:
         remote_stack = self._get_current_remote_stack_data(cloudformation_client=client)
@@ -282,7 +289,7 @@ References:
         return name
 
     def _is_local_template_and_parameters_different_from_remote_template_and_parameters(self, remote_template_meta_data: dict, remote_template_as_dict: dict)->bool:
-        # TODO complete implemention
+        # TODO complete implementing
         return False
 
     def _get_parameters(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->list:
@@ -440,8 +447,10 @@ References:
             self.log(message='First/New deployment - A new stack will be created', level='info')
             return True
 
+        local_checksum = ''
         if action_calculate_local_template_checksum is True:
-            pass
+            local_checksum = self._calculate_local_template_checksum(parameters=current_parsed_parameters, tags=current_parsed_tags)
+            self.log(message='local_checksum={}'.format(local_checksum), level='info')
 
         if action_compare_checksums_and_parameters is True:
             pass
@@ -622,7 +631,7 @@ References:
                 target_environment=target_environment,
                 status=final_state,
                 is_status_final=True,
-                local_template_checksum='',
+                local_template_checksum=self._calculate_local_template_checksum(parameters=parameters_as_list, tags=tags_as_list),
                 remote_template_checksum='',
                 outputs=dict(),
                 resources=dict()
