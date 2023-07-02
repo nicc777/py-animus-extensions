@@ -93,6 +93,7 @@ kind: ShellScript
 version: v1
 metadata:
   name: create-directory
+  skipApplyAll: true
   skipDeleteAll: true
 spec:
   shellInterpreter: bash
@@ -108,10 +109,11 @@ metadata:
   dependencies:
     apply:
     - create-directory
+  skipApplyAll: true
+  skipDeleteAll: true
 spec:
   targetFile: /tmp/cloudformation_templates/cfn-example.yaml
   data: |
-    ---
     AWSTemplateFormatVersion: "2010-09-09"
     Description: 'An example S3 bucket template'
     Parameters:
@@ -137,7 +139,7 @@ spec:
           Name: !Join [ ":", [ !Ref "AWS::StackName", "MyCredentialsArn" ] ]
       MyCredentialsId:
         Description: 'ID for MyCredentials'
-        Value: !Get MyCredentials.Id
+        Value: !GetAtt MyCredentials.Id
         Export:
           Name: !Join [ ":", [ !Ref "AWS::StackName", "MyCredentialsId" ] ]
 ---
@@ -145,6 +147,7 @@ kind: ShellScript
 version: v1
 metadata:
   name: random-username
+  skipApplyAll: true
   skipDeleteAll: true
 spec:
   shellInterpreter: bash
@@ -187,9 +190,9 @@ metadata:
   name: animus-artifacts-for-cloudformation
   dependencies:
     apply:
-    -  aws-boto3-session-global
+    - aws-boto3-session-global
     delete:
-    -  aws-boto3-session-global
+    - aws-boto3-session-global
   executeOnlyOnceOnApply: true
 spec:
   awsBoto3Session:  aws-boto3-session-global
@@ -201,13 +204,14 @@ metadata:
   name: cfn-upload-to-s3
   dependencies:
     apply:
-    - aws-boto3-session
     - animus-artifacts-for-cloudformation
+    - my-credentials-sm-cfn-template
     delete:
-    - aws-boto3-session
     - animus-artifacts-for-cloudformation
+  skipApplyAll: true
+  skipDeleteAll: true
 spec:
-  awsBoto3Session: aws-boto3-session
+  awsBoto3Session: aws-boto3-session-global
   s3Bucket: '{{ .Variables.AwsBoto3S3Bucket:animus-artifacts-for-cloudformation:default:NAME }}'
   globalOverwrite: true
   destinationDirectory: default
@@ -229,6 +233,8 @@ metadata:
   executeOnlyOnceOnApply: true
   skipApplyAll: true
   skipDeleteAll: true
+  apply:
+    - random-username
 spec:
   parameters:
   - parameterName: 'UsernameParameter'
@@ -252,14 +258,14 @@ metadata:
   name: aws-my-credentials-sm-cfn-template-deployment
   dependencies:
     apply:
-    - my-credentials-sm-cfn-template
     - random-username
+    - aws-boto3-session
     - aws-my-credentials-sm-cfn-template-deployment-parameters
     - aws-my-credentials-sm-cfn-template-deployment-tags
-    - aws-boto3-session
     - cfn-upload-to-s3
+    delete:
+    - aws-boto3-session
   executeOnlyOnceOnApply: true
-  skipDeleteAll: true
 spec:
   awsBoto3SessionReference: aws-boto3-session
   templatePath: 'https://s3.amazonaws.com/{{ .Variables.AwsBoto3S3Bucket:animus-artifacts-for-cloudformation:default:NAME }}/default/cfn-example.yaml'

@@ -100,9 +100,9 @@ metadata:
   name: animus-artifacts-for-cloudformation
   dependencies:
     apply:
-    -  aws-boto3-session-global
+    - aws-boto3-session-global
     delete:
-    -  aws-boto3-session-global
+    - aws-boto3-session-global
   executeOnlyOnceOnApply: true
 spec:
   awsBoto3Session:  aws-boto3-session-global
