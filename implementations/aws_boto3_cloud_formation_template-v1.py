@@ -229,7 +229,7 @@ References:
                 self.log(message='CloudFormation stack "{}" is not yet in a final state to be deleted. Waiting...'.format(stack_data['StackName']), level='info')
                 if loop_counter > 60:
                     raise Exception('CloudFormation stack "{}" did not get into a final state within an hour - aborting.'.format(stack_data['StackName']))
-                time.sleep(60)
+                time.sleep(30)
         time.sleep(10)
         final_state = self._track_progress_until_end_state(stack_id=stack_data['StackId'], variable_cache=variable_cache, target_environment=target_environment)
         self.log(message='Stack ID "{}" deleted with final status "{}"'.format(stack_data['StackId'], final_state), level='info')
@@ -517,8 +517,8 @@ References:
         loop_count = 0
         while end_state_reached is False:
             loop_count += 1
-            self.log(message='    Sleeping 1 minute', level='info')
-            time.sleep(60)
+            self.log(message='    Sleeping 30 seconds', level='info')
+            time.sleep(30)
             stack_data = self._get_current_remote_stack_status(cloudformation_client)
             self.log(message='stack_data: {}'.format(json.dumps(stack_data, default=str)), level='debug')
             try:
