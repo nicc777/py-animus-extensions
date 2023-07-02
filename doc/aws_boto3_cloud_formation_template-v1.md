@@ -11,6 +11,7 @@ The behavior can be fine tuned with the `spec.changeDetection` settings
 
 Variables to be set:
 
+* `STACK_NAME` - string with the final CLoudFormation stack name
 * `FINAL_STATUS` - string with the final CLoudFormation status
 * `LOCAL_TEMPLATE_CHECKSUM` - string with the SHA256 checksum of the template in the local file (processed template - not the file checksum)
 * `REMOTE_TEMPLATE_CHECKSUM` - string with the SHA256 checksum of the remote template (processed template - not the raw string checksum)

@@ -119,6 +119,15 @@ References:
             outputs: dict=dict(),
             resources: dict=dict()
         ):
+        variable_cache.store_variable(
+            variable=Variable(
+                name='{}:STACK_NAME'.format(self._var_name(target_environment=target_environment)),
+                initial_value=self._format_template_name_as_stack_name(),
+                logger=self.logger,
+                mask_in_logs=False
+            ),
+            overwrite_existing=True
+        )
         if is_status_final is True:
             variable_cache.store_variable(
                 variable=Variable(
