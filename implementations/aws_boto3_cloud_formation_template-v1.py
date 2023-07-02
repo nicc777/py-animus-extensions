@@ -609,8 +609,6 @@ References:
             return
         self.log(message='APPLY CALLED', level='info')
 
-        cloudformation_client = self._get_boto3_cloudformation_client(variable_cache=variable_cache, target_environment=target_environment)
-
         if self.implemented_manifest_differ_from_this_manifest(
             manifest_lookup_function=manifest_lookup_function,
             variable_cache=variable_cache,
