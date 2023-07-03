@@ -575,27 +575,6 @@ References:
         return final_state
 
     def _extract_outputs_from_stack_data(self, stack_data: dict=dict())->dict:
-        """
-            stack_data:
-            {
-                ...
-                'Outputs': [
-                    {
-                        'OutputKey': 'string',
-                        'OutputValue': 'string',
-                        'Description': 'string',
-                        'ExportName': 'string'
-                    },
-                ],
-                ...
-            }
-
-            spec:
-                variableMappings:
-                    outputs:
-                    - variableName: 'SECRET_ARN'
-                      outputKey: 'MyCredentialsArn'
-        """
         outputs = dict()
         variable_mappings = dict()
         if 'variableMappings' in self.spec:
