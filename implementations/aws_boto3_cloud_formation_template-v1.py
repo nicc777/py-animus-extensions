@@ -617,7 +617,7 @@ References:
                         outputs[variable_name] = value
                     else:
                         self.log(message='  key="{}" NOT FOUND in variable_mappings'.format(key, value), level='debug')
-        self.log(message='PRE-RETURN: outputs: {}'.format(json.dumps(outputs)), level='debug')  #
+        self.log(message='PRE-RETURN: outputs: {}'.format(json.dumps(outputs)), level='debug')  # {"SECRET_ARN": "arn:aws:......."}
         return outputs
 
     def _apply_cloudformation_stack(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
