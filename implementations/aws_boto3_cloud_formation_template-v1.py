@@ -175,15 +175,17 @@ References:
             ),
             overwrite_existing=True
         )
-        variable_cache.store_variable(
-            variable=Variable(
-                name='{}:OUTPUTS'.format(self._var_name(target_environment=target_environment)),
-                initial_value=outputs,
-                logger=self.logger,
-                mask_in_logs=False
-            ),
-            overwrite_existing=True
-        )
+        for output_variable_name, output_value in outputs.items():
+            variable_cache.store_variable(
+                variable=Variable(
+                    name='{}:{}'.format(self._var_name(target_environment=target_environment), output_variable_name),
+                    initial_value='{}'.format(output_value),
+                    logger=self.logger,
+                    mask_in_logs=False
+                ),
+                overwrite_existing=True
+            )
+
         variable_cache.store_variable(
             variable=Variable(
                 name='{}:RESOURCES'.format(self._var_name(target_environment=target_environment)),
@@ -572,6 +574,52 @@ References:
                                 raise Exception('Cannot proceed due to final state being "{}"'.format(final_state))
         return final_state
 
+    def _extract_outputs_from_stack_data(self, stack_data: dict=dict())->dict:
+        """
+            stack_data:
+            {
+                ...
+                'Outputs': [
+                    {
+                        'OutputKey': 'string',
+                        'OutputValue': 'string',
+                        'Description': 'string',
+                        'ExportName': 'string'
+                    },
+                ],
+                ...
+            }
+
+            spec:
+                variableMappings:
+                    outputs:
+                    - variableName: 'SECRET_ARN'
+                      outputKey: 'MyCredentialsArn'
+        """
+        outputs = dict()
+        variable_mappings = dict()
+        if 'variableMappings' in self.spec:
+            if 'outputs' in self.spec['variableMappings']:
+                for mapping_item in self.spec['variableMappings']['outputs']:
+                    variable_mappings[mapping_item['outputKey']] = mapping_item['variableName'] # { 'MyCredentialsArn': 'SECRET_ARN' }
+        self.log(message='variable_mappings: {}'.format(json.dumps(variable_mappings)), level='debug')
+
+        if 'Outputs' in stack_data:
+            for output_data_item in stack_data['Outputs']:
+                if 'OutputKey' in output_data_item and 'OutputValue' in output_data_item:
+                    key = output_data_item['OutputKey']     # MyCredentialsArn
+                    value = output_data_item['OutputValue']   # arn:aws:.......
+                    self.log(message='key="{}"   value="{}"'.format(key, value), level='debug')
+                    if key in variable_mappings:
+                        self.log(message='  key="{}" FOUND in variable_mappings'.format(key, value), level='debug')
+                        variable_name = variable_mappings[key]
+                        self.log(message='  variable_name="{}"'.format(variable_name), level='debug')
+                        outputs[variable_name] = value
+                    else:
+                        self.log(message='  key="{}" NOT FOUND in variable_mappings'.format(key, value), level='debug')
+        self.log(message='PRE-RETURN: outputs: {}'.format(json.dumps(outputs)), level='debug')  #
+        return outputs
+
     def _apply_cloudformation_stack(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
         parameters = self._set_stack_options()
         self.log(message='parameters={}'.format(json.dumps(parameters)), level='debug')
@@ -620,7 +668,6 @@ References:
             time.sleep(10)
             final_state = self._track_progress_until_end_state(stack_id=response['StackId'], variable_cache=variable_cache, target_environment=target_environment)
 
-            # TODO Get outputs...
             # TODO Get resources...
             # TODO Get remote checksum of template and parameters
 
@@ -633,7 +680,7 @@ References:
                 is_status_final=True,
                 local_template_checksum=self._calculate_local_template_checksum(parameters=parameters_as_list, tags=tags_as_list),
                 remote_template_checksum='',
-                outputs=dict(),
+                outputs=self._extract_outputs_from_stack_data(stack_data=stack_data),
                 resources=dict()
             )
         self.log(message='Stack ID "{}" applied with final status "{}"'.format(response['StackId'], final_state), level='info')
