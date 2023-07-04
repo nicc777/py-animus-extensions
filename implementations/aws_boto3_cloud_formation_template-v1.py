@@ -222,11 +222,19 @@ References:
         file_content_as_dict = self._attempt_to_convert_template_data_to_dict(data_as_str=file_content_as_str)
         file_content_as_dict['_PARAMETERS'] = list()
         file_content_as_dict['_TAGS'] = list()
+        file_content_as_dict['_ADAPTED'] = True
         if len(parameters) > 0:
             file_content_as_dict['_PARAMETERS'] = parameters
         if len(tags) > 0:
             file_content_as_dict['_TAGS'] = tags
         return self._calculate_dict_checksum(data=file_content_as_dict)
+
+    def _calculate_remote_template_checksum(self, stack_data: dict, stack_body_as_dict: dict)->str:
+        stack_body_as_dict['_PARAMETERS'] = list()
+        stack_body_as_dict['_TAGS'] = list()
+        stack_body_as_dict['_ADAPTED'] = True
+        # TODO - add parameters and tags from stack_data to stack_body_as_dict
+        return self._calculate_dict_checksum(data=stack_body_as_dict)
 
     def _stack_exists(self, client, stack_name: str)->bool:
         remote_stack = self._get_current_remote_stack_data(cloudformation_client=client)
@@ -252,39 +260,31 @@ References:
         final_state = self._track_progress_until_end_state(stack_id=stack_data['StackId'], variable_cache=variable_cache, target_environment=target_environment)
         self.log(message='Stack ID "{}" deleted with final status "{}"'.format(stack_data['StackId'], final_state), level='info')
 
+    def _get_remote_stack_applied_template_as_dict(
+        self,
+        cloudformation_client,
+        stack_name: str
+    )->dict:
+        template_data = dict()
+        try:
+            response = cloudformation_client.get_template(StackName=stack_name,TemplateStage='Original')
+            if 'TemplateBody' in response:
+                self.log(message='TemplateBody: {}'.format(response['TemplateBody']), level='debug')
+                if isinstance(response['TemplateBody'], dict):
+                    template_data = copy.deepcopy(response['TemplateBody'])
+                elif isinstance(response['TemplateBody'], str):
+                    template_data = self._attempt_to_convert_template_data_to_dict(data_as_str=response['TemplateBody'])
+                else:
+                    self.log(message='Returned data is in an invalid format. Received: {}'.format(response['TemplateBody']), level='error')
+        except:
+            self.log(message='It appears that the remote stack named "{}" does not exists'.format(stack_name), level='error')
+        return template_data
+
     def _get_current_remote_stack_resource_data(
         self,
         cloudformation_client,
         stack_name: str
     )->list:
-        """
-            {
-                'StackResources': [
-                    {
-                        'StackName': 'AwsMyCredentialsSmCfnTemplateDeployment',
-                        'StackId': 'arn:aws:cloudformation:eu-central-1:214483558614:stack/AwsMyCredentialsSmCfnTemplateDeployment/0113e7a0-18ab-11ee-9430-060faacd5bd6',
-                        'LogicalResourceId': 'MyCredentials',
-                        'PhysicalResourceId': 'arn:aws:secretsmanager:eu-central-1:214483558614:secret:MyCredentialsForXyz-FrBqzc',
-                        'ResourceType': 'AWS::SecretsManager::Secret',
-                        'ResourceStatus': 'CREATE_COMPLETE',
-                        .....
-                    },
-                ]
-            }
-
-
-            resulting resource_data:
-
-            [
-                {
-                    'LogicalResourceId': 'MyCredentials',
-                    'PhysicalResourceId': 'arn:aws:secretsmanager:eu-central-1:214483558614:secret:MyCredentialsForXyz-FrBqzc',
-                    'ResourceType': 'AWS::SecretsManager::Secret',
-                    'ResourceStatus': 'CREATE_COMPLETE',
-                },
-            ]
-
-        """
         resource_data = list()
         try:
             response = cloudformation_client.describe_stack_resources(StackName=stack_name)
@@ -730,18 +730,15 @@ References:
         if 'StackId' in response:
             time.sleep(10)
             final_state = self._track_progress_until_end_state(stack_id=response['StackId'], variable_cache=variable_cache, target_environment=target_environment)
-
-            # TODO Get remote checksum of template and parameters
-
             stack_data = self._get_current_remote_stack_data(cloudformation_client)
-
+            remote_stack_template_body_as_dict = self._get_remote_stack_applied_template_as_dict(cloudformation_client=cloudformation_client, stack_name=parameters['StackName'])
             self._set_variables(
                 variable_cache=variable_cache,
                 target_environment=target_environment,
                 status=final_state,
                 is_status_final=True,
                 local_template_checksum=self._calculate_local_template_checksum(parameters=parameters_as_list, tags=tags_as_list),
-                remote_template_checksum='',
+                remote_template_checksum=self._calculate_remote_template_checksum(stack_data=stack_data, stack_body_as_dict=remote_stack_template_body_as_dict),
                 outputs=self._extract_outputs_from_stack_data(stack_data=stack_data),
                 resources=self._extract_resources_from_stack_data(stack_data=stack_data)
             )
