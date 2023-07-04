@@ -672,37 +672,11 @@ References:
                             final_resource_field_name = resource_field_name[0].upper() + resource_field_name[1:]
                             variable_mappings[mapping_item['logicalResourceId']][final_resource_field_name] = target_variable_name
         self.log(message='variable_mappings: {}'.format(json.dumps(variable_mappings)), level='debug')
-        """
-        variable_mappings:
-            {
-                'MyCredentials': {
-                    'PhysicalResourceId': 'CREDS_PHYSICAL_RESOURCE_ID',
-                    'ResourceType': 'CREDS_RESOURCE_TYPE',
-                    'ResourceStatus': 'CREDS_RESOURCE_STATUS',
-                }
-            }
-        """
-
         if 'StackResources' in stack_data:
             for resource_data_item in stack_data['StackResources']:
-                """
-                    {
-                        'LogicalResourceId': 'MyCredentials',
-                        'PhysicalResourceId': 'arn:aws:secretsmanager:eu-central-1:214483558614:secret:MyCredentialsForXyz-FrBqzc',
-                        'ResourceType': 'AWS::SecretsManager::Secret',
-                        'ResourceStatus': 'CREATE_COMPLETE',
-                    }
-                """
                 if 'LogicalResourceId' in resource_data_item:
                     if resource_data_item['LogicalResourceId'] in variable_mappings:
                         for mapping_data in variable_mappings[resource_data_item['LogicalResourceId']]:
-                            """
-                                mapping_data = {
-                                    'PhysicalResourceId': 'CREDS_PHYSICAL_RESOURCE_ID',
-                                    'ResourceType': 'CREDS_RESOURCE_TYPE',
-                                    'ResourceStatus': 'CREDS_RESOURCE_STATUS',
-                                }
-                            """
                             for mapping_key, target_variable_name in mapping_data.items():
                                 if mapping_key in resource_data_item:
                                     resources[target_variable_name] = resource_data_item[mapping_key]
