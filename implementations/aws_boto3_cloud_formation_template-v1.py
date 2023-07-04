@@ -252,10 +252,67 @@ References:
         final_state = self._track_progress_until_end_state(stack_id=stack_data['StackId'], variable_cache=variable_cache, target_environment=target_environment)
         self.log(message='Stack ID "{}" deleted with final status "{}"'.format(stack_data['StackId'], final_state), level='info')
 
+    def _get_current_remote_stack_resource_data(
+        self,
+        cloudformation_client,
+        stack_name: str
+    )->list:
+        """
+            {
+                'StackResources': [
+                    {
+                        'StackName': 'AwsMyCredentialsSmCfnTemplateDeployment',
+                        'StackId': 'arn:aws:cloudformation:eu-central-1:214483558614:stack/AwsMyCredentialsSmCfnTemplateDeployment/0113e7a0-18ab-11ee-9430-060faacd5bd6',
+                        'LogicalResourceId': 'MyCredentials',
+                        'PhysicalResourceId': 'arn:aws:secretsmanager:eu-central-1:214483558614:secret:MyCredentialsForXyz-FrBqzc',
+                        'ResourceType': 'AWS::SecretsManager::Secret',
+                        'ResourceStatus': 'CREATE_COMPLETE',
+                        .....
+                    },
+                ]
+            }
+
+
+            resulting resource_data:
+
+            [
+                {
+                    'LogicalResourceId': 'MyCredentials',
+                    'PhysicalResourceId': 'arn:aws:secretsmanager:eu-central-1:214483558614:secret:MyCredentialsForXyz-FrBqzc',
+                    'ResourceType': 'AWS::SecretsManager::Secret',
+                    'ResourceStatus': 'CREATE_COMPLETE',
+                },
+            ]
+
+        """
+        resource_data = list()
+        try:
+            response = cloudformation_client.describe_stack_resources(StackName=stack_name)
+            if 'StackResources' in response:
+                for raw_resource_data in response['StackResources']:
+                    if raw_resource_data['StackName'] == stack_name:
+                        extracted_data = dict()
+                        extracted_data['LogicalResourceId'] = 'Unknown'
+                        extracted_data['PhysicalResourceId'] = 'Unknown'
+                        extracted_data['ResourceType'] = 'Unknown'
+                        extracted_data['ResourceStatus'] = 'Unknown'
+                        if 'LogicalResourceId' in raw_resource_data:
+                            extracted_data['LogicalResourceId'] = raw_resource_data['LogicalResourceId']
+                        if 'PhysicalResourceId' in raw_resource_data:
+                            extracted_data['PhysicalResourceId'] = raw_resource_data['PhysicalResourceId']
+                        if 'ResourceType' in raw_resource_data:
+                            extracted_data['ResourceType'] = raw_resource_data['ResourceType']
+                        if 'ResourceStatus' in raw_resource_data:
+                            extracted_data['ResourceStatus'] = raw_resource_data['ResourceStatus']
+                        resource_data.append(extracted_data)
+        except:
+            self.log(message='It appears that the remote stack named "{}" does not exists'.format(stack_name), level='error')
+        return resource_data
+
     def _get_current_remote_stack_data(
-            self,
-            cloudformation_client
-        )->dict:
+        self,
+        cloudformation_client
+    )->dict:
         remote_stack_data = dict()  # Refer to https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudformation/client/describe_stacks.html
         try:
             response = cloudformation_client.describe_stacks(
@@ -265,6 +322,10 @@ References:
                 for stack_data in response['Stacks']:
                     if stack_data['StackName'] == self._format_template_name_as_stack_name():
                         remote_stack_data = copy.deepcopy(stack_data)
+                        remote_stack_data['StackResources'] = self._get_current_remote_stack_resource_data(
+                            cloudformation_client=cloudformation_client,
+                            stack_name=self._format_template_name_as_stack_name()
+                        )
         except:
             self.log(message='It appears that the remote stack named "{}" does not exists'.format(self._format_template_name_as_stack_name()), level='error')
         return remote_stack_data
@@ -599,6 +660,55 @@ References:
         self.log(message='PRE-RETURN: outputs: {}'.format(json.dumps(outputs)), level='debug')  # {"SECRET_ARN": "arn:aws:......."}
         return outputs
 
+    def _extract_resources_from_stack_data(self, stack_data: dict=dict())->dict:
+        resources = dict()
+        variable_mappings = dict()
+        if 'variableMappings' in self.spec:
+            if 'resources' in self.spec['variableMappings']:
+                for mapping_item in self.spec['variableMappings']['resources']:
+                    variable_mappings[mapping_item['logicalResourceId']] = dict()
+                    for resource_variable_mapping_data in mapping_item['variables']:
+                        for resource_field_name, target_variable_name in resource_variable_mapping_data.items():
+                            final_resource_field_name = resource_field_name[0].upper() + resource_field_name[1:]
+                            variable_mappings[mapping_item['logicalResourceId']][final_resource_field_name] = target_variable_name
+        self.log(message='variable_mappings: {}'.format(json.dumps(variable_mappings)), level='debug')
+        """
+        variable_mappings:
+            {
+                'MyCredentials': {
+                    'PhysicalResourceId': 'CREDS_PHYSICAL_RESOURCE_ID',
+                    'ResourceType': 'CREDS_RESOURCE_TYPE',
+                    'ResourceStatus': 'CREDS_RESOURCE_STATUS',
+                }
+            }
+        """
+
+        if 'StackResources' in stack_data:
+            for resource_data_item in stack_data['StackResources']:
+                """
+                    {
+                        'LogicalResourceId': 'MyCredentials',
+                        'PhysicalResourceId': 'arn:aws:secretsmanager:eu-central-1:214483558614:secret:MyCredentialsForXyz-FrBqzc',
+                        'ResourceType': 'AWS::SecretsManager::Secret',
+                        'ResourceStatus': 'CREATE_COMPLETE',
+                    }
+                """
+                if 'LogicalResourceId' in resource_data_item:
+                    if resource_data_item['LogicalResourceId'] in variable_mappings:
+                        for mapping_data in variable_mappings[resource_data_item['LogicalResourceId']]:
+                            """
+                                mapping_data = {
+                                    'PhysicalResourceId': 'CREDS_PHYSICAL_RESOURCE_ID',
+                                    'ResourceType': 'CREDS_RESOURCE_TYPE',
+                                    'ResourceStatus': 'CREDS_RESOURCE_STATUS',
+                                }
+                            """
+                            for mapping_key, target_variable_name in mapping_data.items():
+                                if mapping_key in resource_data_item:
+                                    resources[target_variable_name] = resource_data_item[mapping_key]
+        self.log(message='PRE-RETURN: resources: {}'.format(json.dumps(resources)), level='debug')  # {"CREDS_RESOURCE_TYPE": "AWS::SecretsManager::Secret", ...}
+        return resources
+
     def _apply_cloudformation_stack(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
         parameters = self._set_stack_options()
         self.log(message='parameters={}'.format(json.dumps(parameters)), level='debug')
@@ -647,7 +757,6 @@ References:
             time.sleep(10)
             final_state = self._track_progress_until_end_state(stack_id=response['StackId'], variable_cache=variable_cache, target_environment=target_environment)
 
-            # TODO Get resources...
             # TODO Get remote checksum of template and parameters
 
             stack_data = self._get_current_remote_stack_data(cloudformation_client)
@@ -660,7 +769,7 @@ References:
                 local_template_checksum=self._calculate_local_template_checksum(parameters=parameters_as_list, tags=tags_as_list),
                 remote_template_checksum='',
                 outputs=self._extract_outputs_from_stack_data(stack_data=stack_data),
-                resources=dict()
+                resources=self._extract_resources_from_stack_data(stack_data=stack_data)
             )
         self.log(message='Stack ID "{}" applied with final status "{}"'.format(response['StackId'], final_state), level='info')
 
