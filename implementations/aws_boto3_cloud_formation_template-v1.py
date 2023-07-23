@@ -1,18 +1,11 @@
 from py_animus.manifest_management import *
-# from py_animus import get_logger, get_utc_timestamp, parse_raw_yaml_data, logging
+from py_animus import get_logger, get_utc_timestamp, parse_raw_yaml_data, logging
 from py_animus import get_logger, get_utc_timestamp, logging
 import re
 import boto3
 import hashlib
 import json
 import time
-
-# TODO test if really needed - rather make changes in Animus
-import yaml
-try:    # pragma: no cover
-    from yaml import CLoader as Loader, CDumper as Dumper
-except ImportError: # pragma: no cover
-    from yaml import Loader as Loader, Dumper as Dumper
 
 
 FINAL_STATES = (
@@ -38,22 +31,6 @@ ERROR_STATES = (
     'UPDATE_ROLLBACK_COMPLETE',
     'UNKNOWN',
 )
-
-
-# TODO test if really needed - rather make changes in Animus
-def parse_raw_yaml_data(yaml_data: str, logger=get_logger())->dict:
-    configuration = dict()
-    current_part = 0
-    # logger.debug('parse_raw_yaml_data(): RAW DATA: {}'.format(yaml_data))
-    try:
-        for data in yaml.load_all(yaml_data, Loader=Loader):
-            current_part += 1
-            configuration['part_{}'.format(current_part)] = data
-        # logger.debug('configuration={}'.format(configuration))
-    except: # pragma: no cover
-        traceback.print_exc()
-        raise Exception('Failed to parse configuration')
-    return configuration
 
 
 class AwsBoto3CloudFormationTemplate(ManifestBase):
