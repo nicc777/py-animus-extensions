@@ -120,6 +120,15 @@ References:
             outputs: dict=dict(),
             resources: dict=dict()
         ):
+
+        self.log(message='_set_variables(): INPUT ARG "target_environment"       : {}'.format(target_environment), level='debug')
+        self.log(message='_set_variables(): INPUT ARG "status"                   : {}'.format(status), level='debug')
+        self.log(message='_set_variables(): INPUT ARG "is_status_final"          : {}'.format(is_status_final), level='debug')
+        self.log(message='_set_variables(): INPUT ARG "local_template_checksum"  : {}'.format(local_template_checksum), level='debug')
+        self.log(message='_set_variables(): INPUT ARG "remote_template_checksum" : {}'.format(remote_template_checksum), level='debug')
+        self.log(message='_set_variables(): INPUT ARG "outputs"                  : {}'.format(json.dumps(outputs, default=str)), level='debug')
+        self.log(message='_set_variables(): INPUT ARG "resources"                : {}'.format(json.dumps(resources, default=str)), level='debug')
+
         variable_cache.store_variable(
             variable=Variable(
                 name='{}:STACK_NAME'.format(self._var_name(target_environment=target_environment)),
@@ -196,6 +205,17 @@ References:
             ),
             overwrite_existing=True
         )
+
+        for resource_key, resource_val in resources.items():
+            variable_cache.store_variable(
+                variable=Variable(
+                    name='{}:{}'.format(self._var_name(target_environment=target_environment), resource_key),
+                    initial_value=resource_val,
+                    logger=self.logger,
+                    mask_in_logs=False
+                ),
+                overwrite_existing=True
+            )
 
     def _attempt_to_convert_template_data_to_dict(self, data_as_str: str)->dict:
         parse_exception = False
