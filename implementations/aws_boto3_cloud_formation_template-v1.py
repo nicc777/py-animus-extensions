@@ -234,9 +234,16 @@ References:
         return stack_template_data_as_dict
 
     def _calculate_dict_checksum(self, data: dict=dict())->str:
-        return hashlib.sha256(json.dumps(data, default=str, sort_keys=True, ensure_ascii=True).encode('utf-8')).hexdigest()
+        self.log(message='_calculate_dict_checksum(): INPUT ARGS data                 : {}'.format(json.dumps(data, default=str)), level='debug')
+        result = hashlib.sha256(json.dumps(data, default=str, sort_keys=True, ensure_ascii=True).encode('utf-8')).hexdigest()
+        self.log(message='_calculate_dict_checksum(): RETURN result                   : {}'.format(json.dumps(result, default=str)), level='debug')
+        return result
 
     def _calculate_local_template_checksum(self, parameters: list=list(), tags: list=list())->str:
+
+        self.log(message='_calculate_local_template_checksum(): INPUT ARGS parameters : {}'.format(json.dumps(parameters, default=str)), level='debug')
+        self.log(message='_calculate_local_template_checksum(): INPUT ARGS tags       : {}'.format(json.dumps(parameters, default=str)), level='debug')
+
         file_content_as_str = None
         with open(self.spec['localTemplatePath'], 'r') as f:
             file_content_as_str = f.read()
@@ -248,7 +255,11 @@ References:
             file_content_as_dict['_PARAMETERS'] = parameters
         if len(tags) > 0:
             file_content_as_dict['_TAGS'] = tags
-        return self._calculate_dict_checksum(data=file_content_as_dict)
+
+        result = self._calculate_dict_checksum(data=file_content_as_dict)
+        self.log(message='_calculate_local_template_checksum(): RETURN result         : {}'.format(json.dumps(result, default=str)), level='debug')
+
+        return result
 
     def _calculate_remote_template_checksum(self, stack_data: dict, stack_body_as_dict: dict)->str:
         stack_body_as_dict['_PARAMETERS'] = list()
