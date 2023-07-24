@@ -242,7 +242,7 @@ References:
     def _calculate_local_template_checksum(self, parameters: list=list(), tags: list=list())->str:
 
         self.log(message='_calculate_local_template_checksum(): INPUT ARGS parameters : {}'.format(json.dumps(parameters, default=str)), level='debug')
-        self.log(message='_calculate_local_template_checksum(): INPUT ARGS tags       : {}'.format(json.dumps(parameters, default=str)), level='debug')
+        self.log(message='_calculate_local_template_checksum(): INPUT ARGS tags       : {}'.format(json.dumps(tags, default=str)), level='debug')
 
         file_content_as_str = None
         with open(self.spec['localTemplatePath'], 'r') as f:
