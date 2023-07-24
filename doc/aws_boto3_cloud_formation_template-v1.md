@@ -201,7 +201,8 @@ metadata:
     - aws-boto3-session-global
     delete:
     - aws-boto3-session-global
-  executeOnlyOnceOnApply: true
+  skipApplyAll: true
+  skipDeleteAll: true
 spec:
   awsBoto3Session:  aws-boto3-session-global
   name: animus-artifacts-for-cloudformation
@@ -277,6 +278,7 @@ metadata:
 spec:
   awsBoto3SessionReference: aws-boto3-session
   templatePath: 'https://s3.amazonaws.com/{{ .Variables.AwsBoto3S3Bucket:animus-artifacts-for-cloudformation:default:NAME }}/default/cfn-example.yaml'
+  localTemplatePath: '{{ .Variables.WriteFile:my-credentials-sm-cfn-template:default:FILE_PATH }}'
   parameterReferences:
   - aws-my-credentials-sm-cfn-template-deployment-parameters
   tagReferences:
@@ -293,6 +295,35 @@ spec:
       - physicalResourceId: 'CREDS_PHYSICAL_RESOURCE_ID'
       - resourceType: 'CREDS_RESOURCE_TYPE'
       - resourceStatus: 'CREDS_RESOURCE_STATUS'
+---
+kind: WriteFile
+version: v1
+metadata:
+  name: my-credentials-create-report
+  executeOnlyOnceOnApply: true
+  dependencies:
+    apply:
+    - aws-my-credentials-sm-cfn-template-deployment
+spec:
+  targetFile: /tmp/cloudformation_templates/cfn-example-report.json
+  data: |
+    {
+      "StackName": "{{ .Variables.AwsBoto3CloudFormationTemplate:aws-my-credentials-sm-cfn-template-deployment:default:STACK_NAME }}",
+      "FinalStatus": "{{ .Variables.AwsBoto3CloudFormationTemplate:aws-my-credentials-sm-cfn-template-deployment:default:FINAL_STATUS }}",
+      "LocalTemplateAndParametersChecksum": "{{ .Variables.AwsBoto3CloudFormationTemplate:aws-my-credentials-sm-cfn-template-deployment:default:LOCAL_TEMPLATE_CHECKSUM }}",
+      "RemoteTemplateAndParametersChecksum": "{{ .Variables.AwsBoto3CloudFormationTemplate:aws-my-credentials-sm-cfn-template-deployment:default:REMOTE_TEMPLATE_CHECKSUM }}"
+      "Outputs": {
+        "SecretArn": "{{ .Variables.AwsBoto3CloudFormationTemplate:aws-my-credentials-sm-cfn-template-deployment:default:SECRET_ARN }}",
+        "SecretId": "{{ .Variables.AwsBoto3CloudFormationTemplate:aws-my-credentials-sm-cfn-template-deployment:default:SECRET_ID }}"
+      },
+      "Resources": [
+        {
+          "PhysicalResourceId": "{{ .Variables.AwsBoto3CloudFormationTemplate:aws-my-credentials-sm-cfn-template-deployment:default:CREDS_PHYSICAL_RESOURCE_ID }}",
+          "resourceType": "{{ .Variables.AwsBoto3CloudFormationTemplate:aws-my-credentials-sm-cfn-template-deployment:default:CREDS_RESOURCE_TYPE }}",
+          "ResourceStatus": "{{ .Variables.AwsBoto3CloudFormationTemplate:aws-my-credentials-sm-cfn-template-deployment:default:CREDS_RESOURCE_STATUS }}"
+        }
+      ]
+    }
 ```
 
 This is the absolute minimal example based on required values. Dummy random data was generated where required.
