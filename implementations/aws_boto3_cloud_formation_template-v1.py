@@ -643,14 +643,14 @@ References:
             if 'outputs' in self.spec['variableMappings']:
                 for mapping_item in self.spec['variableMappings']['outputs']:
                     variable_mappings[mapping_item['outputKey']] = mapping_item['variableName'] # { 'MyCredentialsArn': 'SECRET_ARN' }
-        self.log(message='variable_mappings: {}'.format(json.dumps(variable_mappings)), level='debug')
+        self.log(message='_extract_outputs_from_stack_data(): variable_mappings: {}'.format(json.dumps(variable_mappings)), level='debug')
 
         if 'Outputs' in stack_data:
             for output_data_item in stack_data['Outputs']:
                 if 'OutputKey' in output_data_item and 'OutputValue' in output_data_item:
                     key = output_data_item['OutputKey']     # MyCredentialsArn
                     value = output_data_item['OutputValue']   # arn:aws:.......
-                    self.log(message='key="{}"   value="{}"'.format(key, value), level='debug')
+                    self.log(message='_extract_outputs_from_stack_data(): key="{}"   value="{}"'.format(key, value), level='debug')
                     if key in variable_mappings:
                         self.log(message='  key="{}" FOUND in variable_mappings'.format(key, value), level='debug')
                         variable_name = variable_mappings[key]
@@ -658,10 +658,11 @@ References:
                         outputs[variable_name] = value
                     else:
                         self.log(message='  key="{}" NOT FOUND in variable_mappings'.format(key, value), level='debug')
-        self.log(message='PRE-RETURN: outputs: {}'.format(json.dumps(outputs)), level='debug')  # {"SECRET_ARN": "arn:aws:......."}
+        self.log(message='_extract_outputs_from_stack_data(): PRE-RETURN: outputs: {}'.format(json.dumps(outputs)), level='debug')  # {"SECRET_ARN": "arn:aws:......."}
         return outputs
 
     def _extract_resources_from_stack_data(self, stack_data: dict=dict())->dict:
+        self.log(message='_extract_resources_from_stack_data(): stack_data: {}'.format(json.dumps(stack_data, default=str)), level='debug')
         resources = dict()
         variable_mappings = dict()
         if 'variableMappings' in self.spec:
@@ -672,16 +673,20 @@ References:
                         for resource_field_name, target_variable_name in resource_variable_mapping_data.items():
                             final_resource_field_name = resource_field_name[0].upper() + resource_field_name[1:]
                             variable_mappings[mapping_item['logicalResourceId']][final_resource_field_name] = target_variable_name
-        self.log(message='variable_mappings: {}'.format(json.dumps(variable_mappings)), level='debug')
+        self.log(message='_extract_resources_from_stack_data(): variable_mappings: {}'.format(json.dumps(variable_mappings, default=str)), level='debug')
         if 'StackResources' in stack_data:
             for resource_data_item in stack_data['StackResources']:
                 if 'LogicalResourceId' in resource_data_item:
+                    self.log(message='_extract_resources_from_stack_data(): resource_data_item["LogicalResourceId"]: {}'.format(resource_data_item['LogicalResourceId']), level='debug')
                     if resource_data_item['LogicalResourceId'] in variable_mappings:
-                        for mapping_data in variable_mappings[resource_data_item['LogicalResourceId']]:
-                            for mapping_key, target_variable_name in mapping_data.items():
-                                if mapping_key in resource_data_item:
-                                    resources[target_variable_name] = resource_data_item[mapping_key]
-        self.log(message='PRE-RETURN: resources: {}'.format(json.dumps(resources)), level='debug')  # {"CREDS_RESOURCE_TYPE": "AWS::SecretsManager::Secret", ...}
+                        mapping_data = variable_mappings[resource_data_item['LogicalResourceId']]
+
+                        self.log(message='_extract_resources_from_stack_data(): mapping_data: {}'.format(json.dumps(mapping_data, default=str)), level='debug')
+
+                        for mapping_key, target_variable_name in mapping_data.items():
+                            if mapping_key in resource_data_item:
+                                resources[target_variable_name] = resource_data_item[mapping_key]
+        self.log(message='_extract_resources_from_stack_data(): PRE-RETURN: resources: {}'.format(json.dumps(resources, default=str)), level='debug')  # {"CREDS_RESOURCE_TYPE": "AWS::SecretsManager::Secret", ...}
         return resources
 
     def _apply_cloudformation_stack(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):

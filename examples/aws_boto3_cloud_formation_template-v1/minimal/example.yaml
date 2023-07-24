@@ -103,7 +103,8 @@ metadata:
     - aws-boto3-session-global
     delete:
     - aws-boto3-session-global
-  executeOnlyOnceOnApply: true
+  skipApplyAll: true
+  skipDeleteAll: true
 spec:
   awsBoto3Session:  aws-boto3-session-global
   name: animus-artifacts-for-cloudformation
