@@ -262,11 +262,32 @@ References:
         return result
 
     def _calculate_remote_template_checksum(self, stack_data: dict, stack_body_as_dict: dict)->str:
+
+        self.log(message='_calculate_remote_template_checksum(): INPUT ARGS stack_data         : {}'.format(json.dumps(stack_data, default=str)), level='debug')
+        self.log(message='_calculate_remote_template_checksum(): INPUT ARGS stack_body_as_dict : {}'.format(json.dumps(stack_body_as_dict, default=str)), level='debug')
+
         stack_body_as_dict['_PARAMETERS'] = list()
         stack_body_as_dict['_TAGS'] = list()
         stack_body_as_dict['_ADAPTED'] = True
-        # TODO - add parameters and tags from stack_data to stack_body_as_dict
-        return self._calculate_dict_checksum(data=stack_body_as_dict)
+
+        if 'Parameters' in stack_data:
+            if stack_data['Parameters'] is not None:
+                if isinstance(stack_data['Parameters'], list):
+                    if len(stack_data['Parameters']) > 0:
+                        stack_body_as_dict['_PARAMETERS'] = stack_data['Parameters']
+
+        if 'Tags' in stack_data:
+            if stack_data['Tags'] is not None:
+                if isinstance(stack_data['Tags'], list):
+                    if len(stack_data['Tags']) > 0:
+                        stack_body_as_dict['_TAGS'] = stack_data['Tags']
+
+        checksum = self._calculate_dict_checksum(data=stack_body_as_dict)
+
+        self.log(message='_calculate_remote_template_checksum(): PROCESSED stack_body_as_dict  : {}'.format(json.dumps(stack_body_as_dict, default=str)), level='debug')
+        self.log(message='_calculate_remote_template_checksum(): PROCESSED checksum            : {}'.format(checksum), level='debug')
+
+        return checksum
 
     def _stack_exists(self, client, stack_name: str)->bool:
         remote_stack = self._get_current_remote_stack_data(cloudformation_client=client)
