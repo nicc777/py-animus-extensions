@@ -404,10 +404,6 @@ References:
                 name = '{}{}'.format(name, word.capitalize())
         return name
 
-    def _is_local_template_and_parameters_different_from_remote_template_and_parameters(self, remote_template_meta_data: dict, remote_template_as_dict: dict)->bool:
-        # TODO complete implementing
-        return False
-
     def _get_parameters(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->list:
         parameters = list()
         if 'parameterReferences' in self.spec:
@@ -514,7 +510,6 @@ References:
             overwrite_existing=False
         )
 
-
         ###
         ### Check previous processing status to determine next actions
         ###
@@ -534,23 +529,23 @@ References:
             raise_exception_on_not_found=False
         )
 
-        action_get_remote_stack_data = False
-        action_calculate_local_template_checksum = False
+        self.log(message='implemented_manifest_differ_from_this_manifest(): current_parsed_parameters : {}'.format(json.dumps(current_parsed_parameters, default=str)), level='debug')
+        self.log(message='implemented_manifest_differ_from_this_manifest(): current_parsed_tags       : {}'.format(json.dumps(current_parsed_tags, default=str)), level='debug')
+        self.log(message='implemented_manifest_differ_from_this_manifest(): current_processing_status : {}'.format(current_processing_status), level='debug')
+
         action_compare_checksums_and_parameters = False
 
         remote_stack_data = dict()
+        remote_stack_template_body_as_dict = dict()
 
-        if current_processing_status == 'NOT_STARTED':
-            action_get_remote_stack_data = True
-            action_calculate_local_template_checksum = True
-        elif current_processing_status == 'DONE':
-            return False
-
-        if action_get_remote_stack_data is True:
+        try:
             remote_stack_data = self._get_current_remote_stack_data(cloudformation_client)
+        except:
+            self.log(message='implemented_manifest_differ_from_this_manifest(): Failed to retrieve remote stack data', level='warning')
         if len(remote_stack_data) > 0:
             action_compare_checksums_and_parameters = True
-            self.log(message='Stack was deployed previously. Next step is to compare checksums of the templates and parameters to see if a changeset is required.', level='info')
+            self.log(message='implemented_manifest_differ_from_this_manifest(): Stack was deployed previously. Next step is to compare checksums of the templates and parameters to see if a changeset is required.', level='info')
+            remote_stack_template_body_as_dict = self._get_remote_stack_applied_template_as_dict(cloudformation_client=cloudformation_client, stack_name=self._format_template_name_as_stack_name())
         else:
             variable_cache.store_variable(
                 variable=Variable(
@@ -560,16 +555,26 @@ References:
                 ),
                 overwrite_existing=True
             )
-            self.log(message='First/New deployment - A new stack will be created', level='info')
+            self.log(message='implemented_manifest_differ_from_this_manifest(): First/New deployment - A new stack will be created', level='info')
             return True
 
-        local_checksum = ''
-        if action_calculate_local_template_checksum is True:
-            local_checksum = self._calculate_local_template_checksum(parameters=current_parsed_parameters, tags=current_parsed_tags)
-            self.log(message='local_checksum={}'.format(local_checksum), level='info')
-
         if action_compare_checksums_and_parameters is True:
-            pass
+            local_template_checksum = self._calculate_local_template_checksum(parameters=current_parsed_parameters, tags=current_parsed_tags)
+            remote_template_checksum = self._calculate_remote_template_checksum(stack_data=remote_stack_data, stack_body_as_dict=remote_stack_template_body_as_dict)
+            self.log(message='implemented_manifest_differ_from_this_manifest(): Comparing local_template_checksum with value "{}" to remote_template_checksum with value of "{}"'.format(local_template_checksum, remote_template_checksum), level='info')
+            if local_template_checksum != remote_template_checksum:
+                variable_cache.store_variable(
+                    variable=Variable(
+                        name='{}:NEXT_ACTION'.format(self._var_name(target_environment=target_environment)),
+                        initial_value='DEPLOY_CHANGE_SET',
+                        logger=self.logger
+                    ),
+                    overwrite_existing=True
+                )
+                self.log(message='implemented_manifest_differ_from_this_manifest(): A ChangeSet needs to be applied', level='info')
+                return True
+            else:
+                self.log(message='implemented_manifest_differ_from_this_manifest(): The current deployment does NOT have to be updated', level='info')
 
         return False
 
@@ -814,7 +819,7 @@ References:
             target_environment=target_environment,
             value_placeholders=value_placeholders
         ) is False:
-            self.log(message='Stack already deployed and no new changes detected.', level='info')
+            self.log(message='apply_manifest(): Stack already deployed and no new changes detected.', level='info')
             return
 
         change_type = variable_cache.get_value(
@@ -824,12 +829,19 @@ References:
             raise_exception_on_expired=False,
             raise_exception_on_not_found=False
         )
-        self.log(message='Apply Action: {}'.format(change_type), level='info')
+        self.log(message='apply_manifest(): Apply Action: {}'.format(change_type), level='info')
         if change_type in ('NONE', 'NOTHING'):
+            self.log(message='apply_manifest(): Final Action: NONE / NOTHING', level='info')
             return
 
         if change_type == 'DEPLOY_NEW_STACK':
+            self.log(message='apply_manifest(): Final Action: DEPLOY_NEW_STACK', level='info')
             self._apply_cloudformation_stack(variable_cache=variable_cache, target_environment=target_environment)
+
+        if change_type == 'DEPLOY_CHANGE_SET':
+            # TODO deploy change set
+            self.log(message='apply_manifest(): Final Action: DEPLOY_CHANGE_SET', level='info')
+            pass
 
         return
 
