@@ -1,6 +1,5 @@
 from py_animus.manifest_management import *
 from py_animus import get_logger, get_utc_timestamp, parse_raw_yaml_data, logging
-from py_animus import get_logger, get_utc_timestamp, logging
 import re
 import boto3
 import hashlib
@@ -371,6 +370,7 @@ References:
             response = cloudformation_client.describe_stacks(
                 StackName=self._format_template_name_as_stack_name()
             )
+            self.log(message='_get_current_remote_stack_data(): response: {}'.format(json.dumps(response, default=str)), level='debug')
             if 'Stacks' in response:
                 for stack_data in response['Stacks']:
                     if stack_data['StackName'] == self._format_template_name_as_stack_name():
@@ -379,6 +379,29 @@ References:
                             cloudformation_client=cloudformation_client,
                             stack_name=self._format_template_name_as_stack_name()
                         )
+        except:
+            self.log(message='It appears that the remote stack named "{}" does not exists'.format(self._format_template_name_as_stack_name()), level='error')
+        return remote_stack_data
+
+    def _get_current_change_set_data(
+        self,
+        cloudformation_client,
+        change_Set_name: str
+    )->dict:
+        remote_stack_data = dict()  # Refer to https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudformation/client/describe_stacks.html
+        try:
+            response = cloudformation_client.describe_change_set(
+                ChangeSetName=change_Set_name,
+                StackName=self._format_template_name_as_stack_name()
+            )
+            self.log(message='_get_current_change_set_data(): response: {}'.format(json.dumps(response, default=str)), level='debug')
+            if 'ChangeSetName' in response:
+                if response['StackName'] == self._format_template_name_as_stack_name():
+                    remote_stack_data = copy.deepcopy(response)
+                    remote_stack_data['StackResources'] = self._get_current_remote_stack_resource_data(
+                        cloudformation_client=cloudformation_client,
+                        stack_name=self._format_template_name_as_stack_name()
+                    )
         except:
             self.log(message='It appears that the remote stack named "{}" does not exists'.format(self._format_template_name_as_stack_name()), level='error')
         return remote_stack_data
@@ -648,30 +671,43 @@ References:
         self.log(message='Initial stack_options: {}'.format(json.dumps(stack_options)), level='info')
         return stack_options
 
-    def _track_progress_until_end_state(self, stack_id: str, variable_cache: VariableCache=VariableCache(), target_environment: str='default')->str:
+    def _track_progress_until_end_state(self, stack_id: str, variable_cache: VariableCache=VariableCache(), target_environment: str='default', is_change_set: bool=False, change_Set_name: str=None)->str:
         end_state_reached = False
         cloudformation_client = self._get_boto3_cloudformation_client(variable_cache=variable_cache, target_environment=target_environment)
         final_state = 'UNKNOWN'
-        self.log(message='Waiting for stack "{}" to finish'.format(stack_id), level='info')
+        self.log(message='_track_progress_until_end_state(): Waiting for stack "{}" to finish'.format(stack_id), level='info')
         loop_count = 0
         while end_state_reached is False:
             loop_count += 1
-            self.log(message='    Sleeping 30 seconds', level='info')
-            time.sleep(30)
-            stack_data = self._get_current_remote_stack_data(cloudformation_client)
-            self.log(message='stack_data: {}'.format(json.dumps(stack_data, default=str)), level='debug')
+            self.log(message='_track_progress_until_end_state():     Sleeping 15 seconds', level='info')
+            time.sleep(15)
+
+            if is_change_set is False:
+                stack_data = self._get_current_remote_stack_data(cloudformation_client)
+            else:
+                stack_data = self._get_current_change_set_data(cloudformation_client, change_Set_name=change_Set_name)
+
+            self.log(message='_track_progress_until_end_state(): stack_data: {}'.format(json.dumps(stack_data, default=str)), level='debug')
             try:
                 if stack_data['StackId'] == stack_id:
-                    self.log(message='        Stack ID "{}" progress status: {}'.format(stack_id, stack_data['StackStatus']), level='info')
-                    if stack_data['StackStatus'] in FINAL_STATES:
+                    status = 'UNKNOWN'
+                    if 'Status' in stack_data:
+                        status = copy.deepcopy(stack_data['Status'])
+                    elif 'StackStatus' in stack_data:
+                        status = copy.deepcopy(stack_data['StackStatus'])
+
+                    self.log(message='_track_progress_until_end_state():         Stack ID "{}" progress status: {}'.format(stack_id, status), level='info')
+
+                    if status in FINAL_STATES:
                         end_state_reached = True
-                        final_state = stack_data['StackStatus']
+                        final_state = status
             except:
-                self.log(message='Stack data could not be retrieved - likely because stack does not exist (yet). Setting final_state to "NOT_FOUND"', level='info')
+                self.log(message='EXCEPTION: {}'.format(traceback.format_exc()), level='error')
+                self.log(message='_track_progress_until_end_state(): Stack data could not be retrieved - likely because stack does not exist (yet). Setting final_state to "NOT_FOUND"', level='info')
                 final_state = 'NOT_FOUND'
                 end_state_reached = True
             if loop_count > 120:
-                self.log(message='Waited for more than 2 hours - giving up', level='warning')
+                self.log(message='_track_progress_until_end_state(): Waited for more than 2 hours - giving up', level='warning')
                 end_state_reached = True
         raise_Exception_on_final_states_tuple = (
             'CREATE_FAILED',
@@ -746,9 +782,9 @@ References:
         self.log(message='_extract_resources_from_stack_data(): PRE-RETURN: resources: {}'.format(json.dumps(resources, default=str)), level='debug')  # {"CREDS_RESOURCE_TYPE": "AWS::SecretsManager::Secret", ...}
         return resources
 
-    def _apply_cloudformation_stack(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default'):
+    def _apply_cloudformation_stack(self, variable_cache: VariableCache=VariableCache(), target_environment: str='default', create_change_set: bool=False):
         parameters = self._set_stack_options()
-        self.log(message='parameters={}'.format(json.dumps(parameters)), level='debug')
+        self.log(message='_apply_cloudformation_stack(): parameters={}'.format(json.dumps(parameters)), level='debug')
 
         if 'templatePath' in self.spec:
             if self.spec['templatePath'].lower().startswith('https://s3.amazonaws.com/'):
@@ -785,14 +821,45 @@ References:
         parameters['StackName'] = self._format_template_name_as_stack_name()
 
         response = dict()
-        self.log(message='Final Parameters for Boto3 CloudFormation Stack: {}'.format(json.dumps(parameters)), level='debug')
         cloudformation_client = self._get_boto3_cloudformation_client(variable_cache=variable_cache, target_environment=target_environment)
-        response = cloudformation_client.create_stack(**parameters)
-        self.log(message='New cloudwatch Stack AWS API Response: {}'.format(json.dumps(response)), level='info')
+
+        change_set_name = None
+        is_change_set = False
+        if create_change_set is False:
+            self.log(message='_apply_cloudformation_stack(): Final Parameters for Boto3 CloudFormation Stack: {}'.format(json.dumps(parameters, default=str)), level='debug')
+            response = cloudformation_client.create_stack(**parameters)
+        else:
+            is_change_set = True
+            change_set_name = '{}-{}'.format(
+                self._format_template_name_as_stack_name(),
+                get_utc_timestamp(with_decimal=False)
+            )
+            parameters['ChangeSetName'] = change_set_name
+            parameters['ChangeSetType'] = 'UPDATE'
+            for parameter_name_to_remove in ('TimeoutInMinutes', 'EnableTerminationProtection','OnFailure',):
+                parameters.pop(parameter_name_to_remove)
+            self.log(message='_apply_cloudformation_stack(): Final Parameters for Boto3 CloudFormation Change Set: {}'.format(json.dumps(parameters, default=str)), level='debug')
+            response = cloudformation_client.create_change_set(**parameters)
+
+        self.log(message='_apply_cloudformation_stack(): AWS API Response: {}'.format(json.dumps(response, default=str)), level='info')
 
         if 'StackId' in response:
             time.sleep(10)
-            final_state = self._track_progress_until_end_state(stack_id=response['StackId'], variable_cache=variable_cache, target_environment=target_environment)
+            final_state = self._track_progress_until_end_state(stack_id=response['StackId'], variable_cache=variable_cache, target_environment=target_environment, is_change_set=is_change_set, change_Set_name=change_set_name)
+
+            self.log(message='_apply_cloudformation_stack(): final_state: {}'.format(final_state), level='info')
+
+            if create_change_set is True and final_state in ('CREATE_COMPLETE',):
+                response2 = cloudformation_client.execute_change_set(
+                    ChangeSetName=parameters['ChangeSetName'],
+                    StackName=parameters['StackName'],
+                    DisableRollback=False
+                )
+                time.sleep(30)
+                self.log(message='_apply_cloudformation_stack(): AWS API Response (Change Set): {}'.format(json.dumps(response2, default=str)), level='info')
+                final_state = self._track_progress_until_end_state(stack_id=response['StackId'], variable_cache=variable_cache, target_environment=target_environment, is_change_set=False, change_Set_name=None)
+                self.log(message='_apply_cloudformation_stack(): final_state (post change set execution): {}'.format(final_state), level='info')
+
             stack_data = self._get_current_remote_stack_data(cloudformation_client)
             remote_stack_template_body_as_dict = self._get_remote_stack_applied_template_as_dict(cloudformation_client=cloudformation_client, stack_name=parameters['StackName'])
             self._set_variables(
@@ -805,7 +872,7 @@ References:
                 outputs=self._extract_outputs_from_stack_data(stack_data=stack_data),
                 resources=self._extract_resources_from_stack_data(stack_data=stack_data)
             )
-        self.log(message='Stack ID "{}" applied with final status "{}"'.format(response['StackId'], final_state), level='info')
+        self.log(message='_apply_cloudformation_stack(): Stack ID "{}" applied with final status "{}"'.format(response['StackId'], final_state), level='info')
 
     def apply_manifest(self, manifest_lookup_function: object=dummy_manifest_lookup_function, variable_cache: VariableCache=VariableCache(), increment_exec_counter: bool=False, target_environment: str='default', value_placeholders: ValuePlaceHolders=ValuePlaceHolders()):
         if target_environment not in self.metadata['environments']:
@@ -834,14 +901,41 @@ References:
             self.log(message='apply_manifest(): Final Action: NONE / NOTHING', level='info')
             return
 
+        applied = variable_cache.get_value(
+            variable_name='{}:APPLIED'.format(self._var_name(target_environment=target_environment)),
+            value_if_expired=False,
+            default_value_if_not_found=False,
+            raise_exception_on_expired=False,
+            raise_exception_on_not_found=False
+        )
+        self.log(message='apply_manifest(): Checking if previously applied in same run: {}'.format(applied), level='info')
+
         if change_type == 'DEPLOY_NEW_STACK':
             self.log(message='apply_manifest(): Final Action: DEPLOY_NEW_STACK', level='info')
             self._apply_cloudformation_stack(variable_cache=variable_cache, target_environment=target_environment)
+            variable_cache.store_variable(
+                variable=Variable(
+                    name='{}:APPLIED'.format(self._var_name(target_environment=target_environment)),
+                    initial_value=True,
+                    logger=self.logger,
+                    mask_in_logs=False
+                ),
+                overwrite_existing=True
+            )
+            applied = True
 
-        if change_type == 'DEPLOY_CHANGE_SET':
-            # TODO deploy change set
+        if applied is False and change_type == 'DEPLOY_CHANGE_SET':
             self.log(message='apply_manifest(): Final Action: DEPLOY_CHANGE_SET', level='info')
-            pass
+            self._apply_cloudformation_stack(variable_cache=variable_cache, target_environment=target_environment, create_change_set=True)
+            variable_cache.store_variable(
+                variable=Variable(
+                    name='{}:APPLIED'.format(self._var_name(target_environment=target_environment)),
+                    initial_value=True,
+                    logger=self.logger,
+                    mask_in_logs=False
+                ),
+                overwrite_existing=True
+            )
 
         return
 
